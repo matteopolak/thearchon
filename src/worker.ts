@@ -10,7 +10,7 @@ const bot = new FishBot(options, parentPort!);
 
 console.log(`[WORKER] Starting ${options.alias}`);
 
-const logFileLocation = path.join(bot.directory, 'chat.log');
+const logFileLocation = path.join(bot.directory, 'latest.log');
 
 bot.client.on('messagestr', (m, _, json) => {
 	if (m.startsWith('██')) return;

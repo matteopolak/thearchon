@@ -99,7 +99,14 @@ export default class BaseBot {
 		if (this.initialised) throw new Error('Already initialised');
 
 		this.initialised = true;
+
 		await fs.mkdir(this.directory, { recursive: true });
+		await fs
+			.rename(
+				path.join(this.directory, 'latest.log'),
+				path.join(this.directory, `chat_${Date.now()}.log`),
+			)
+			.catch(() => {});
 
 		this.client.on('messagestr', async m => {
 			if (m === 'You can also submit your answer with /code <code>') {
@@ -267,18 +274,18 @@ export default class BaseBot {
 	private async saveInventory() {
 		return fs.writeFile(
 			path.join(this.directory, 'inventory.json'),
-			JSON.stringify(this.client.inventory.slots),
+			JSON.stringify(this.client.inventory.slots, null, 2),
 		);
 	}
 
 	private async saveEntityList() {
 		await fs.writeFile(
 			path.join(this.directory, 'players.json'),
-			JSON.stringify(this.client.players),
+			JSON.stringify(this.client.players, null, 2),
 		);
 		await fs.writeFile(
 			path.join(this.directory, 'entities.json'),
-			JSON.stringify(this.client.entities),
+			JSON.stringify(this.client.entities, null, 2),
 		);
 	}
 
