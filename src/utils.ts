@@ -66,8 +66,8 @@ export function unscramble(data: number[][]) {
 
 	const characters = [];
 
-	for (let y = 0; y < rows - CHARACTER_WIDTH; ++y) {
-		for (let x = 0; x < columns - CHARACTER_HEIGHT; ++x) {
+	for (let y = 0; y < rows - CHARACTER_HEIGHT; ++y) {
+		for (let x = 0; x < columns - CHARACTER_WIDTH; ++x) {
 			try {
 				const character = findCharacter(data, x, y);
 

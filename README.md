@@ -1,5 +1,10 @@
 # Auto-Fisher for TheArchon 🎣
-![Build Status](https://github.com/matteopolak/thearchon/actions/workflows/check.yml/badge.svg)<br>
+![Build Status](https://github.com/matteopolak/thearchon/actions/workflows/check.yml/badge.svg)
+[![License][license-image]][license-url]<br>
+
+[license-url]: https://opensource.org/licenses/MIT
+[license-image]: https://img.shields.io/npm/l/make-coverage-badge.svg
+
 A feature-packed auto-fishing bot for the Minecraft server [TheArchon](https://thearchon.net/).
 
 ## Setup

@@ -10,7 +10,7 @@
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
 		"importsNotUsedAsValues": "error",
-		"types": ["node"],
+		"types": ["node", "jest"],
 		"noUnusedParameters": true,
 		"moduleResolution": "node"
 	},
