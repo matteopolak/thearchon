@@ -14,6 +14,7 @@
 		"sourceType": "module"
 	},
 	"plugins": ["@typescript-eslint"],
+	"files": ["src/**/*.ts"],
 	"rules": {
 		"quotes": ["error", "single", { "avoidEscape": true }],
 		"@typescript-eslint/no-non-null-assertion": "off",
