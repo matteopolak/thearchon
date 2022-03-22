@@ -4,10 +4,12 @@ import * as utils from './solve_captcha';
 
 import type { RawMapData } from '../src/typings';
 
-const suite = new Benchmark.Suite();
+const suite = new Benchmark.Suite('captcha_test', {
+	async: true,
+});
 
 const data: Buffer = JSON.parse(
-	fs.readFileSync('./resources/map_flat.json', 'utf8'),
+	fs.readFileSync('./resources/map.json', 'utf8'),
 );
 
 function createMap(): RawMapData {
@@ -28,12 +30,9 @@ suite
 		utils.unscrambleOld(utils.formatMapDataOld(createMap()));
 	})
 	.add('new_captcha_solver', () => {
-		utils.unscrambleNew(createMap());
+		utils.unscramble(createMap());
 	})
 	.on('cycle', (event: { target: string }) => {
 		console.log(event.target.toString());
 	})
-	.on('complete', () => {
-		console.log(`Fastest is ${suite.filter('fastest').map('name')}`);
-	})
-	.run({ async: true });
+	.run();

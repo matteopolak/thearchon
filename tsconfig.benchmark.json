@@ -2,18 +2,16 @@
 	"compilerOptions": {
 		"target": "esnext",
 		"module": "commonjs",
-		"outDir": "./dist",
-		"rootDir": "./src",
 		"removeComments": true,
 		"strict": true,
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
 		"importsNotUsedAsValues": "error",
-		"types": ["node"],
+		"types": ["node", "jest"],
 		"noUnusedParameters": true,
 		"moduleResolution": "node"
 	},
-	"include": ["src/**/*.ts"],
+	"include": ["src/**/*.ts", "benchmarks/**/*.ts"],
 	"exclude": ["./node_modules", "./dist"]
 }

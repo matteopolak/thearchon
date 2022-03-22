@@ -9,7 +9,7 @@
 		"check:style": "prettier --check src/**/*.ts && eslint src",
 		"check:tsc": "tsc --noEmit",
 		"test": "jest --verbose ./tests",
-		"benchmark": "ts-node benchmarks/benchmarks.ts --project tsconfig.benchmarks.json"
+		"benchmark": "ts-node benchmarks/benchmarks.ts --project tsconfig.benchmark.json"
 	},
 	"author": "Matteo Polak",
 	"license": "MIT",
@@ -27,7 +27,6 @@
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-prettier": "^4.0.0",
 		"jest": "^27.5.1",
-		"png-js": "^1.0.0",
 		"prettier": "^2.6.0",
 		"ts-jest": "^27.1.3",
 		"ts-node": "^10.7.0",

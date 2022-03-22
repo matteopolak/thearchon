@@ -76,30 +76,29 @@ export function unscrambleOld(data: number[][]) {
 	return characters;
 }
 
-function findCharacterNew(
+function findCharacter(
 	json: RawMapData,
-	x: number,
-	y: number,
+	options: { x: number; y: number },
 ): string | undefined {
 	for (const character in characters) {
 		let match = true;
 
-		// @ts-ignore
-		const bits: number[] = characters[character];
+		const bits: number[] = characters[character as keyof typeof characters];
 
 		for (let i = 0; i < CHARACTER_HEIGHT; i++) {
 			for (let j = 0; j < CHARACTER_WIDTH; j++) {
-				const index = x + j + (y + i) * json.columns;
+				const index = options.x + j + (options.y + i) * json.columns;
 
-				if (json.data[index] === 2) return;
+				if (json.data[index] === 2) {
+					options.x += CHARACTER_WIDTH;
 
-				const bit =
-					json.data[index] < 3
-						? json.data[index]
-						: (json.data[index] =
-								json.data[index] === 119 || json.data[index] === 34 ? 1 : 0);
+					return undefined;
+				}
 
-				if (bits[j + i * CHARACTER_WIDTH] !== bit) {
+				if (
+					!!bits[j + i * CHARACTER_WIDTH] !==
+					(json.data[index] === 119 || json.data[index] === 34)
+				) {
 					match = false;
 					break;
 				}
@@ -111,27 +110,34 @@ function findCharacterNew(
 		if (match) {
 			for (let i = 0; i < CHARACTER_HEIGHT; i++) {
 				for (let j = 0; j < CHARACTER_WIDTH; j++) {
-					json.data[x + j + (y + i) * json.columns] = 2;
+					json.data[options.x + j + (options.y + i) * json.columns] = 2;
 				}
 			}
+
+			options.x += CHARACTER_WIDTH;
 
 			return character;
 		}
 	}
+
+	return undefined;
 }
 
-export function unscrambleNew(json: RawMapData) {
+export function unscramble(json: RawMapData) {
 	const rows = json.rows;
 	const columns = json.columns;
 
 	const characters = [];
+	const options = {
+		x: 0,
+		y: 0,
+	};
 
-	for (let y = 0; y < rows - CHARACTER_HEIGHT; ++y) {
-		for (let x = 0; x < columns - CHARACTER_WIDTH; ++x) {
-			const character = findCharacterNew(json, x, y);
+	for (options.y = 0; options.y < rows - CHARACTER_HEIGHT; ++options.y) {
+		for (options.x = 0; options.x < columns - CHARACTER_WIDTH; ++options.x) {
+			const character = findCharacter(json, options);
 
 			if (character) {
-				x += CHARACTER_WIDTH;
 				characters.push(character);
 			}
 		}

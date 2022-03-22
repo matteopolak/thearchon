@@ -1,7 +1,7 @@
 import BaseBot from './BaseBot';
 import { FISHING_RODS, ROD_TO_BAIT } from '../constants';
 import { Destination, DestinationType, SellType } from '../typings';
-import { currencyFormatter, formatMapData, unscramble } from '../utils';
+import { currencyFormatter, unscramble } from '../utils';
 
 import type { BaseBotOptions } from './BaseBot';
 import type { InventoryData, RawMapData } from '../typings';
@@ -49,7 +49,7 @@ export default class FishBot extends BaseBot {
 			)
 				return;
 
-			const answer = unscramble(formatMapData(map));
+			const answer = unscramble(map);
 
 			if (answer.length === 5 && this.captcha.active) {
 				if (this.logger)

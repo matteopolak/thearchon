@@ -2,10 +2,21 @@ import fs from 'fs/promises';
 import { unscramble } from '../src/utils';
 
 test('process a map with every character and digit', async () => {
-	const map = JSON.parse(await fs.readFile('./resources/map.json', 'utf8'));
-	const data = unscramble(map);
+	const data: Buffer = JSON.parse(
+		await fs.readFile('./resources/map.json', 'utf8'),
+	);
+	const result = unscramble({
+		itemDamage: 0,
+		scale: 0,
+		icons: [],
+		rows: 103,
+		columns: 91,
+		x: 0,
+		y: 0,
+		data,
+	});
 
-	expect(data).toEqual([
+	expect(result).toEqual([
 		'0',
 		'1',
 		'2',
