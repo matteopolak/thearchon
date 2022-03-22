@@ -1,2 +1,5 @@
-src/characters.ts
+data/**/*
 dist/**/*
+node_modules/**/*
+resources/**/*
+src/characters.ts
