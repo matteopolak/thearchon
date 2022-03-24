@@ -26,7 +26,7 @@ function createMap(): RawMapData {
 }
 
 suite
-	.add('new_captcha_solver', () => {
+	.add('captcha_solver', () => {
 		utils.unscramble(createMap());
 	})
 	.add('unstable_captcha_solver', () => {
