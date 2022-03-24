@@ -5,6 +5,13 @@ import type { RawMapData } from './typings';
 const CHARACTER_WIDTH = 12;
 const CHARACTER_HEIGHT = 14;
 
+// prettier-ignore
+const filter: string[][] = [
+	['0', '2', '3', '6', '7', '8', '9', 'C', 'D', 'G', 'J', 'L', 'O', 'Q', 'U', 'V', 'W', 'Z'],
+	['1', '4', '5', 'A', 'B', 'E', 'F', 'H', 'I', 'K', 'M', 'N', 'P', 'R', 'S', 'T', 'X', 'Y'],
+	[],
+];
+
 export const currencyFormatter = new Intl.NumberFormat('en-US', {
 	maximumFractionDigits: 2,
 	minimumFractionDigits: 2,
@@ -14,13 +21,18 @@ function findCharacter(
 	json: RawMapData,
 	options: { x: number; y: number },
 ): string | undefined {
-	for (const character in characters) {
+	// half of the letters have a pixel here, so it's worthwhile
+	// to check for it at the start
+	const bit = json.data[options.x + 4 + (options.y + 4) * json.columns];
+	const filtered = filter[bit === 119 || bit === 34 ? 1 : 0];
+
+	for (const character of filtered) {
 		let match = true;
 
 		const bits: number[] = characters[character as keyof typeof characters];
 
-		for (let i = 0; i < CHARACTER_HEIGHT; i++) {
-			for (let j = 0; j < CHARACTER_WIDTH; j++) {
+		for (let i = 0; i < CHARACTER_HEIGHT; i += 2) {
+			for (let j = 0; j < CHARACTER_WIDTH; j += 2) {
 				const index = options.x + j + (options.y + i) * json.columns;
 
 				if (json.data[index] === 2) {

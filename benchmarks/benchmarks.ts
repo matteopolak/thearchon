@@ -26,11 +26,11 @@ function createMap(): RawMapData {
 }
 
 suite
-	.add('old_captcha_solver', () => {
-		utils.unscrambleOld(utils.formatMapDataOld(createMap()));
-	})
 	.add('new_captcha_solver', () => {
 		utils.unscramble(createMap());
+	})
+	.add('unstable_captcha_solver', () => {
+		utils.unscrambleMapped(createMap());
 	})
 	.on('cycle', (event: { target: string }) => {
 		console.log(event.target.toString());
