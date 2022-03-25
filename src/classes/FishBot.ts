@@ -38,9 +38,11 @@ export default class FishBot extends BaseBot {
 
 		await super.init();
 
-		// @ts-ignore
-		this._client.on('map', async (map: RawMapData) => {
+		this._client._client.on('map', async (map: RawMapData) => {
+			console.log('map');
 			if (this.state !== State.SOLVING_CAPTCHA) return;
+
+			console.log('got map');
 
 			map.columns = Math.abs(map.columns);
 			map.rows = Math.abs(map.rows);
@@ -351,7 +353,8 @@ export default class FishBot extends BaseBot {
 	}
 
 	private async startFishing(_: Context) {
-		if (this.isFishing) return false;
+		if (this.state === State.FISHING || this.state === State.SOLVING_CAPTCHA)
+			return false;
 
 		this.state = State.FISHING;
 		this.isFishing = true;

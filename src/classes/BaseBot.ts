@@ -141,6 +141,8 @@ export default class BaseBot {
 			if (m === 'You can also submit your answer with /code <code>') {
 				const { promise, resolve } = createPromiseResolvePair();
 
+				console.log(`[${this.alias}] Captcha started`);
+
 				this.captcha.promise = promise;
 				this.captcha.resolve = resolve;
 				this.captcha.startedAt = Date.now();
