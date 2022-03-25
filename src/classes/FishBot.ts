@@ -17,7 +17,7 @@ import BaseBot from './BaseBot';
 import type { BaseBotOptions } from './BaseBot';
 
 export default class FishBot extends BaseBot {
-	private isFishing = false;
+	public isFishing = false;
 	private port: MessagePort;
 	private sellType: SellType;
 
@@ -64,7 +64,6 @@ export default class FishBot extends BaseBot {
 						)}`,
 					);
 
-				const previous = this.previousState;
 				this.state = State.IDLE;
 
 				await this.command(this.context, `/code ${answer.join('')}`);
@@ -74,7 +73,7 @@ export default class FishBot extends BaseBot {
 					'Great job! You solved the captcha and can continue playing.',
 				);
 
-				if (previous === State.FISHING) {
+				if (this.captcha.fishing) {
 					this.state = State.FISHING;
 					this.fish(ctx);
 				}

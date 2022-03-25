@@ -45,6 +45,7 @@ export default class BaseBot {
 		startedAt: 0,
 		promise: Promise.resolve(),
 		resolve: () => {},
+		fishing: false,
 	};
 
 	public _state: State = State.IDLE;
@@ -147,6 +148,7 @@ export default class BaseBot {
 
 				console.log(`[${this.alias}] Captcha started...`);
 
+				this.captcha.fishing = this.fisher?.isFishing ?? false;
 				this.captcha.promise = promise;
 				this.captcha.resolve = resolve;
 				this.captcha.startedAt = Date.now();
