@@ -16,6 +16,10 @@ jobs:
         with:
           node-version: 16.x
 
+      - name: Move config file
+        run: |
+          cp src/config.example.ts src/config.ts
+
       - name: Install dependencies
         run: |
           npm install --global yarn
