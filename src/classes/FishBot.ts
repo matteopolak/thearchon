@@ -74,7 +74,6 @@ export default class FishBot extends BaseBot {
 				);
 
 				if (this.captcha.fishing) {
-					this.state = State.FISHING;
 					this.fish(ctx);
 				}
 			}
