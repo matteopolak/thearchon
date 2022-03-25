@@ -7,6 +7,12 @@
 
 A feature-packed auto-fishing bot for the Minecraft server [TheArchon](https://thearchon.net/).
 
+## Features
+* Sells fish, replenishes bait, and upgrades fishing rods
+* Solves anti-macro CAPTCHAs
+* Reconnects on server restarts
+* Automatically send fishing money to your bank account
+
 ## Setup
 Configuration is done in `src/config.ts`.
 If you are setting this up for the first time, rename `src/config.example.ts` to `src/config.ts`.

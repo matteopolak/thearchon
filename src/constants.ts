@@ -22,7 +22,7 @@ export const FISH_COUNT_THRESHOLD = 50;
 export const BAIT_THRESHOLD = 0;
 
 export const MESSAGE_COOLDOWN = 1500;
-export const COMMAND_COOLDOWN = 2500;
+export const COMMAND_COOLDOWN = 3100;
 
 export const COMMAND_REGEX = /^\((\w{3,16})\)\s(.+)$/;
 export const TELEPORT_REGEX = /^(\w{3,16}) has requested to teleport to you\.$/;

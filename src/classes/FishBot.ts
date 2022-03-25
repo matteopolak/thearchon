@@ -214,6 +214,7 @@ export default class FishBot extends BaseBot {
 				);
 
 				await this.client.clickWindow(ctx, 14, 0, 0);
+				await this.client.waitForTicks(ctx, 5);
 				await this.client.clickWindow(ctx, FISHING_ROD_SLOTS[best + 1], 0, 0);
 			}
 		} else {
@@ -270,6 +271,7 @@ export default class FishBot extends BaseBot {
 				);
 
 				await this.client.clickWindow(ctx, 14, 0, 0);
+				await this.client.waitForTicks(ctx, 5);
 				await this.client.clickWindow(ctx, FISHING_ROD_SLOTS[best + 1], 0, 0);
 			}
 		} else {

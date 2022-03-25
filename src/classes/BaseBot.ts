@@ -57,6 +57,7 @@ export default class BaseBot {
 		resolve: () => void;
 		ctx: Context;
 	}[] = [];
+	private commandQueueActive = false;
 	private lastCommandTimestamp: number = 0;
 
 	private messageQueue: {
@@ -64,6 +65,7 @@ export default class BaseBot {
 		resolve: () => void;
 		ctx: Context;
 	}[] = [];
+	private messageQueueActive = false;
 	private lastMessageTimestamp: number = 0;
 	private initialised = false;
 
@@ -233,9 +235,7 @@ export default class BaseBot {
 	private addCommandToQueue(ctx: Context, message: string): Promise<any> {
 		const { promise, resolve } = createPromiseResolvePair();
 
-		if (message.startsWith('/code ')) {
-			this.commandQueue.unshift({ message, resolve, ctx });
-		} else this.commandQueue.push({ message, resolve, ctx });
+		this.commandQueue.push({ message, resolve, ctx });
 
 		return promise;
 	}
@@ -395,27 +395,29 @@ export default class BaseBot {
 
 				return this.client.chat(ctx, message);
 			}
+
+			const promise = this.addCommandToQueue(ctx, message);
+
+			while (this.commandQueue.length !== 0) {
+				const { message, resolve, ctx } = this.commandQueue.shift()!;
+
+				if (ctx !== this.context) continue;
+
+				await sleep(COMMAND_COOLDOWN - this.lastCommandAgo);
+				this.lastCommandTimestamp = Date.now();
+
+				if (this.logger)
+					console.log(`[${this.alias}] [CHAT] Sending command: ${message}`);
+
+				this.client.chat(ctx, message);
+
+				resolve();
+			}
+
+			return promise;
 		}
 
-		const promise = this.addCommandToQueue(ctx, message);
-
-		while (this.commandQueue.length !== 0) {
-			const { message, resolve, ctx } = this.commandQueue.shift()!;
-
-			if (ctx !== this.context) continue;
-
-			await sleep(COMMAND_COOLDOWN - this.lastCommandAgo);
-			this.lastCommandTimestamp = Date.now();
-
-			if (this.logger)
-				console.log(`[${this.alias}] [CHAT] Sending command: ${message}`);
-
-			this.client.chat(ctx, message);
-
-			resolve();
-		}
-
-		return promise;
+		return this.addCommandToQueue(ctx, message);
 	}
 
 	public async chat(ctx: Context, message: string): Promise<void> {
@@ -522,9 +524,17 @@ export default class BaseBot {
 				return resolve(window);
 			};
 
-			this._client.once('windowOpen', resolve);
+			this._client.once('windowOpen', listener);
 			// @ts-ignore
 			this._client.once('context_changed', listener);
+
+			if (ctx !== this.context) {
+				// @ts-ignore
+				this._client.off('context_changed', listener);
+				this._client.off('windowOpen', listener);
+
+				return resolve(undefined);
+			}
 		});
 
 		await action(ctx);
