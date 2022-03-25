@@ -91,10 +91,10 @@ export function unscramble(json: RawMapData) {
 	return characters;
 }
 
-export function sleep(ms: number) {
+export function sleep(ms: number): Promise<true> | undefined {
 	if (ms <= 0) return;
 
-	return new Promise(r => setTimeout(r, ms));
+	return new Promise(r => setTimeout(r, ms, true));
 }
 
 export function createPromiseResolvePair(): {

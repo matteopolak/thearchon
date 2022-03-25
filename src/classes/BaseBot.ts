@@ -16,7 +16,7 @@ import {
 	MONEY_THRESHOLD,
 	TELEPORT_REGEX,
 } from '../constants';
-import { Context, DestinationType, SellType, State } from '../typings';
+import { Context, DestinationType, RawItem, SellType, State } from '../typings';
 import type { CommandFunction, Destination } from '../typings';
 import { createPromiseResolvePair, currencyFormatter, sleep } from '../utils';
 import BaseState from './BaseState';
@@ -57,7 +57,6 @@ export default class BaseBot {
 		resolve: () => void;
 		ctx: Context;
 	}[] = [];
-	private commandQueueActive = false;
 	private lastCommandTimestamp: number = 0;
 
 	private messageQueue: {
@@ -65,7 +64,6 @@ export default class BaseBot {
 		resolve: () => void;
 		ctx: Context;
 	}[] = [];
-	private messageQueueActive = false;
 	private lastMessageTimestamp: number = 0;
 	private initialised = false;
 
@@ -108,6 +106,40 @@ export default class BaseBot {
 		this._state = value;
 	}
 
+	public async waitForSlotItem(ctx: Context, slot: number, item: number) {
+		if (ctx !== this.context) return;
+
+		return new Promise<undefined>(resolve => {
+			const listener = (packet: RawItem) => {
+				if (packet.slot !== slot || packet.item.blockId !== item) return;
+
+				this._client._client.off('set_slot', listener);
+				// @ts-ignore
+				this._client.off('context_changed', contextListener);
+
+				resolve(undefined);
+			};
+
+			const contextListener = () => {
+				this._client._client.off('set_slot', listener);
+
+				resolve(undefined);
+			};
+
+			this._client._client.on('set_slot', listener);
+			// @ts-ignore
+			this._client.once('context_changed', contextListener);
+
+			if (ctx !== this.context) {
+				this._client._client.off('set_slot', listener);
+				// @ts-ignore
+				this._client.off('context_changed', contextListener);
+
+				resolve(undefined);
+			}
+		});
+	}
+
 	public async join(ctx: Context = this.context): Promise<void> {
 		const message = await this.completeActionAndWaitForMessages(
 			ctx,
@@ -147,8 +179,6 @@ export default class BaseBot {
 		this._client.on('messagestr', async m => {
 			if (m === 'You can also submit your answer with /code <code>') {
 				const { promise, resolve } = createPromiseResolvePair();
-
-				console.log(`[${this.alias}] Captcha started...`);
 
 				this.captcha.fishing = this.fisher?.isFishing ?? false;
 				this.captcha.promise = promise;
@@ -222,6 +252,63 @@ export default class BaseBot {
 				}
 			}
 		});
+
+		this.initializeCommandLoop();
+		this.initializeMessageLoop();
+	}
+
+	private async initializeCommandLoop() {
+		while (await sleep(COMMAND_COOLDOWN)) {
+			const { message, resolve, ctx } = this.commandQueue.shift() ?? {};
+
+			if (
+				ctx !== this.context ||
+				message === undefined ||
+				resolve === undefined ||
+				ctx === undefined
+			) {
+				if (resolve) resolve();
+
+				continue;
+			}
+
+			await sleep(COMMAND_COOLDOWN - this.lastCommandAgo);
+			this.lastCommandTimestamp = Date.now();
+
+			if (this.logger)
+				console.log(`[${this.alias}] [CHAT] Sending command: ${message}`);
+
+			this.client.chat(ctx, message);
+
+			resolve();
+		}
+	}
+
+	private async initializeMessageLoop() {
+		while (await sleep(MESSAGE_COOLDOWN)) {
+			const { message, resolve, ctx } = this.messageQueue.shift() ?? {};
+
+			if (
+				ctx !== this.context ||
+				message === undefined ||
+				resolve === undefined ||
+				ctx === undefined
+			) {
+				if (resolve) resolve();
+
+				continue;
+			}
+
+			await sleep(MESSAGE_COOLDOWN - this.lastMessageAgo);
+			this.lastMessageTimestamp = Date.now();
+
+			if (this.logger)
+				console.log(`[${this.alias}] [CHAT] Sending message: ${message}`);
+
+			this.client.chat(ctx, message);
+
+			resolve();
+		}
 	}
 
 	private get lastMessageAgo() {
@@ -383,79 +470,11 @@ export default class BaseBot {
 
 	public async command(ctx: Context, message: string): Promise<void> {
 		if (!message || ctx !== this.context) return;
-
-		if (this.commandQueue.length === 0) {
-			const waitFor = COMMAND_COOLDOWN - this.lastCommandAgo;
-
-			if (waitFor <= 0) {
-				this.lastCommandTimestamp = Date.now();
-
-				if (this.logger)
-					console.log(`[${this.alias}] [CHAT] Sending command: ${message}`);
-
-				return this.client.chat(ctx, message);
-			}
-
-			const promise = this.addCommandToQueue(ctx, message);
-
-			while (this.commandQueue.length !== 0) {
-				const { message, resolve, ctx } = this.commandQueue.shift()!;
-
-				if (ctx !== this.context) continue;
-
-				await sleep(COMMAND_COOLDOWN - this.lastCommandAgo);
-				this.lastCommandTimestamp = Date.now();
-
-				if (this.logger)
-					console.log(`[${this.alias}] [CHAT] Sending command: ${message}`);
-
-				this.client.chat(ctx, message);
-
-				resolve();
-			}
-
-			return promise;
-		}
-
 		return this.addCommandToQueue(ctx, message);
 	}
 
 	public async chat(ctx: Context, message: string): Promise<void> {
 		if (!message || ctx !== this.context) return;
-
-		if (this.messageQueue.length === 0) {
-			const waitFor = MESSAGE_COOLDOWN - this.lastMessageAgo;
-
-			if (waitFor <= 0) {
-				this.lastMessageTimestamp = Date.now();
-
-				if (this.logger)
-					console.log(`[${this.alias}] [CHAT] Sending message: ${message}`);
-
-				return this.client.chat(ctx, message);
-			}
-
-			const promise = this.addMessageToQueue(ctx, message);
-
-			while (this.messageQueue.length !== 0) {
-				const { message, resolve, ctx } = this.messageQueue.shift()!;
-
-				if (ctx !== this.context) continue;
-
-				await sleep(MESSAGE_COOLDOWN - this.lastMessageAgo);
-				this.lastMessageTimestamp = Date.now();
-
-				if (this.logger)
-					console.log(`[${this.alias}] [CHAT] Sending message: ${message}`);
-
-				this.client.chat(ctx, message);
-
-				resolve();
-			}
-
-			return promise;
-		}
-
 		return this.addMessageToQueue(ctx, message);
 	}
 
@@ -477,6 +496,19 @@ export default class BaseBot {
 		message: string,
 	) {
 		const promise = this.client.awaitMessage(ctx, message);
+
+		await action();
+
+		return promise;
+	}
+
+	public async completeActionAndWaitForSlotItem(
+		ctx: Context,
+		action: () => any,
+		slot: number,
+		item: number,
+	) {
+		const promise = this.waitForSlotItem(ctx, slot, item);
 
 		await action();
 

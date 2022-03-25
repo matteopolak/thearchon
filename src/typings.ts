@@ -1,4 +1,5 @@
 import type { BotOptions } from 'mineflayer';
+import type { Item } from 'prismarine-item';
 
 export type Context = number;
 export type CommandFunction = (
@@ -6,6 +7,17 @@ export type CommandFunction = (
 	username: string,
 	...args: string[]
 ) => any;
+
+export interface RawItem {
+	windowId: number;
+	slot: number;
+	item: {
+		blockId: number;
+		itemCount: number;
+		itemDamage: number;
+		nbtData: Item['nbt'];
+	};
+}
 
 export type BaseBotOptions = BotOptions & {
 	alias: string;

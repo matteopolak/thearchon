@@ -29,4 +29,4 @@ export const TELEPORT_REGEX = /^(\w{3,16}) has requested to teleport to you\.$/;
 export const BALANCE_REGEX = /^Your balance is \$([\d,\.]+)/;
 export const MOBCOINS_REGEX = /^You have ([\d,\.]+) MobCoins/;
 export const FISHMONGER_SELL_REGEX = /^You sold all your fish for \$([\d,\.]+)/;
-export const MONEY_THRESHOLD = 250000;
+export const MONEY_THRESHOLD = 5000000;

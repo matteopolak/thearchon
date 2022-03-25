@@ -106,10 +106,9 @@ export default class FishBot extends BaseBot {
 	private getBestFishingRod(index = false) {
 		const item = this.client.inventory.slots.reduce((a, b) =>
 			// @ts-ignore
-			FISHING_RODS.indexOf(a?.nbt?.value?.display?.value?.Name?.value) -
-				// @ts-ignore
-				FISHING_RODS.indexOf(b?.nbt?.value?.display?.value?.Name?.value) >
-			0
+			FISHING_RODS.indexOf(a?.nbt?.value?.display?.value?.Name?.value) >
+			// @ts-ignore
+			FISHING_RODS.indexOf(b?.nbt?.value?.display?.value?.Name?.value)
 				? a
 				: b,
 		);
@@ -207,15 +206,28 @@ export default class FishBot extends BaseBot {
 			await this.client.waitForTicks(ctx, 5);
 
 			const best = this.getBestFishingRod(true);
+			const slot = FISHING_ROD_SLOTS[best + 1];
 
 			if (best !== -1 && best < 4) {
 				console.log(
 					`[${this.alias}] [PURCHASE] Purchasing ${FISHING_RODS[best + 1]}`,
 				);
 
-				await this.client.clickWindow(ctx, 14, 0, 0);
-				await this.client.waitForTicks(ctx, 5);
+				await this.completeActionAndWaitForSlotItem(
+					ctx,
+					() => this.client.clickWindow(ctx, 14, 0, 0),
+					slot,
+					346,
+				);
+
 				await this.client.clickWindow(ctx, FISHING_ROD_SLOTS[best + 1], 0, 0);
+
+				await this.completeActionAndWaitForSlotItem(
+					ctx,
+					() => this.client.closeWindow(ctx, window),
+					11,
+					266,
+				);
 			}
 		} else {
 			if (this.logger)
@@ -264,15 +276,28 @@ export default class FishBot extends BaseBot {
 			await this.client.waitForTicks(ctx, 5);
 
 			const best = this.getBestFishingRod(true);
+			const slot = FISHING_ROD_SLOTS[best + 1];
 
 			if (best !== -1 && best < 4) {
 				console.log(
 					`[${this.alias}] [PURCHASE] Purchasing ${FISHING_RODS[best + 1]}`,
 				);
 
-				await this.client.clickWindow(ctx, 14, 0, 0);
-				await this.client.waitForTicks(ctx, 5);
+				await this.completeActionAndWaitForSlotItem(
+					ctx,
+					() => this.client.clickWindow(ctx, 14, 0, 0),
+					slot,
+					346,
+				);
+
 				await this.client.clickWindow(ctx, FISHING_ROD_SLOTS[best + 1], 0, 0);
+
+				await this.completeActionAndWaitForSlotItem(
+					ctx,
+					() => this.client.closeWindow(ctx, window),
+					11,
+					266,
+				);
 			}
 		} else {
 			if (this.logger)

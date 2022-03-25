@@ -53,6 +53,14 @@ export default class BaseState {
 			this.client._client.on('messagestr', listener);
 			// @ts-ignore
 			this.client._client.once('context_changed', contextListener);
+
+			if (ctx !== this.client.context) {
+				this.client._client.off('messagestr', listener);
+				// @ts-ignore
+				this.client._client.off('context_changed', contextListener);
+
+				resolve(undefined);
+			}
 		});
 	}
 
