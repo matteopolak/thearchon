@@ -1,10 +1,10 @@
 import BaseBot from './BaseBot';
 import { FISHING_RODS, ROD_TO_BAIT } from '../constants';
-import { Destination, DestinationType, SellType } from '../typings';
+import { Destination, DestinationType, SellType, State } from '../typings';
 import { currencyFormatter, unscramble } from '../utils';
 
 import type { BaseBotOptions } from './BaseBot';
-import type { InventoryData, RawMapData } from '../typings';
+import type { Context, InventoryData, RawMapData } from '../typings';
 import type { Item } from 'prismarine-item';
 import type { MessagePort } from 'worker_threads';
 
@@ -34,8 +34,9 @@ export default class FishBot extends BaseBot {
 
 		await super.init();
 
-		this.client._client.on('map', async (map: RawMapData) => {
-			if (!this.captcha.active) return;
+		// @ts-ignore
+		this._client.on('map', async (map: RawMapData) => {
+			if (this.state !== State.SOLVING_CAPTCHA) return;
 
 			map.columns = Math.abs(map.columns);
 			map.rows = Math.abs(map.rows);
@@ -49,9 +50,10 @@ export default class FishBot extends BaseBot {
 			)
 				return;
 
+			const ctx = this.context;
 			const answer = unscramble(map);
 
-			if (answer.length === 5 && this.captcha.active) {
+			if (answer.length === 5 && this.state === State.SOLVING_CAPTCHA) {
 				if (this.logger)
 					console.log(
 						`[${this.alias}] [CAPTCHA] Possible answer found: ${answer.join(
@@ -59,28 +61,33 @@ export default class FishBot extends BaseBot {
 						)}`,
 					);
 
-				await this.command(`/code ${answer.join('')}`);
+				await this.command(ctx, `/code ${answer.join('')}`);
 
-				this.captcha.active = false;
+				const previous = this.previousState;
+				this.state = State.IDLE;
 
 				await this.client.awaitMessage(
+					ctx,
 					'Great job! You solved the captcha and can continue playing.',
 				);
 
-				process.exit(50);
+				if (previous === State.FISHING) {
+					this.state = State.FISHING;
+					this.fish(ctx);
+				}
 			}
 		});
 	}
 
-	public async teleportToHome(name: Destination) {
+	public async teleportToHome(ctx: Context, name: Destination) {
 		if (name === Destination.FOREST) {
-			this.client.setControlState('sneak', false);
+			this.client.setControlState(ctx, 'sneak', false);
 		}
 
-		await super.teleport(name, DestinationType.HOME);
+		await super.teleport(ctx, name, DestinationType.HOME);
 
 		if (name === Destination.FISHING) {
-			this.client.setControlState('sneak', true);
+			this.client.setControlState(ctx, 'sneak', true);
 		}
 	}
 
@@ -120,20 +127,22 @@ export default class FishBot extends BaseBot {
 			: item;
 	}
 
-	private waitForBite() {
+	private waitForBite(ctx: Context) {
+		if (ctx !== this.context) return;
+
 		return new Promise(resolve => {
 			const listener = (title: string) => {
 				if (
 					title ===
 					'{"extra":[{"color":"dark_aqua","text":"You Got a Bite!"}],"text":""}'
 				) {
-					this.client.removeListener('title', listener);
+					this._client.removeListener('title', listener);
 
 					return resolve(true);
 				}
 			};
 
-			this.client.on('title', listener);
+			this._client.on('title', listener);
 		});
 	}
 
@@ -170,26 +179,30 @@ export default class FishBot extends BaseBot {
 		return inventory;
 	}
 
-	private async sellFish(goBack = true) {
-		await this.teleportToHome(Destination.FOREST);
+	private async sellFish(ctx: Context, goBack = true) {
+		if (ctx !== this.context) return;
 
-		const window = await this.completeActionAndWaitForWindow(async () => {
+		await this.teleportToHome(ctx, Destination.FOREST);
+
+		const window = await this.completeActionAndWaitForWindow(ctx, async () => {
 			const entity = Object.values(this.client.entities).find(
 				e => e.username === '§a§lFishmonger',
 			);
 
 			if (!entity) process.exit();
 			else {
-				await this.client.activateEntity(entity);
+				await this.client.activateEntity(ctx, entity);
 			}
 		});
+
+		if (window === undefined) return;
 
 		const sellSlot =
 			window.slots.find(i => i.displayName === this.sellType)?.slot ?? -1;
 
 		if (sellSlot !== -1) {
-			await this.client.clickWindow(sellSlot, 0, 0);
-			await this.client.waitForTicks(5);
+			await this.client.clickWindow(ctx, sellSlot, 0, 0);
+			await this.client.waitForTicks(ctx, 5);
 		} else {
 			if (this.logger)
 				console.log(
@@ -197,24 +210,28 @@ export default class FishBot extends BaseBot {
 				);
 		}
 
-		this.client.closeWindow(window);
-		if (goBack) await this.teleportToHome(Destination.FISHING);
-		this.client.activateItem();
+		this.client.closeWindow(ctx, window);
+		if (goBack) await this.teleportToHome(ctx, Destination.FISHING);
+		this.client.activateItem(ctx);
 	}
 
-	private async purchaseBait() {
-		await this.teleportToHome(Destination.FOREST);
+	private async purchaseBait(ctx: Context) {
+		if (ctx !== this.context) return;
 
-		const window = await this.completeActionAndWaitForWindow(async () => {
+		await this.teleportToHome(ctx, Destination.FOREST);
+
+		const window = await this.completeActionAndWaitForWindow(ctx, async () => {
 			const entity = Object.values(this.client.entities).find(
 				e => e.username === '§a§lFishmonger',
 			);
 
 			if (!entity) process.exit();
 			else {
-				await this.client.activateEntity(entity);
+				await this.client.activateEntity(ctx, entity);
 			}
 		});
+
+		if (window === undefined) return;
 
 		const [sellSlot, buySlot] = window.slots.reduce(
 			(a, b) => {
@@ -229,8 +246,8 @@ export default class FishBot extends BaseBot {
 		);
 
 		if (sellSlot !== -1) {
-			await this.client.clickWindow(sellSlot, 0, 0);
-			await this.client.waitForTicks(5);
+			await this.client.clickWindow(ctx, sellSlot, 0, 0);
+			await this.client.waitForTicks(ctx, 5);
 		} else {
 			if (this.logger)
 				console.log(
@@ -242,11 +259,11 @@ export default class FishBot extends BaseBot {
 			const rodIndex = this.getBestFishingRod(true);
 			const baitSlot = ROD_TO_BAIT[rodIndex === -1 ? 0 : rodIndex];
 
-			await this.client.clickWindow(buySlot, 0, 0);
-			await this.client.waitForTicks(5);
-			await this.client.clickWindow(baitSlot, 0, 0);
-			await this.client.waitForTicks(5);
-			await this.client.clickWindow(17, 0, 0);
+			await this.client.clickWindow(ctx, buySlot, 0, 0);
+			await this.client.waitForTicks(ctx, 5);
+			await this.client.clickWindow(ctx, baitSlot, 0, 0);
+			await this.client.waitForTicks(ctx, 5);
+			await this.client.clickWindow(ctx, 17, 0, 0);
 		} else {
 			if (this.logger)
 				console.log(
@@ -254,21 +271,25 @@ export default class FishBot extends BaseBot {
 				);
 		}
 
-		this.client.closeWindow(window);
-		await this.teleportToHome(Destination.FISHING);
-		this.client.activateItem();
+		this.client.closeWindow(ctx, window);
+		await this.teleportToHome(ctx, Destination.FISHING);
+		this.client.activateItem(ctx);
 	}
 
-	private sellFishAndPurchaseBait() {
-		return this.purchaseBait();
+	private sellFishAndPurchaseBait(ctx: Context) {
+		return this.purchaseBait(ctx);
 	}
 
-	private clearCommand() {
-		return this.clearInventory();
+	private clearCommand(ctx: Context) {
+		if (this.state === State.SOLVING_CAPTCHA) return;
+
+		this.state = State.CLEARING_INVENTORY;
+
+		return this.clearInventory(ctx);
 	}
 
-	private async clearInventory() {
-		await this.teleport(Destination.SPAWN, DestinationType.RAW);
+	private async clearInventory(ctx: Context) {
+		await this.teleport(ctx, Destination.SPAWN, DestinationType.RAW);
 
 		for (const item of this.client.inventory.slots) {
 			if (item === null || item.slot < 9 || item.slot > 44) continue;
@@ -283,29 +304,29 @@ export default class FishBot extends BaseBot {
 				// @ts-ignore
 				!FISHING_RODS.includes(item.nbt?.value?.display?.value?.Name?.value)
 			) {
-				await this.client.toss(item.type, item.metadata, item.count);
-				await this.client.waitForTicks(10);
+				await this.client.toss(ctx, item.type, item.metadata, item.count);
+				await this.client.waitForTicks(ctx, 10);
 			}
 		}
 	}
 
-	private async checkFishingThresholds() {
+	private async checkFishingThresholds(ctx: Context) {
 		const inventory = this.getInventoryData();
 
 		if (this.isInventoryFull()) {
-			await this.clearInventory();
+			await this.clearInventory(ctx);
 		}
 
 		if (inventory.count.bait === BAIT_THRESHOLD) {
-			await this.purchaseBait();
+			await this.purchaseBait(ctx);
 
 			return true;
 		} else if (
 			inventory.slots.fish >= FISH_THRESHOLD ||
 			inventory.count.fish >= FISH_COUNT_THRESHOLD
 		) {
-			if (inventory.count.bait >= FISH_THRESHOLD) await this.sellFish();
-			else await this.sellFishAndPurchaseBait();
+			if (inventory.count.bait >= FISH_THRESHOLD) await this.sellFish(ctx);
+			else await this.sellFishAndPurchaseBait(ctx);
 
 			return true;
 		}
@@ -313,9 +334,9 @@ export default class FishBot extends BaseBot {
 		return false;
 	}
 
-	public async fish() {
+	public async fish(ctx: Context) {
 		try {
-			return this.startFishing();
+			return this.startFishing(ctx);
 		} catch (e) {
 			console.log(`[${this.alias}] [ERROR] Error during fishing: ${e}`);
 		}
@@ -325,54 +346,54 @@ export default class FishBot extends BaseBot {
 		this.isFishing = false;
 	}
 
-	private async startFishing() {
+	private async startFishing(_: Context) {
 		if (this.isFishing) return false;
 
-		this.isFishing = true;
+		this.state = State.FISHING;
 
-		const captchaState = this.captcha.startedAt;
+		const ctx = this.context;
 		const rod = this.getBestFishingRod();
 
-		if (rod === null) {
-			return (this.isFishing = false);
-		}
+		if (rod === null) return;
 
 		this.port.postMessage({ sellType: this.sellType, isFishing: true });
 
 		if (rod.displayName !== this.client.heldItem?.displayName)
-			await this.client.equip(rod, 'hand');
+			await this.client.equip(ctx, rod, 'hand');
 
-		if (!(await this.checkFishingThresholds()))
-			await this.teleportToHome(Destination.FISHING);
+		if (!(await this.checkFishingThresholds(ctx)))
+			await this.teleportToHome(ctx, Destination.FISHING);
 
-		while (this.isFishing && captchaState === this.captcha.startedAt) {
-			await this.checkFishingThresholds();
-			await this.client.waitForTicks(5);
+		while (this.isFishing && ctx === this.context) {
+			await this.checkFishingThresholds(ctx);
+			await this.client.waitForTicks(ctx, 5);
 
 			if (rod.displayName !== this.client.heldItem?.displayName)
-				await this.client.equip(rod, 'hand');
+				await this.client.equip(ctx, rod, 'hand');
 
-			this.client.activateItem();
-			await this.waitForBite();
-			this.client.activateItem();
+			this.client.activateItem(ctx);
+			await this.waitForBite(ctx);
+			this.client.activateItem(ctx);
 
-			await this.client.waitForTicks(5);
+			await this.client.waitForTicks(ctx, 5);
 		}
 
 		return true;
 	}
 
-	public async showFishValue() {
+	public async showFishValue(ctx: Context) {
+		if (this.state === State.SOLVING_CAPTCHA) return;
+
 		const value = this.client.inventory.items().reduce(
 			// @ts-ignore
 			(a, b) => a + (b.nbt?.value?.arfshfishworth?.value ?? 0),
 			0,
 		);
 
-		return this.command(`/p ${currencyFormatter.format(value)}`);
+		return this.command(ctx, `/p ${currencyFormatter.format(value)}`);
 	}
 
-	public async setSellTypeCommand(_: string, type: string) {
+	public async setSellTypeCommand(_: Context, __: string, type: string) {
 		if (type === 'coins') type = SellType.COINS;
 		else if (type === 'mobcoins') type = SellType.MOB_COINS;
 		else return;

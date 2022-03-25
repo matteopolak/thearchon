@@ -1,9 +1,10 @@
+import BaseState from './BaseState';
 import config from '../config';
 import { once } from 'events';
 import fs from 'fs/promises';
 import mineflayer from 'mineflayer';
 import path from 'path';
-import { DestinationType, SellType } from '../typings';
+import { Context, DestinationType, SellType, State } from '../typings';
 import { createPromiseResolvePair, currencyFormatter, sleep } from '../utils';
 
 import type { Bot, BotOptions } from 'mineflayer';
@@ -32,31 +33,45 @@ const MONEY_THRESHOLD = 40000000;
 export default class BaseBot {
 	public balance: number;
 	public checkedBalance: boolean;
-	public client: Bot;
 	public directory: string;
 	public alias: string;
 	public logger: boolean;
 	public whitelist: Set<string>;
 	public commands: Map<string, CommandFunction> = new Map();
 	public options: BaseBotOptions;
+	public _client: Bot;
+	public client: BaseState;
 	public captcha = {
-		active: false,
 		startedAt: 0,
 		promise: Promise.resolve(),
 		resolve: () => {},
 	};
 
-	private commandQueue: { message: string; resolve: () => void }[] = [];
+	public _state: State = State.IDLE;
+	public previousState: State = State.IDLE;
+	public context: Context = 0;
+
+	private commandQueue: {
+		message: string;
+		resolve: () => void;
+		ctx: Context;
+	}[] = [];
 	private lastCommandTimestamp: number = 0;
 
-	private messageQueue: { message: string; resolve: () => void }[] = [];
+	private messageQueue: {
+		message: string;
+		resolve: () => void;
+		ctx: Context;
+	}[] = [];
 	private lastMessageTimestamp: number = 0;
 	private initialised = false;
+
 	public fisher?: FishBot;
 
 	constructor(options: BaseBotOptions) {
 		this.options = options;
-		this.client = mineflayer.createBot(options);
+		this._client = mineflayer.createBot(options);
+		this.client = new BaseState(this);
 		this.alias = options.alias;
 		this.logger = options.logger ?? config.log;
 		this.whitelist = options.whitelist ?? new Set();
@@ -74,25 +89,35 @@ export default class BaseBot {
 		this.commands.set('pay', this.sendMoney.bind(this));
 		this.commands.set('exec', this.executeCommand.bind(this));
 
-		this.client.once('spawn', this.join.bind(this));
+		this._client.once('spawn', this.join.bind(this));
 	}
 
-	public async join(): Promise<void> {
+	set state(value: State) {
+		this.previousState = this._state;
+		++this.context;
+		// @ts-ignore
+		this._client.emit('context_changed');
+
+		this._state = value;
+	}
+
+	public async join(ctx: Context = this.context): Promise<void> {
 		const message = await this.completeActionAndWaitForMessages(
-			() => this.command('/ruby'),
+			ctx,
+			() => this.command(ctx, '/ruby'),
 			/^You have no new mail\./,
 			/^Unable to connect to \w+: Server restarting/,
 		);
 
 		if (message !== 'You have no new mail.') {
-			await this.client.waitForTicks(200);
+			await this.client.waitForTicks(ctx, 200);
 
-			return this.join();
+			return this.join(ctx);
 		}
 	}
 
 	public async addLoginHook(hook: (bot: BaseBot) => any) {
-		this.client.once('spawn', () => hook(this));
+		this._client.once('spawn', () => hook(this));
 	}
 
 	public async init() {
@@ -108,7 +133,7 @@ export default class BaseBot {
 			)
 			.catch(() => {});
 
-		this.client.on('messagestr', async m => {
+		this._client.on('messagestr', async m => {
 			if (m === 'You can also submit your answer with /code <code>') {
 				const { promise, resolve } = createPromiseResolvePair();
 
@@ -116,7 +141,7 @@ export default class BaseBot {
 				this.captcha.resolve = resolve;
 				this.captcha.startedAt = Date.now();
 
-				return (this.captcha.active = true);
+				return (this.state = State.SOLVING_CAPTCHA);
 			}
 
 			if (
@@ -127,12 +152,14 @@ export default class BaseBot {
 				return process.exit();
 			}
 
+			const ctx = this.context;
+
 			if (FISHMONGER_SELL_REGEX.test(m)) {
 				const value = parseFloat(
 					m.match(FISHMONGER_SELL_REGEX)![1].replaceAll(',', ''),
 				);
 
-				if (this.checkedBalance === false) await this.getCurrentBalance();
+				if (this.checkedBalance === false) await this.getCurrentBalance(ctx);
 				else this.balance += value;
 
 				console.log(
@@ -143,6 +170,7 @@ export default class BaseBot {
 
 				if (this.balance >= MONEY_THRESHOLD) {
 					return this.command(
+						this.context,
 						`/pay ${config.autopay_to} ${(this.balance - 150000).toFixed(2)}`,
 					);
 				}
@@ -154,7 +182,7 @@ export default class BaseBot {
 				TELEPORT_REGEX.test(m) &&
 				this.whitelist.has(m.match(TELEPORT_REGEX)![1])
 			) {
-				return this.command('/tpaccept');
+				return this.command(ctx, '/tpaccept');
 			}
 
 			if (COMMAND_REGEX.test(m) === false) return;
@@ -174,7 +202,7 @@ export default class BaseBot {
 					);
 
 				try {
-					return run(sender, ...args);
+					return run(this.context, sender, ...args);
 				} catch (e) {
 					console.log(`[${this.alias}] [ERROR] ${e}`);
 				}
@@ -190,31 +218,31 @@ export default class BaseBot {
 		return Date.now() - this.lastCommandTimestamp;
 	}
 
-	private addCommandToQueue(message: string): Promise<any> {
+	private addCommandToQueue(ctx: Context, message: string): Promise<any> {
 		const { promise, resolve } = createPromiseResolvePair();
 
 		if (message.startsWith('/code ')) {
-			this.commandQueue.unshift({ message, resolve });
+			this.commandQueue.unshift({ message, resolve, ctx });
 			// @ts-ignore
 			this.client.emit('custom::code_added');
-		} else this.commandQueue.push({ message, resolve });
+		} else this.commandQueue.push({ message, resolve, ctx });
 
 		return promise;
 	}
 
-	private addMessageToQueue(message: string): Promise<any> {
+	private addMessageToQueue(ctx: Context, message: string): Promise<any> {
 		const { promise, resolve } = createPromiseResolvePair();
 
-		this.messageQueue.push({ message, resolve });
+		this.messageQueue.push({ message, resolve, ctx });
 
 		return promise;
 	}
 
-	public async getCurrentMobCoins() {
+	public async getCurrentMobCoins(ctx: Context) {
 		const balance: Promise<number> = new Promise(resolve => {
 			const listener = (m: string) => {
 				if (MOBCOINS_REGEX.test(m)) {
-					this.client.removeListener('messagestr', listener);
+					this._client.removeListener('messagestr', listener);
 
 					const balanceString = m.match(MOBCOINS_REGEX)![1];
 
@@ -222,19 +250,25 @@ export default class BaseBot {
 				}
 			};
 
-			this.client.on('messagestr', listener);
+			this._client.on('messagestr', listener);
+			// @ts-ignore
+			this._client.once('context_changed', () => {
+				this._client.removeListener('messagestr', listener);
+
+				resolve(0);
+			});
 		});
 
-		await this.command('/mobcoins balance');
+		await this.command(ctx, '/mobcoins balance');
 
 		return balance;
 	}
 
-	public async getCurrentBalance(real = false) {
+	public async getCurrentBalance(ctx: Context, real = false) {
 		const balance: Promise<number> = new Promise(resolve => {
 			const listener = (m: string) => {
 				if (BALANCE_REGEX.test(m)) {
-					this.client.removeListener('messagestr', listener);
+					this._client.removeListener('messagestr', listener);
 
 					const balanceString = m.match(BALANCE_REGEX)![1];
 					const balance = parseFloat(balanceString.replaceAll(',', ''));
@@ -246,97 +280,102 @@ export default class BaseBot {
 				}
 			};
 
-			this.client.on('messagestr', listener);
+			this._client.on('messagestr', listener);
+
+			// @ts-ignore
+			this._client.on('context_changed', () => {
+				this._client.removeListener('messagestr', listener);
+
+				resolve(0);
+			});
 		});
 
-		await this.command('/balance');
+		await this.command(ctx, '/balance');
 
 		return Math.max(await balance, 0);
 	}
 
-	private async sendMoney(username: string) {
-		const balance = await this.getCurrentBalance();
+	private async sendMoney(ctx: Context, username: string) {
+		const balance = await this.getCurrentBalance(ctx);
 
-		if (balance > 0)
-			await this.command(`/pay ${username} ${Math.floor(balance)}`);
+		if (balance > 0) {
+			await this.command(ctx, `/pay ${username} ${Math.floor(balance)}`);
+		}
 	}
 
-	private async teleportTo(username: string) {
-		return this.command(`/tpa ${username}`);
+	private async teleportTo(ctx: Context, username: string) {
+		return this.command(ctx, `/tpa ${username}`);
 	}
 
-	private async lookAt(username: string) {
-		const player = this.client.players[username];
+	private async lookAt(ctx: Context, username: string) {
+		const player = this._client.players[username];
 
-		if (player) return this.client.lookAt(player.entity.position);
+		if (player) return this.client.lookAt(ctx, player.entity.position);
 	}
 
 	private async saveInventory() {
 		return fs.writeFile(
 			path.join(this.directory, 'inventory.json'),
-			JSON.stringify(this.client.inventory.slots, null, 2),
+			JSON.stringify(this._client.inventory.slots, null, 2),
 		);
 	}
 
 	private async saveEntityList() {
 		await fs.writeFile(
 			path.join(this.directory, 'players.json'),
-			JSON.stringify(this.client.players, null, 2),
+			JSON.stringify(this._client.players, null, 2),
 		);
 		await fs.writeFile(
 			path.join(this.directory, 'entities.json'),
-			JSON.stringify(this.client.entities, null, 2),
+			JSON.stringify(this._client.entities, null, 2),
 		);
 	}
 
-	private async acceptTeleportRequest() {
-		return this.command('/tpaccept');
+	private async acceptTeleportRequest(ctx: Context) {
+		return this.command(ctx, '/tpaccept');
 	}
 
-	private async executeCommand(_: string, ...args: string[]) {
-		return this.command(`/${args.join(' ')}`);
+	private async executeCommand(ctx: Context, _: string, ...args: string[]) {
+		return this.command(ctx, `/${args.join(' ')}`);
 	}
 
-	private async showMobCoinsBalance() {
-		const balance = await this.getCurrentMobCoins();
+	private async showMobCoinsBalance(ctx: Context) {
+		const balance = await this.getCurrentMobCoins(ctx);
 
-		return this.command(`/p ${currencyFormatter.format(balance)}`);
+		return this.command(ctx, `/p ${currencyFormatter.format(balance)}`);
 	}
 
-	private async showBalance() {
-		const balance = await this.getCurrentBalance(true);
+	private async showBalance(ctx: Context) {
+		const balance = await this.getCurrentBalance(ctx, true);
 
-		return this.command(`/p ${currencyFormatter.format(balance)}`);
+		return this.command(ctx, `/p ${currencyFormatter.format(balance)}`);
 	}
 
-	public async command(message: string): Promise<void> {
-		if (!message) return;
+	public async command(ctx: Context, message: string): Promise<void> {
+		if (!message || ctx !== this.context) return;
 
 		if (this.commandQueue.length === 0) {
 			const waitFor = 2000 - this.lastCommandAgo;
 
-			if (
-				waitFor <= 0 &&
-				(!this.captcha.active || message.startsWith('/code '))
-			) {
+			if (waitFor <= 0 && message.startsWith('/code ')) {
 				this.lastCommandTimestamp = Date.now();
 
 				if (this.logger)
 					console.log(`[${this.alias}] [CHAT] Sending command: ${message}`);
 
-				return this.client.chat(message);
+				return this.client.chat(ctx, message);
 			}
 		}
 
-		const promise = this.addCommandToQueue(message);
+		const promise = this.addCommandToQueue(ctx, message);
 
 		while (this.commandQueue.length !== 0) {
-			const { message, resolve } = this.commandQueue.shift()!;
+			const { message, resolve, ctx } = this.commandQueue.shift()!;
 
-			if (this.captcha.active && !message.startsWith('/code ')) {
-				this.commandQueue.unshift({ message, resolve });
+			if (!message.startsWith('/code ')) {
+				this.commandQueue.unshift({ message, resolve, ctx });
 
-				await once(this.client, 'custom::code_added');
+				await once(this._client, 'custom::code_added');
 
 				continue;
 			}
@@ -347,7 +386,7 @@ export default class BaseBot {
 			if (this.logger)
 				console.log(`[${this.alias}] [CHAT] Sending command: ${message}`);
 
-			this.client.chat(message);
+			this.client.chat(ctx, message);
 
 			resolve();
 		}
@@ -355,7 +394,7 @@ export default class BaseBot {
 		return promise;
 	}
 
-	public async chat(message: string): Promise<void> {
+	public async chat(ctx: Context, message: string): Promise<void> {
 		if (!message) return;
 
 		if (this.messageQueue.length === 0) {
@@ -367,10 +406,10 @@ export default class BaseBot {
 				if (this.logger)
 					console.log(`[${this.alias}] [CHAT] Sending message: ${message}`);
 
-				return this.client.chat(message);
+				return this.client.chat(ctx, message);
 			}
 
-			const promise = this.addMessageToQueue(message);
+			const promise = this.addMessageToQueue(ctx, message);
 
 			while (this.messageQueue.length !== 0) {
 				const { message, resolve } = this.messageQueue.shift()!;
@@ -381,7 +420,7 @@ export default class BaseBot {
 				if (this.logger)
 					console.log(`[${this.alias}] [CHAT] Sending message: ${message}`);
 
-				this.client.chat(message);
+				this.client.chat(ctx, message);
 
 				resolve();
 			}
@@ -389,14 +428,15 @@ export default class BaseBot {
 			return promise;
 		}
 
-		return this.addMessageToQueue(message);
+		return this.addMessageToQueue(ctx, message);
 	}
 
 	public async completeActionAndWaitForMessages(
+		ctx: Context,
 		action: () => any,
 		...message: string[] | RegExp[]
 	) {
-		const promise = this.client.awaitMessage(...message);
+		const promise = this.client.awaitMessage(ctx, ...message);
 
 		await action();
 
@@ -404,10 +444,11 @@ export default class BaseBot {
 	}
 
 	public async completeActionAndWaitForMessage(
+		ctx: Context,
 		action: () => any,
 		message: string,
 	) {
-		const promise = this.client.awaitMessage(message);
+		const promise = this.client.awaitMessage(ctx, message);
 
 		await action();
 
@@ -415,37 +456,60 @@ export default class BaseBot {
 	}
 
 	public async teleport(
+		ctx: Context,
 		name: Destination,
 		type: DestinationType = DestinationType.HOME,
 	) {
-		await this.completeActionAndWaitForMessage(() => {
-			this.command(
-				type === DestinationType.HOME
-					? `/home ${name}`
-					: type === DestinationType.WARP
-					? `/warp ${name}`
-					: `/${name}`,
-			);
-		}, 'Teleportation commencing...');
+		if (ctx !== this.context) return;
 
-		await this.client.waitForTicks(20);
-		await this.client.waitForChunksToLoad();
+		await this.completeActionAndWaitForMessage(
+			ctx,
+			() => {
+				this.command(
+					ctx,
+					type === DestinationType.HOME
+						? `/home ${name}`
+						: type === DestinationType.WARP
+						? `/warp ${name}`
+						: `/${name}`,
+				);
+			},
+			'Teleportation commencing...',
+		);
+
+		await this.client.waitForTicks(ctx, 20);
+		await this.client.waitForChunksToLoad(ctx);
 	}
 
 	public async completeActionAndWaitForWindow(
-		action: () => any,
-	): Promise<Window> {
-		const waitForWindow = once(this.client, 'windowOpen');
+		ctx: Context,
+		action: (ctx: Context) => any,
+	): Promise<Window | undefined> {
+		if (ctx !== this.context) return;
 
-		await action();
+		const waitForWindow: Promise<Window | undefined> = new Promise(resolve => {
+			const listener = (window?: Window) => {
+				this._client.removeListener('windowOpen', listener);
+				// @ts-ignore
+				this._client.removeListener('context_changed', listener);
 
-		const [window] = await waitForWindow;
+				return resolve(window);
+			};
+
+			this._client.once('windowOpen', resolve);
+			// @ts-ignore
+			this._client.once('context_changed', listener);
+		});
+
+		await action(ctx);
+
+		const window = await waitForWindow;
 
 		return window;
 	}
 
 	public isInventoryFull() {
-		return !this.client.inventory.slots.some(
+		return !this._client.inventory.slots.some(
 			(s, i) => i > 8 && i < 45 && (s === null || s.type === 0),
 		);
 	}
