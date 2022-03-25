@@ -70,7 +70,7 @@ export default class FishBot extends BaseBot {
 				this.state = State.IDLE;
 
 				await this.client.awaitMessage(
-					ctx,
+					this.context,
 					'Great job! You solved the captcha and can continue playing.',
 				);
 
