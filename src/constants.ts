@@ -10,6 +10,8 @@ export const FISHING_RODS = [
 	'§c§lMega Rod',
 ];
 
+export const FISHING_ROD_SLOTS = [10, 11, 13, 15, 16];
+
 export const VERSION = config.version;
 export const ROD_TO_BAIT = [9, 11, 13, 15, 15];
 
@@ -20,7 +22,7 @@ export const FISH_COUNT_THRESHOLD = 50;
 export const BAIT_THRESHOLD = 0;
 
 export const MESSAGE_COOLDOWN = 1500;
-export const COMMAND_COOLDOWN = 2100;
+export const COMMAND_COOLDOWN = 2500;
 
 export const COMMAND_REGEX = /^\((\w{3,16})\)\s(.+)$/;
 export const TELEPORT_REGEX = /^(\w{3,16}) has requested to teleport to you\.$/;

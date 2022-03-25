@@ -6,6 +6,7 @@ import config from '../config';
 import {
 	BAIT_THRESHOLD,
 	FISHING_RODS,
+	FISHING_ROD_SLOTS,
 	FISH_COUNT_THRESHOLD,
 	FISH_THRESHOLD,
 	ROD_TO_BAIT,
@@ -204,6 +205,17 @@ export default class FishBot extends BaseBot {
 		if (sellSlot !== -1) {
 			await this.client.clickWindow(ctx, sellSlot, 0, 0);
 			await this.client.waitForTicks(ctx, 5);
+
+			const best = this.getBestFishingRod(true);
+
+			if (best !== -1 && best < 4) {
+				console.log(
+					`[${this.alias}] [PURCHASE] Purchasing ${FISHING_RODS[best + 1]}`,
+				);
+
+				await this.client.clickWindow(ctx, 14, 0, 0);
+				await this.client.clickWindow(ctx, FISHING_ROD_SLOTS[best + 1], 0, 0);
+			}
 		} else {
 			if (this.logger)
 				console.log(
@@ -249,6 +261,17 @@ export default class FishBot extends BaseBot {
 		if (sellSlot !== -1) {
 			await this.client.clickWindow(ctx, sellSlot, 0, 0);
 			await this.client.waitForTicks(ctx, 5);
+
+			const best = this.getBestFishingRod(true);
+
+			if (best !== -1 && best < 4) {
+				console.log(
+					`[${this.alias}] [PURCHASE] Purchasing ${FISHING_RODS[best + 1]}`,
+				);
+
+				await this.client.clickWindow(ctx, 14, 0, 0);
+				await this.client.clickWindow(ctx, FISHING_ROD_SLOTS[best + 1], 0, 0);
+			}
 		} else {
 			if (this.logger)
 				console.log(

@@ -4,6 +4,7 @@ type ServerType = 'onyx' | 'ruby' | 'amber' | 'chaos' | 'genesis' | 'origins';
 interface Config {
 	fishOnJoin: boolean;
 	sneakWhileFishing: boolean;
+	upgradeFishingRodAutomatically: boolean;
 	server: ServerType;
 	whitelist: string[];
 	autopay_to: string;
@@ -21,6 +22,7 @@ const config: Config = {
 	fishOnJoin: true,
 	server: 'onyx',
 	sneakWhileFishing: false,
+	upgradeFishingRodAutomatically: true,
 	whitelist: ['main_account', 'anoter_account'],
 	autopay_to: 'main_account',
 	log: true,

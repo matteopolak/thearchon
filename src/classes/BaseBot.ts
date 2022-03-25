@@ -385,7 +385,7 @@ export default class BaseBot {
 		if (!message || ctx !== this.context) return;
 
 		if (this.commandQueue.length === 0) {
-			const waitFor = 2000 - this.lastCommandAgo;
+			const waitFor = COMMAND_COOLDOWN - this.lastCommandAgo;
 
 			if (waitFor <= 0) {
 				this.lastCommandTimestamp = Date.now();
@@ -422,7 +422,7 @@ export default class BaseBot {
 		if (!message || ctx !== this.context) return;
 
 		if (this.messageQueue.length === 0) {
-			const waitFor = 2000 - this.lastMessageAgo;
+			const waitFor = MESSAGE_COOLDOWN - this.lastMessageAgo;
 
 			if (waitFor <= 0) {
 				this.lastMessageTimestamp = Date.now();
