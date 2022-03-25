@@ -2,6 +2,7 @@ import type { MessagePort } from 'worker_threads';
 
 import type { Item } from 'prismarine-item';
 
+import config from '../config';
 import {
 	BAIT_THRESHOLD,
 	FISHING_RODS,
@@ -83,13 +84,13 @@ export default class FishBot extends BaseBot {
 	}
 
 	public async teleportToHome(ctx: Context, name: Destination) {
-		if (name === Destination.FOREST) {
+		if (name === Destination.FOREST && config.sneakWhileFishing) {
 			this.client.setControlState(ctx, 'sneak', false);
 		}
 
 		await super.teleport(ctx, name, DestinationType.HOME);
 
-		if (name === Destination.FISHING) {
+		if (name === Destination.FISHING && config.sneakWhileFishing) {
 			this.client.setControlState(ctx, 'sneak', true);
 		}
 	}
@@ -353,6 +354,7 @@ export default class FishBot extends BaseBot {
 		if (this.isFishing) return false;
 
 		this.state = State.FISHING;
+		this.isFishing = true;
 
 		const ctx = this.context;
 		const rod = this.getBestFishingRod();
@@ -364,10 +366,13 @@ export default class FishBot extends BaseBot {
 		if (rod.displayName !== this.client.heldItem?.displayName)
 			await this.client.equip(ctx, rod, 'hand');
 
+		console.log('fishing', ctx, this.context);
+
 		if (!(await this.checkFishingThresholds(ctx)))
 			await this.teleportToHome(ctx, Destination.FISHING);
 
 		while (this.isFishing && ctx === this.context) {
+			console.log('fishing', ctx, this.context);
 			await this.checkFishingThresholds(ctx);
 			await this.client.waitForTicks(ctx, 5);
 

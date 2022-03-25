@@ -1,6 +1,10 @@
 type AuthType = 'mojang' | 'microsoft';
+type ServerType = 'onyx' | 'ruby' | 'amber' | 'chaos' | 'genesis' | 'origins';
 
 interface Config {
+	fishOnJoin: boolean;
+	sneakWhileFishing: boolean;
+	server: ServerType;
 	whitelist: string[];
 	autopay_to: string;
 	log: boolean;
@@ -14,6 +18,9 @@ interface Config {
 }
 
 const config: Config = {
+	fishOnJoin: true,
+	server: 'onyx',
+	sneakWhileFishing: false,
 	whitelist: ['main_account', 'anoter_account'],
 	autopay_to: 'main_account',
 	log: true,

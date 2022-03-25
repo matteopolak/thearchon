@@ -104,7 +104,7 @@ export default class BaseBot {
 	public async join(ctx: Context = this.context): Promise<void> {
 		const message = await this.completeActionAndWaitForMessages(
 			ctx,
-			() => this.command(ctx, '/ruby'),
+			() => this.command(ctx, `/${config.server}`),
 			/^You have no new mail\./,
 			/^Unable to connect to \w+: Server restarting/,
 		);
@@ -113,6 +113,10 @@ export default class BaseBot {
 			await this.client.waitForTicks(ctx, 200);
 
 			return this.join(ctx);
+		}
+
+		if (this.fisher && config.fishOnJoin) {
+			this.fisher.fish(ctx);
 		}
 	}
 
