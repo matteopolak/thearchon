@@ -14,6 +14,7 @@ import {
 	MESSAGE_COOLDOWN,
 	MOBCOINS_REGEX,
 	MONEY_THRESHOLD,
+	SURPLUS_MONEY_THRESHOLD,
 	TELEPORT_REGEX,
 } from '../constants';
 import { Context, DestinationType, RawItem, SellType, State } from '../typings';
@@ -215,7 +216,9 @@ export default class BaseBot {
 				if (this.balance >= MONEY_THRESHOLD) {
 					return this.command(
 						this.context,
-						`/pay ${config.autopay_to} ${(this.balance - 150000).toFixed(2)}`,
+						`/pay ${config.autopay_to} ${(
+							this.balance - SURPLUS_MONEY_THRESHOLD
+						).toFixed(2)}`,
 					);
 				}
 
@@ -383,7 +386,7 @@ export default class BaseBot {
 					this.balance = balance;
 					this.checkedBalance = true;
 
-					return resolve(balance - (real ? 0 : 150000));
+					return resolve(balance - (real ? 0 : SURPLUS_MONEY_THRESHOLD));
 				}
 			};
 

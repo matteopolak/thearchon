@@ -6,10 +6,11 @@ import config from '../config';
 import {
 	BAIT_THRESHOLD,
 	FISHING_RODS,
-	FISHING_ROD_SLOTS,
+	FISHING_ROD_DATA,
 	FISH_COUNT_THRESHOLD,
 	FISH_THRESHOLD,
 	ROD_TO_BAIT,
+	SURPLUS_MONEY_THRESHOLD,
 } from '../constants';
 import { Destination, DestinationType, SellType, State } from '../typings';
 import type { Context, InventoryData, RawMapData } from '../typings';
@@ -206,9 +207,13 @@ export default class FishBot extends BaseBot {
 			await this.client.waitForTicks(ctx, 5);
 
 			const best = this.getBestFishingRod(true);
-			const slot = FISHING_ROD_SLOTS[best + 1];
+			const data = FISHING_ROD_DATA[best < 4 ? best + 1 : 0];
 
-			if (best !== -1 && best < 4) {
+			if (
+				best !== -1 &&
+				best < 4 &&
+				data.price >= this.balance - SURPLUS_MONEY_THRESHOLD
+			) {
 				console.log(
 					`[${this.alias}] [PURCHASE] Purchasing ${FISHING_RODS[best + 1]}`,
 				);
@@ -216,11 +221,11 @@ export default class FishBot extends BaseBot {
 				await this.completeActionAndWaitForSlotItem(
 					ctx,
 					() => this.client.clickWindow(ctx, 14, 0, 0),
-					slot,
+					data.slot,
 					346,
 				);
 
-				await this.client.clickWindow(ctx, FISHING_ROD_SLOTS[best + 1], 0, 0);
+				await this.client.clickWindow(ctx, data.slot, 0, 0);
 
 				await this.completeActionAndWaitForSlotItem(
 					ctx,
@@ -276,9 +281,13 @@ export default class FishBot extends BaseBot {
 			await this.client.waitForTicks(ctx, 5);
 
 			const best = this.getBestFishingRod(true);
-			const slot = FISHING_ROD_SLOTS[best + 1];
+			const data = FISHING_ROD_DATA[best < 4 ? best + 1 : 0];
 
-			if (best !== -1 && best < 4) {
+			if (
+				best !== -1 &&
+				best < 4 &&
+				data.price >= this.balance - SURPLUS_MONEY_THRESHOLD
+			) {
 				console.log(
 					`[${this.alias}] [PURCHASE] Purchasing ${FISHING_RODS[best + 1]}`,
 				);
@@ -286,11 +295,11 @@ export default class FishBot extends BaseBot {
 				await this.completeActionAndWaitForSlotItem(
 					ctx,
 					() => this.client.clickWindow(ctx, 14, 0, 0),
-					slot,
+					data.slot,
 					346,
 				);
 
-				await this.client.clickWindow(ctx, FISHING_ROD_SLOTS[best + 1], 0, 0);
+				await this.client.clickWindow(ctx, data.slot, 0, 0);
 
 				await this.completeActionAndWaitForSlotItem(
 					ctx,

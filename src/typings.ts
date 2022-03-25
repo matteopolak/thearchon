@@ -8,6 +8,11 @@ export type CommandFunction = (
 	...args: string[]
 ) => any;
 
+export interface FishingRodData {
+	slot: number;
+	price: number;
+}
+
 export interface RawItem {
 	windowId: number;
 	slot: number;
