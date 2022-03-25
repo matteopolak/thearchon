@@ -12,19 +12,19 @@ console.log(`[WORKER] Starting ${options.alias}`);
 
 const logFileLocation = path.join(bot.directory, 'latest.log');
 
-bot.client.on('messagestr', (m, _, json) => {
+bot._client.on('messagestr', (m, _, json) => {
 	if (m.startsWith('██')) return;
 
 	fs.appendFile(logFileLocation, `${m} ::: ${JSON.stringify(json)}\n`);
 });
 
-bot.client.on('kicked', async reason => {
+bot._client.on('kicked', async reason => {
 	console.log(`[${bot.alias}] [INFO] Kicked: ${reason}`);
 
 	process.exit();
 });
 
-bot.client.on('end', async reason => {
+bot._client.on('end', async reason => {
 	console.log(`[${bot.alias}] [INFO] Kicked: ${reason}`);
 
 	process.exit();

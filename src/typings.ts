@@ -1,4 +1,26 @@
-export type CommandFunction = (username: string, ...args: string[]) => any;
+import type { BotOptions } from 'mineflayer';
+
+export type Context = number;
+export type CommandFunction = (
+	ctx: Context,
+	username: string,
+	...args: string[]
+) => any;
+
+export type BaseBotOptions = BotOptions & {
+	alias: string;
+	whitelist?: Set<string>;
+	logger?: boolean;
+	sellType?: SellType;
+	fish?: boolean;
+};
+
+export enum State {
+	IDLE,
+	FISHING,
+	SOLVING_CAPTCHA,
+	CLEARING_INVENTORY,
+}
 
 export enum DestinationType {
 	HOME,
