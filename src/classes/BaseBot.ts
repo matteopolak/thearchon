@@ -1,6 +1,5 @@
 import BaseState from './BaseState';
 import config from '../config';
-import { once } from 'events';
 import fs from 'fs/promises';
 import mineflayer from 'mineflayer';
 import path from 'path';
@@ -223,8 +222,6 @@ export default class BaseBot {
 
 		if (message.startsWith('/code ')) {
 			this.commandQueue.unshift({ message, resolve, ctx });
-			// @ts-ignore
-			this.client.emit('custom::code_added');
 		} else this.commandQueue.push({ message, resolve, ctx });
 
 		return promise;
@@ -242,7 +239,7 @@ export default class BaseBot {
 		const balance: Promise<number> = new Promise(resolve => {
 			const listener = (m: string) => {
 				if (MOBCOINS_REGEX.test(m)) {
-					this._client.removeListener('messagestr', listener);
+					this._client.off('messagestr', listener);
 
 					const balanceString = m.match(MOBCOINS_REGEX)![1];
 
@@ -250,13 +247,23 @@ export default class BaseBot {
 				}
 			};
 
-			this._client.on('messagestr', listener);
-			// @ts-ignore
-			this._client.once('context_changed', () => {
-				this._client.removeListener('messagestr', listener);
+			const context = () => {
+				this._client.off('messagestr', listener);
 
 				resolve(0);
-			});
+			};
+
+			this._client.on('messagestr', listener);
+			// @ts-ignore
+			this._client.once('context_changed', () => context);
+
+			if (ctx !== this.context) {
+				// @ts-ignore
+				this._client.off('context_changed', context);
+				this._client.off('messagestr', listener);
+
+				return resolve(0);
+			}
 		});
 
 		await this.command(ctx, '/mobcoins balance');
@@ -268,7 +275,7 @@ export default class BaseBot {
 		const balance: Promise<number> = new Promise(resolve => {
 			const listener = (m: string) => {
 				if (BALANCE_REGEX.test(m)) {
-					this._client.removeListener('messagestr', listener);
+					this._client.off('messagestr', listener);
 
 					const balanceString = m.match(BALANCE_REGEX)![1];
 					const balance = parseFloat(balanceString.replaceAll(',', ''));
@@ -280,14 +287,24 @@ export default class BaseBot {
 				}
 			};
 
+			const context = () => {
+				this._client.off('messagestr', listener);
+
+				resolve(0);
+			};
+
 			this._client.on('messagestr', listener);
 
 			// @ts-ignore
-			this._client.on('context_changed', () => {
-				this._client.removeListener('messagestr', listener);
+			this._client.on('context_changed', context);
 
-				resolve(0);
-			});
+			if (ctx !== this.context) {
+				// @ts-ignore
+				this._client.off('context_changed', context);
+				this._client.off('messagestr', listener);
+
+				return resolve(0);
+			}
 		});
 
 		await this.command(ctx, '/balance');
@@ -357,7 +374,7 @@ export default class BaseBot {
 		if (this.commandQueue.length === 0) {
 			const waitFor = 2000 - this.lastCommandAgo;
 
-			if (waitFor <= 0 && message.startsWith('/code ')) {
+			if (waitFor <= 0) {
 				this.lastCommandTimestamp = Date.now();
 
 				if (this.logger)
@@ -372,13 +389,7 @@ export default class BaseBot {
 		while (this.commandQueue.length !== 0) {
 			const { message, resolve, ctx } = this.commandQueue.shift()!;
 
-			if (!message.startsWith('/code ')) {
-				this.commandQueue.unshift({ message, resolve, ctx });
-
-				await once(this._client, 'custom::code_added');
-
-				continue;
-			}
+			if (ctx !== this.context) continue;
 
 			await sleep(COMMAND_COOLDOWN - this.lastCommandAgo);
 			this.lastCommandTimestamp = Date.now();
@@ -395,7 +406,7 @@ export default class BaseBot {
 	}
 
 	public async chat(ctx: Context, message: string): Promise<void> {
-		if (!message) return;
+		if (!message || ctx !== this.context) return;
 
 		if (this.messageQueue.length === 0) {
 			const waitFor = 2000 - this.lastMessageAgo;
@@ -412,7 +423,9 @@ export default class BaseBot {
 			const promise = this.addMessageToQueue(ctx, message);
 
 			while (this.messageQueue.length !== 0) {
-				const { message, resolve } = this.messageQueue.shift()!;
+				const { message, resolve, ctx } = this.messageQueue.shift()!;
+
+				if (ctx !== this.context) continue;
 
 				await sleep(MESSAGE_COOLDOWN - this.lastMessageAgo);
 				this.lastMessageTimestamp = Date.now();
@@ -489,9 +502,9 @@ export default class BaseBot {
 
 		const waitForWindow: Promise<Window | undefined> = new Promise(resolve => {
 			const listener = (window?: Window) => {
-				this._client.removeListener('windowOpen', listener);
+				this._client.off('windowOpen', listener);
 				// @ts-ignore
-				this._client.removeListener('context_changed', listener);
+				this._client.off('context_changed', listener);
 
 				return resolve(window);
 			};

@@ -136,7 +136,7 @@ export default class FishBot extends BaseBot {
 					title ===
 					'{"extra":[{"color":"dark_aqua","text":"You Got a Bite!"}],"text":""}'
 				) {
-					this._client.removeListener('title', listener);
+					this._client.off('title', listener);
 
 					return resolve(true);
 				}
