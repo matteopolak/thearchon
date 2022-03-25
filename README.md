@@ -9,6 +9,7 @@ A feature-packed auto-fishing bot for the Minecraft server [TheArchon](https://t
 
 ## Setup
 Configuration is done in `src/config.ts`.
+If you are setting this up for the first time, rename `src/config.example.ts` to `src/config.ts`.
 | Key | Value |
 | --- | --- |
 | `accounts` | The account information of the bots |
