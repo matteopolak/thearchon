@@ -1,14 +1,25 @@
-import BaseState from './BaseState';
-import config from '../config';
 import fs from 'fs/promises';
-import mineflayer from 'mineflayer';
 import path from 'path';
-import { Context, DestinationType, SellType, State } from '../typings';
-import { createPromiseResolvePair, currencyFormatter, sleep } from '../utils';
 
+import mineflayer from 'mineflayer';
 import type { Bot, BotOptions } from 'mineflayer';
 import type { Window } from 'prismarine-windows';
+
+import config from '../config';
+import {
+	BALANCE_REGEX,
+	COMMAND_COOLDOWN,
+	COMMAND_REGEX,
+	FISHMONGER_SELL_REGEX,
+	MESSAGE_COOLDOWN,
+	MOBCOINS_REGEX,
+	MONEY_THRESHOLD,
+	TELEPORT_REGEX,
+} from '../constants';
+import { Context, DestinationType, SellType, State } from '../typings';
 import type { CommandFunction, Destination } from '../typings';
+import { createPromiseResolvePair, currencyFormatter, sleep } from '../utils';
+import BaseState from './BaseState';
 import type FishBot from './FishBot';
 
 export type BaseBotOptions = BotOptions & {
@@ -18,16 +29,6 @@ export type BaseBotOptions = BotOptions & {
 	sellType?: SellType;
 	fish?: boolean;
 };
-
-const MESSAGE_COOLDOWN = 1500;
-const COMMAND_COOLDOWN = 2100;
-
-const COMMAND_REGEX = /^\((\w{3,16})\)\s(.+)$/;
-const TELEPORT_REGEX = /^(\w{3,16}) has requested to teleport to you\.$/;
-const BALANCE_REGEX = /^Your balance is \$([\d,\.]+)/;
-const MOBCOINS_REGEX = /^You have ([\d,\.]+) MobCoins/;
-const FISHMONGER_SELL_REGEX = /^You sold all your fish for \$([\d,\.]+)/;
-const MONEY_THRESHOLD = 40000000;
 
 export default class BaseBot {
 	public balance: number;

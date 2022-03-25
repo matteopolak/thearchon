@@ -1,9 +1,9 @@
-import config from './config';
-import { VERSION, WORKER_PATH } from './constants';
-import { SellType } from './typings';
 import { Worker } from 'worker_threads';
 
 import type { BaseBotOptions } from './classes/BaseBot';
+import config from './config';
+import { VERSION, WORKER_PATH } from './constants';
+import { SellType } from './typings';
 
 function sleep(ms: number) {
 	return new Promise(r => setTimeout(r, ms));

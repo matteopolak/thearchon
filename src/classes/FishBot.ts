@@ -1,16 +1,19 @@
-import BaseBot from './BaseBot';
-import { FISHING_RODS, ROD_TO_BAIT } from '../constants';
-import { Destination, DestinationType, SellType, State } from '../typings';
-import { currencyFormatter, unscramble } from '../utils';
-
-import type { BaseBotOptions } from './BaseBot';
-import type { Context, InventoryData, RawMapData } from '../typings';
-import type { Item } from 'prismarine-item';
 import type { MessagePort } from 'worker_threads';
 
-const FISH_THRESHOLD = 24;
-const FISH_COUNT_THRESHOLD = 50;
-const BAIT_THRESHOLD = 0;
+import type { Item } from 'prismarine-item';
+
+import {
+	BAIT_THRESHOLD,
+	FISHING_RODS,
+	FISH_COUNT_THRESHOLD,
+	FISH_THRESHOLD,
+	ROD_TO_BAIT,
+} from '../constants';
+import { Destination, DestinationType, SellType, State } from '../typings';
+import type { Context, InventoryData, RawMapData } from '../typings';
+import { currencyFormatter, unscramble } from '../utils';
+import BaseBot from './BaseBot';
+import type { BaseBotOptions } from './BaseBot';
 
 export default class FishBot extends BaseBot {
 	private isFishing = false;

@@ -1,10 +1,11 @@
-import type BaseBot from './BaseBot';
-import type { Context } from '../typings';
 import type { ControlState, EquipmentDestination } from 'mineflayer';
 import type { Entity } from 'prismarine-entity';
 import type { Item } from 'prismarine-item';
 import type { Window } from 'prismarine-windows';
 import type { Vec3 } from 'vec3';
+
+import type { Context } from '../typings';
+import type BaseBot from './BaseBot';
 
 export default class BaseState {
 	private client: BaseBot;

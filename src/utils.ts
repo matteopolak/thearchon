@@ -1,5 +1,4 @@
 import characters from './characters';
-
 import type { RawMapData } from './typings';
 
 const CHARACTER_WIDTH = 12;

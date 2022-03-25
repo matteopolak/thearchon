@@ -1,9 +1,9 @@
-import FishBot from './classes/FishBot';
 import fs from 'fs/promises';
 import path from 'path';
-import { workerData, parentPort } from 'worker_threads';
+import { parentPort, workerData } from 'worker_threads';
 
 import type { BaseBotOptions } from './classes/BaseBot';
+import FishBot from './classes/FishBot';
 
 const { options }: { options: BaseBotOptions } = workerData;
 const bot = new FishBot(options, parentPort!);
