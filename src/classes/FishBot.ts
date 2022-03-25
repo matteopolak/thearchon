@@ -366,13 +366,10 @@ export default class FishBot extends BaseBot {
 		if (rod.displayName !== this.client.heldItem?.displayName)
 			await this.client.equip(ctx, rod, 'hand');
 
-		console.log('fishing', ctx, this.context);
-
 		if (!(await this.checkFishingThresholds(ctx)))
 			await this.teleportToHome(ctx, Destination.FISHING);
 
 		while (this.isFishing && ctx === this.context) {
-			console.log('fishing', ctx, this.context);
 			await this.checkFishingThresholds(ctx);
 			await this.client.waitForTicks(ctx, 5);
 
