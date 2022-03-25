@@ -92,6 +92,10 @@ export default class BaseBot {
 		this._client.once('spawn', this.join.bind(this));
 	}
 
+	get state() {
+		return this._state;
+	}
+
 	set state(value: State) {
 		this.previousState = this._state;
 		++this.context;
@@ -141,7 +145,7 @@ export default class BaseBot {
 			if (m === 'You can also submit your answer with /code <code>') {
 				const { promise, resolve } = createPromiseResolvePair();
 
-				console.log(`[${this.alias}] Captcha started`);
+				console.log(`[${this.alias}] Captcha started...`);
 
 				this.captcha.promise = promise;
 				this.captcha.resolve = resolve;

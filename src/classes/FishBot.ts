@@ -39,10 +39,7 @@ export default class FishBot extends BaseBot {
 		await super.init();
 
 		this._client._client.on('map', async (map: RawMapData) => {
-			console.log('map');
 			if (this.state !== State.SOLVING_CAPTCHA) return;
-
-			console.log('got map');
 
 			map.columns = Math.abs(map.columns);
 			map.rows = Math.abs(map.rows);
@@ -67,10 +64,10 @@ export default class FishBot extends BaseBot {
 						)}`,
 					);
 
-				await this.command(ctx, `/code ${answer.join('')}`);
-
 				const previous = this.previousState;
 				this.state = State.IDLE;
+
+				await this.command(this.context, `/code ${answer.join('')}`);
 
 				await this.client.awaitMessage(
 					this.context,
