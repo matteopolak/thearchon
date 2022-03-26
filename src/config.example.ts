@@ -1,5 +1,5 @@
-import { ServerType } from './typings';
-import type { Config } from './typings';
+import { ServerType } from './typings.js';
+import type { Config } from './typings.js';
 
 const config: Config = {
 	fishOnJoin: true,

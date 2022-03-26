@@ -2,13 +2,19 @@ import fs from 'fs/promises';
 import path from 'path';
 import { parentPort, workerData } from 'worker_threads';
 
-import type { BaseBotOptions } from './classes/BaseBot';
-import FishBot from './classes/FishBot';
+import chalk from 'chalk';
+
+import type { BaseBotOptions } from './classes/BaseBot.js';
+import FishBot from './classes/FishBot.js';
 
 const { options }: { options: BaseBotOptions } = workerData;
 const bot = new FishBot(options, parentPort!);
 
-console.log(`[WORKER] Starting ${options.alias}`);
+console.log(
+	`${' '.repeat(17)}${chalk.bold(chalk.cyan('Worker'))} Starting ${chalk.yellow(
+		options.alias,
+	)}`,
+);
 
 const logFileLocation = path.join(bot.directory, 'latest.log');
 
@@ -19,13 +25,13 @@ bot._bot.on('messagestr', (m, _, json) => {
 });
 
 bot._bot.on('kicked', async reason => {
-	console.log(`[${bot.alias}] [INFO] Kicked: ${reason}`);
+	bot.logger.error(`Kicked: ${chalk.redBright(reason)}`);
 
 	process.exit();
 });
 
 bot._bot.on('end', async reason => {
-	console.log(`[${bot.alias}] [INFO] Ended: ${reason}`);
+	bot.logger.error(`Ended: ${chalk.redBright(reason)}`);
 
 	process.exit();
 });

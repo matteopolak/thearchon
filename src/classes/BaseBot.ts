@@ -1,11 +1,12 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 import mineflayer from 'mineflayer';
 import type { Bot, BotOptions } from 'mineflayer';
 import type { Window } from 'prismarine-windows';
 
-import config from '../config';
+import config from '../config.js';
 import {
 	BALANCE_REGEX,
 	COMMAND_COOLDOWN,
@@ -16,12 +17,25 @@ import {
 	MONEY_THRESHOLD,
 	SURPLUS_MONEY_THRESHOLD,
 	TELEPORT_REGEX,
-} from '../constants';
-import { Context, DestinationType, RawItem, SellType, State } from '../typings';
-import type { CommandFunction, Destination } from '../typings';
-import { createPromiseResolvePair, currencyFormatter, sleep } from '../utils';
-import BaseState from './BaseState';
-import type FishBot from './FishBot';
+} from '../constants.js';
+import {
+	Context,
+	DestinationType,
+	RawItem,
+	SellType,
+	State,
+} from '../typings.js';
+import type { CommandFunction, Destination } from '../typings.js';
+import {
+	createPromiseResolvePair,
+	currencyFormatter,
+	sleep,
+} from '../utils.js';
+import BaseState from './BaseState.js';
+import type FishBot from './FishBot.js';
+import Logger from './Logger.js';
+
+const __dirname = fileURLToPath(import.meta.url);
 
 export type BaseBotOptions = BotOptions & {
 	alias: string;
@@ -36,12 +50,12 @@ export default class BaseBot {
 	public checkedBalance: boolean;
 	public directory: string;
 	public alias: string;
-	public logger: boolean;
 	public whitelist: Set<string>;
 	public commands: Map<string, CommandFunction> = new Map();
 	public options: BaseBotOptions;
 	public _bot: Bot;
 	public client: BaseState;
+	public logger: Logger;
 	public captcha = {
 		startedAt: 0,
 		promise: Promise.resolve(),
@@ -75,11 +89,11 @@ export default class BaseBot {
 		this._bot = mineflayer.createBot(options);
 		this.client = new BaseState(this);
 		this.alias = options.alias;
-		this.logger = options.logger ?? config.log;
 		this.whitelist = options.whitelist ?? new Set();
-		this.directory = path.join(__dirname, '..', '..', 'data', this.alias);
+		this.directory = path.join(__dirname, '..', '..', '..', 'data', this.alias);
 		this.balance = 0;
 		this.checkedBalance = false;
+		this.logger = new Logger(options);
 
 		this.commands.set('tp', this.teleportTo.bind(this));
 		this.commands.set('look', this.lookAt.bind(this));
@@ -198,8 +212,7 @@ export default class BaseBot {
 					this.client.activateItem(ctx);
 				});
 
-				if (this.logger)
-					console.log(`[${this.alias}] Captcha detected. Solving...`);
+				this.logger.info('Captcha detected. Solving...');
 
 				return (this.state = State.SOLVING_CAPTCHA);
 			}
@@ -227,13 +240,11 @@ export default class BaseBot {
 				if (this.checkedBalance === false) await this.getCurrentBalance(ctx);
 				else this.balance += value;
 
-				if (this.logger) {
-					console.log(
-						`[${this.alias}] [SELL] Sold fish for ${currencyFormatter.format(
-							value,
-						)} | Balance: ${currencyFormatter.format(this.balance)}`,
-					);
-				}
+				this.logger.info(
+					`Sold fish for ${currencyFormatter.format(
+						value,
+					)} | Balance: ${currencyFormatter.format(this.balance)}`,
+				);
 
 				if (this.balance >= MONEY_THRESHOLD) {
 					const amount = Math.floor(this.balance - SURPLUS_MONEY_THRESHOLD);
@@ -267,16 +278,12 @@ export default class BaseBot {
 			const run = this.commands.get(command);
 
 			if (run !== undefined) {
-				if (this.logger) {
-					console.log(
-						`[${this.alias}] [COMMAND] ${sender} ran command '${command}'`,
-					);
-				}
+				this.logger.info(`${sender} ran command '${command}'`);
 
 				try {
 					return run(this.context, sender, ...args);
-				} catch (e) {
-					console.log(`[${this.alias}] [ERROR] ${e}`);
+				} catch (e: any) {
+					this.logger.error(e);
 				}
 			}
 		});
@@ -303,9 +310,7 @@ export default class BaseBot {
 			await sleep(COMMAND_COOLDOWN - this.lastCommandAgo);
 			this.lastCommandTimestamp = Date.now();
 
-			if (this.logger)
-				console.log(`[${this.alias}] [CHAT] Sending command: ${message}`);
-
+			this.logger.info(`Sending command: ${message}`);
 			this.client.chat(ctx, message);
 
 			resolve();
@@ -330,9 +335,7 @@ export default class BaseBot {
 			await sleep(MESSAGE_COOLDOWN - this.lastMessageAgo);
 			this.lastMessageTimestamp = Date.now();
 
-			if (this.logger)
-				console.log(`[${this.alias}] [CHAT] Sending message: ${message}`);
-
+			this.logger.info(`Sending message: ${message}`);
 			this.client.chat(ctx, message);
 
 			resolve();

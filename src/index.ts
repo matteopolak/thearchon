@@ -1,9 +1,11 @@
 import { Worker } from 'worker_threads';
 
-import type { BaseBotOptions } from './classes/BaseBot';
-import config from './config';
-import { VERSION, WORKER_PATH } from './constants';
-import { SellType } from './typings';
+import chalk from 'chalk';
+
+import type { BaseBotOptions } from './classes/BaseBot.js';
+import config from './config.js';
+import { VERSION, WORKER_PATH } from './constants.js';
+import { SellType } from './typings.js';
 
 function sleep(ms: number) {
 	return new Promise(r => setTimeout(r, ms));
@@ -11,6 +13,7 @@ function sleep(ms: number) {
 
 const defaults = {
 	whitelist: new Set(config.whitelist),
+	logger: config.log,
 	host: 'best.thearchon.net',
 	port: 25565,
 	version: VERSION,
@@ -18,7 +21,11 @@ const defaults = {
 };
 
 function start(payload: { options: BaseBotOptions }) {
-	console.log(`[PARENT] Starting worker for ${payload.options.alias}`);
+	console.log(
+		`${' '.repeat(17)}${chalk.bold(
+			chalk.cyan('Parent'),
+		)} Starting worker for ${chalk.yellow(payload.options.alias)}`,
+	);
 
 	const worker = new Worker(WORKER_PATH, {
 		workerData: payload,
@@ -26,9 +33,9 @@ function start(payload: { options: BaseBotOptions }) {
 
 	const messageHandler = (data: { isFishing: boolean; sellType: SellType }) => {
 		console.log(
-			`[PARENT] ${payload.options.alias} is ${
-				data.isFishing ? 'fishing' : 'not fishing'
-			} and trading for ${
+			`${' '.repeat(17)}${chalk.bold(chalk.cyan('Parent'))} ${chalk.yellow(
+				payload.options.alias,
+			)} is ${data.isFishing ? 'fishing' : 'not fishing'} and trading for ${
 				data.sellType === SellType.COINS ? 'coins' : 'mob coins'
 			}`,
 		);

@@ -6,7 +6,7 @@ import type { Item } from 'prismarine-item';
 import type { Window } from 'prismarine-windows';
 import type { Vec3 } from 'vec3';
 
-import config from '../config';
+import config from '../config.js';
 import {
 	BAIT_THRESHOLD,
 	FISHING_RODS,
@@ -15,12 +15,12 @@ import {
 	FISH_THRESHOLD,
 	ROD_TO_BAIT,
 	SURPLUS_MONEY_THRESHOLD,
-} from '../constants';
-import { Destination, DestinationType, SellType, State } from '../typings';
-import type { Context, InventoryData, RawMapData } from '../typings';
-import { currencyFormatter, unscramble } from '../utils';
-import BaseBot from './BaseBot';
-import type { BaseBotOptions } from './BaseBot';
+} from '../constants.js';
+import { Destination, DestinationType, SellType, State } from '../typings.js';
+import type { Context, InventoryData, RawMapData } from '../typings.js';
+import { currencyFormatter, unscramble } from '../utils.js';
+import BaseBot from './BaseBot.js';
+import type { BaseBotOptions } from './BaseBot.js';
 
 export default class FishBot extends BaseBot {
 	public isFishing = false;
@@ -64,13 +64,7 @@ export default class FishBot extends BaseBot {
 			const answer = unscramble(map);
 
 			if (answer.length === 5 && this.state === State.SOLVING_CAPTCHA) {
-				if (this.logger) {
-					console.log(
-						`[${this.alias}] [CAPTCHA] Possible answer found: ${answer.join(
-							'',
-						)}`,
-					);
-				}
+				this.logger.info(`Possible answer found: ${answer.join('')}`);
 
 				this.state = State.IDLE;
 
@@ -196,11 +190,9 @@ export default class FishBot extends BaseBot {
 			} else inventory.slots.taken++;
 		}
 
-		if (this.logger) {
-			console.log(
-				`[${this.alias}] [INVENTORY] Fish: ${inventory.count.fish}/${inventory.slots.fish} Bait: ${inventory.count.bait}/${inventory.slots.bait}`,
-			);
-		}
+		this.logger.info(
+			`Fish: ${inventory.count.fish}/${inventory.slots.fish} Bait: ${inventory.count.bait}/${inventory.slots.bait}`,
+		);
 
 		return inventory;
 	}
@@ -232,11 +224,7 @@ export default class FishBot extends BaseBot {
 			best < 4 &&
 			data.price >= this.balance - SURPLUS_MONEY_THRESHOLD
 		) {
-			if (this.logger) {
-				console.log(
-					`[${this.alias}] [PURCHASE] Purchasing ${FISHING_RODS[best + 1]}`,
-				);
-			}
+			this.logger.info(`Purchasing ${FISHING_RODS[best + 1]}`);
 
 			await this.completeActionAndWaitForSlotItem(
 				ctx,
@@ -271,7 +259,7 @@ export default class FishBot extends BaseBot {
 		const rodIndex = this.getBestFishingRod(true);
 		const baitSlot = ROD_TO_BAIT[rodIndex === -1 ? 0 : rodIndex];
 
-		if (this.logger) console.log(`[${this.alias}] [PURCHASE] Purchasing bait`);
+		this.logger.info('Purchasing bait');
 
 		await this.client.clickWindow(ctx, 15, 0, 0);
 		await this.client.waitForTicks(ctx, 5);
@@ -458,13 +446,13 @@ export default class FishBot extends BaseBot {
 			if (rod.displayName !== this.client.heldItem?.displayName)
 				await this.client.equip(ctx, rod, 'hand');
 
-			if (this.logger) console.log(`[${this.alias}] [FISHING] Casting...`);
+			this.logger.info('Casting...');
 
 			await this.cast(ctx);
 			await this.waitForBite(ctx);
 			this.client.activateItem(ctx);
 
-			if (this.logger) console.log(`[${this.alias}] [FISHING] Reeling...`);
+			this.logger.info('Reeling...');
 
 			await this.client.waitForTicks(ctx, 5);
 		}
