@@ -127,6 +127,10 @@ export default class BaseState {
 		return this.client._bot.equip(item, destination);
 	}
 
+	get entity() {
+		return this.client._bot.entity;
+	}
+
 	get heldItem() {
 		return this.client._bot.heldItem;
 	}

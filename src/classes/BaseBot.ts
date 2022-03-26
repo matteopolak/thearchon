@@ -156,6 +156,7 @@ export default class BaseBot {
 		}
 
 		if (this.fisher && config.fishOnJoin) {
+			this.fisher.bestFishingRod = this.fisher.getBestFishingRod(true);
 			this.fisher.fish(ctx);
 		}
 	}
@@ -178,6 +179,8 @@ export default class BaseBot {
 			.catch(() => {});
 
 		this._bot.on('messagestr', async m => {
+			const ctx = this.context;
+
 			if (m === 'You can also submit your answer with /code <code>') {
 				const { promise, resolve } = createPromiseResolvePair();
 
@@ -185,6 +188,11 @@ export default class BaseBot {
 				this.captcha.promise = promise;
 				this.captcha.resolve = resolve;
 				this.captcha.startedAt = Date.now();
+
+				await this.client.waitForTicks(ctx, 20);
+				this.client.activateItem(ctx);
+
+				console.log(`[${this.alias}] Captcha started`);
 
 				return (this.state = State.SOLVING_CAPTCHA);
 			}
@@ -196,8 +204,6 @@ export default class BaseBot {
 			) {
 				return process.exit();
 			}
-
-			const ctx = this.context;
 
 			if (FISHMONGER_SELL_REGEX.test(m)) {
 				const value = parseFloat(
