@@ -181,7 +181,10 @@ export default class BaseBot {
 		this._bot.on('messagestr', async m => {
 			const ctx = this.context;
 
-			if (m === 'You can also submit your answer with /code <code>') {
+			if (
+				m === "Don't panic! This is just a routine check to stop AFK fishing" ||
+				m === 'You are required to complete a captcha to continue playing.'
+			) {
 				const { promise, resolve } = createPromiseResolvePair();
 
 				this.captcha.fishing = this.fisher?.isFishing ?? false;
@@ -189,8 +192,11 @@ export default class BaseBot {
 				this.captcha.resolve = resolve;
 				this.captcha.startedAt = Date.now();
 
-				await this.client.waitForTicks(ctx, 20);
-				this.client.activateItem(ctx);
+				this.client.waitForTicks(ctx, 20 * 15).then(() => {
+					if (this.state !== State.SOLVING_CAPTCHA) return;
+
+					this.client.activateItem(ctx);
+				});
 
 				console.log(`[${this.alias}] Captcha started`);
 
@@ -199,9 +205,16 @@ export default class BaseBot {
 
 			if (
 				m ===
-					"It looks like you might be lost, so we've sent you back to spawn!" ||
-				m.startsWith('TheArchon » This server is rebooting')
+				"It looks like you might be lost, so we've sent you back to spawn!"
 			) {
+				this.state = State.IDLE;
+
+				if (this.previousState === State.FISHING && this.fisher) {
+					return this.fisher.fish(ctx);
+				}
+			}
+
+			if (m.startsWith('TheArchon » This server is rebooting')) {
 				return process.exit();
 			}
 

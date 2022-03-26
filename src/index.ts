@@ -18,7 +18,7 @@ const defaults = {
 };
 
 function start(payload: { options: BaseBotOptions }) {
-	console.log(`[PARENT] Staring worker for ${payload.options.alias}`);
+	console.log(`[PARENT] Starting worker for ${payload.options.alias}`);
 
 	const worker = new Worker(WORKER_PATH, {
 		workerData: payload,
@@ -39,18 +39,17 @@ function start(payload: { options: BaseBotOptions }) {
 
 	worker.on('message', messageHandler);
 
-	worker.once('error', async () => {
+	worker.once('error', async error => {
+		console.error(payload.options.alias, error);
+
 		worker.removeListener('message', messageHandler);
-
-		await sleep(3_000);
-
-		start(payload);
+		worker.terminate();
 	});
 
 	worker.once('exit', async () => {
 		worker.removeListener('message', messageHandler);
 
-		await sleep(3_000);
+		await sleep(10_000);
 
 		start(payload);
 	});

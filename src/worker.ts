@@ -30,4 +30,6 @@ bot._bot.on('end', async reason => {
 	process.exit();
 });
 
+bot._bot.on('title', console.log);
+
 bot.init();

@@ -15,19 +15,19 @@ export default class BaseState {
 	}
 
 	waitForTicks(ctx: Context, ticks: number) {
-		if (ctx !== this.client.context) return;
+		if (ctx !== this.client.context) return Promise.resolve();
 
 		return this.client._bot.waitForTicks(ticks);
 	}
 
 	waitForChunksToLoad(ctx: Context) {
-		if (ctx !== this.client.context) return;
+		if (ctx !== this.client.context) return Promise.resolve();
 
 		return this.client._bot.waitForChunksToLoad();
 	}
 
 	awaitMessage(ctx: Context, ...args: string[] | RegExp[]) {
-		if (ctx !== this.client.context) return;
+		if (ctx !== this.client.context) return Promise.resolve();
 
 		return new Promise<string | undefined>(resolve => {
 			const listener = (message: string) => {
@@ -65,13 +65,13 @@ export default class BaseState {
 	}
 
 	chat(ctx: Context, message: string) {
-		if (ctx !== this.client.context) return;
+		if (ctx !== this.client.context) return Promise.resolve();
 
 		return this.client._bot.chat(message);
 	}
 
 	lookAt(ctx: Context, point: Vec3, force?: boolean) {
-		if (ctx !== this.client.context) return;
+		if (ctx !== this.client.context) return Promise.resolve();
 
 		return this.client._bot.lookAt(point, force);
 	}
@@ -83,13 +83,13 @@ export default class BaseState {
 	}
 
 	activateEntity(ctx: Context, entity: Entity) {
-		if (ctx !== this.client.context) return;
+		if (ctx !== this.client.context) return Promise.resolve();
 
 		return this.client._bot.activateEntity(entity);
 	}
 
 	clickWindow(ctx: Context, slot: number, mouseButton: number, mode: number) {
-		if (ctx !== this.client.context) return;
+		if (ctx !== this.client.context) return Promise.resolve();
 
 		return this.client._bot.clickWindow(slot, mouseButton, mode);
 	}
@@ -112,7 +112,7 @@ export default class BaseState {
 		metadata: number | null,
 		count: number | null,
 	) {
-		if (ctx !== this.client.context) return;
+		if (ctx !== this.client.context) return Promise.resolve();
 
 		return this.client._bot.toss(itemType, metadata, count);
 	}
@@ -122,7 +122,7 @@ export default class BaseState {
 		item: number | Item,
 		destination: EquipmentDestination | null,
 	) {
-		if (ctx !== this.client.context) return;
+		if (ctx !== this.client.context) return Promise.resolve();
 
 		return this.client._bot.equip(item, destination);
 	}

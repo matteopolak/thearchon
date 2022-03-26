@@ -1,3 +1,5 @@
+import fs from 'fs/promises';
+import path from 'path';
 import type { MessagePort } from 'worker_threads';
 
 import type { Item } from 'prismarine-item';
@@ -46,13 +48,13 @@ export default class FishBot extends BaseBot {
 
 		this._bot._client.on('map', async (map: RawMapData) => {
 			if (this.state !== State.SOLVING_CAPTCHA) return;
-			map.columns = Math.abs(map.columns);
-			map.rows = Math.abs(map.rows);
 
 			if (
 				!map.data?.length ||
 				map.columns === 128 ||
 				map.rows === 128 ||
+				map.columns === -128 ||
+				map.rows === -128 ||
 				!map.columns ||
 				!map.rows
 			)
@@ -132,7 +134,7 @@ export default class FishBot extends BaseBot {
 	}
 
 	private waitForBite(ctx: Context) {
-		if (ctx !== this.context) return;
+		if (ctx !== this.context) return Promise.resolve();
 
 		return new Promise(resolve => {
 			const listener = (title: string) => {
@@ -141,12 +143,30 @@ export default class FishBot extends BaseBot {
 					'{"extra":[{"color":"dark_aqua","text":"You Got a Bite!"}],"text":""}'
 				) {
 					this._bot.off('title', listener);
+					// @ts-ignore
+					this._bot.off('context_changed', contextListener);
 
 					return resolve(true);
 				}
 			};
 
+			const contextListener = () => {
+				this._bot.off('title', listener);
+
+				resolve(false);
+			};
+
 			this._bot.on('title', listener);
+			// @ts-ignore
+			this._bot.once('context_changed', contextListener);
+
+			if (ctx !== this.context) {
+				this._bot.off('title', listener);
+				// @ts-ignore
+				this._bot.off('context_changed', contextListener);
+
+				resolve(false);
+			}
 		});
 	}
 
@@ -221,6 +241,11 @@ export default class FishBot extends BaseBot {
 				346,
 			);
 
+			await fs.writeFile(
+				path.join(this.directory, `window-${Date.now()}.json`),
+				JSON.stringify(window, null, 2),
+			);
+
 			await this.client.clickWindow(ctx, data.slot, 0, 0);
 
 			await this.completeActionAndWaitForSlotItem(
@@ -277,7 +302,6 @@ export default class FishBot extends BaseBot {
 
 		this.client.closeWindow(ctx, window);
 		if (goBack) await this.teleportToHome(ctx, Destination.FISHING);
-		this.client.activateItem(ctx);
 	}
 
 	private async purchaseBait(ctx: Context) {
@@ -306,7 +330,6 @@ export default class FishBot extends BaseBot {
 
 		this.client.closeWindow(ctx, window);
 		await this.teleportToHome(ctx, Destination.FISHING);
-		this.client.activateItem(ctx);
 	}
 
 	private sellFishAndPurchaseBait(ctx: Context) {
@@ -372,6 +395,8 @@ export default class FishBot extends BaseBot {
 	}
 
 	private async cast(ctx: Context) {
+		if (ctx !== this.context) return;
+
 		let cast = true;
 
 		const listener = (name: string, position: Vec3) => {
@@ -381,10 +406,19 @@ export default class FishBot extends BaseBot {
 			) {
 				cast = false;
 				this._bot.off('soundEffectHeard', listener);
+				// @ts-ignore
+				this._bot.off('context_changed', contextListener);
 			}
 		};
 
+		const contextListener = () => {
+			cast = false;
+			this._bot.off('soundEffectHeard', listener);
+		};
+
 		this._bot.on('soundEffectHeard', listener);
+		// @ts-ignore
+		this._bot.once('context_changed', contextListener);
 
 		while (cast) {
 			this.client.activateItem(ctx);
@@ -414,6 +448,9 @@ export default class FishBot extends BaseBot {
 			await this.checkFishingThresholds(ctx);
 			await this.client.waitForTicks(ctx, 5);
 
+			const rod = this.getBestFishingRod();
+
+			if (rod === null) break;
 			if (rod.displayName !== this.client.heldItem?.displayName)
 				await this.client.equip(ctx, rod, 'hand');
 
