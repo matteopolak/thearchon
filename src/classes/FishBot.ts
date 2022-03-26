@@ -6,7 +6,7 @@ import type { Item } from 'prismarine-item';
 import type { Window } from 'prismarine-windows';
 import type { Vec3 } from 'vec3';
 
-import config from '../config.js';
+import config from '../config';
 import {
 	BAIT_THRESHOLD,
 	FISHING_RODS,
@@ -15,12 +15,12 @@ import {
 	FISH_THRESHOLD,
 	ROD_TO_BAIT,
 	SURPLUS_MONEY_THRESHOLD,
-} from '../constants.js';
-import { Destination, DestinationType, SellType, State } from '../typings.js';
-import type { Context, InventoryData, RawMapData } from '../typings.js';
-import { currencyFormatter, unscramble } from '../utils.js';
-import BaseBot from './BaseBot.js';
-import type { BaseBotOptions } from './BaseBot.js';
+} from '../constants';
+import { Destination, DestinationType, SellType, State } from '../typings';
+import type { Context, InventoryData, RawMapData } from '../typings';
+import { currencyFormatter, unscramble } from '../utils';
+import BaseBot from './BaseBot';
+import type { BaseBotOptions } from './BaseBot';
 
 export default class FishBot extends BaseBot {
 	public isFishing = false;

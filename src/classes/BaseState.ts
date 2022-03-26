@@ -4,8 +4,8 @@ import type { Item } from 'prismarine-item';
 import type { Window } from 'prismarine-windows';
 import type { Vec3 } from 'vec3';
 
-import type { Context } from '../typings.js';
-import type BaseBot from './BaseBot.js';
+import type { Context } from '../typings';
+import type BaseBot from './BaseBot';
 
 export default class BaseState {
 	private client: BaseBot;

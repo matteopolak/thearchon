@@ -4,8 +4,8 @@ import { parentPort, workerData } from 'worker_threads';
 
 import chalk from 'chalk';
 
-import type { BaseBotOptions } from './classes/BaseBot.js';
-import FishBot from './classes/FishBot.js';
+import type { BaseBotOptions } from './classes/BaseBot';
+import FishBot from './classes/FishBot';
 
 const { options }: { options: BaseBotOptions } = workerData;
 const bot = new FishBot(options, parentPort!);

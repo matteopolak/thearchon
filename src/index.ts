@@ -2,10 +2,10 @@ import { Worker } from 'worker_threads';
 
 import chalk from 'chalk';
 
-import type { BaseBotOptions } from './classes/BaseBot.js';
-import config from './config.js';
-import { VERSION, WORKER_PATH } from './constants.js';
-import { SellType } from './typings.js';
+import type { BaseBotOptions } from './classes/BaseBot';
+import config from './config';
+import { VERSION, WORKER_PATH } from './constants';
+import { SellType } from './typings';
 
 function sleep(ms: number) {
 	return new Promise(r => setTimeout(r, ms));

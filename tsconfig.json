@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		"target": "esnext",
-		"module": "esnext",
+		"module": "commonjs",
 		"outDir": "./dist",
 		"rootDir": "./src",
 		"removeComments": true,
@@ -11,8 +11,7 @@
 		"forceConsistentCasingInFileNames": true,
 		"importsNotUsedAsValues": "error",
 		"types": ["node", "jest"],
-		"noUnusedParameters": true,
-		"moduleResolution": "node"
+		"noUnusedParameters": true
 	},
 	"include": ["src/**/*.ts"],
 	"exclude": ["./node_modules", "./dist"]

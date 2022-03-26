@@ -1,12 +1,11 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
 import mineflayer from 'mineflayer';
 import type { Bot, BotOptions } from 'mineflayer';
 import type { Window } from 'prismarine-windows';
 
-import config from '../config.js';
+import config from '../config';
 import {
 	BALANCE_REGEX,
 	COMMAND_COOLDOWN,
@@ -17,25 +16,13 @@ import {
 	MONEY_THRESHOLD,
 	SURPLUS_MONEY_THRESHOLD,
 	TELEPORT_REGEX,
-} from '../constants.js';
-import {
-	Context,
-	DestinationType,
-	RawItem,
-	SellType,
-	State,
-} from '../typings.js';
-import type { CommandFunction, Destination } from '../typings.js';
-import {
-	createPromiseResolvePair,
-	currencyFormatter,
-	sleep,
-} from '../utils.js';
-import BaseState from './BaseState.js';
-import type FishBot from './FishBot.js';
-import Logger from './Logger.js';
-
-const __dirname = fileURLToPath(import.meta.url);
+} from '../constants';
+import { Context, DestinationType, RawItem, SellType, State } from '../typings';
+import type { CommandFunction, Destination } from '../typings';
+import { createPromiseResolvePair, currencyFormatter, sleep } from '../utils';
+import BaseState from './BaseState';
+import type FishBot from './FishBot';
+import Logger from './Logger';
 
 export type BaseBotOptions = BotOptions & {
 	alias: string;
@@ -90,7 +77,7 @@ export default class BaseBot {
 		this.client = new BaseState(this);
 		this.alias = options.alias;
 		this.whitelist = options.whitelist ?? new Set();
-		this.directory = path.join(__dirname, '..', '..', '..', 'data', this.alias);
+		this.directory = path.join(__dirname, '..', '..', 'data', this.alias);
 		this.balance = 0;
 		this.checkedBalance = false;
 		this.logger = new Logger(options);

@@ -1,4 +1,5 @@
 import fs from 'fs/promises';
+
 import { unscramble } from '../src/utils';
 
 test('process a map with every character and digit', async () => {

@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 
-import type { BaseBotOptions } from '../typings.js';
+import type { BaseBotOptions } from '../typings';
 
 export default class Logger {
 	private options: BaseBotOptions;

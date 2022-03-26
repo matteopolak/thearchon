@@ -1,5 +1,5 @@
-import characters from './characters.js';
-import type { RawMapData } from './typings.js';
+import characters from './characters';
+import type { RawMapData } from './typings';
 
 const CHARACTER_WIDTH = 12;
 const CHARACTER_HEIGHT = 14;

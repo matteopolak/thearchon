@@ -1,11 +1,8 @@
 import path from 'path';
-import { fileURLToPath } from 'url';
 
-import config from './config.js';
-import { ServerType } from './typings.js';
-import type { FishingRodData } from './typings.js';
-
-const __dirname = fileURLToPath(import.meta.url);
+import config from './config';
+import { ServerType } from './typings';
+import type { FishingRodData } from './typings';
 
 export const FISHING_RODS = [
 	'§7§lOld Rod',
@@ -156,7 +153,7 @@ export const FISHING_ROD_DATA: FishingRodData[] =
 export const VERSION = config.version;
 export const ROD_TO_BAIT = [9, 11, 13, 15, 15];
 
-export const WORKER_PATH = path.join(__dirname, '..', 'worker.js');
+export const WORKER_PATH = path.join(__dirname, 'worker.js');
 
 export const FISH_THRESHOLD = 24;
 export const FISH_COUNT_THRESHOLD = 50;
