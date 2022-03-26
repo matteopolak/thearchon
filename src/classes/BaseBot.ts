@@ -214,11 +214,13 @@ export default class BaseBot {
 				);
 
 				if (this.balance >= MONEY_THRESHOLD) {
+					const amount = Math.floor(this.balance - SURPLUS_MONEY_THRESHOLD);
+
+					this.balance -= amount;
+
 					return this.command(
 						this.context,
-						`/pay ${config.autopay_to} ${(
-							this.balance - SURPLUS_MONEY_THRESHOLD
-						).toFixed(2)}`,
+						`/pay ${config.autopay_to} ${amount.toFixed(2)}`,
 					);
 				}
 
@@ -419,7 +421,11 @@ export default class BaseBot {
 		const balance = await this.getCurrentBalance(ctx);
 
 		if (balance > 0) {
-			await this.command(ctx, `/pay ${username} ${Math.floor(balance)}`);
+			const amount = Math.floor(balance);
+
+			this.balance -= amount;
+
+			await this.command(ctx, `/pay ${username} ${amount}`);
 		}
 	}
 

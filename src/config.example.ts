@@ -1,26 +1,9 @@
-type AuthType = 'mojang' | 'microsoft';
-type ServerType = 'onyx' | 'ruby' | 'amber' | 'chaos' | 'genesis' | 'origins';
-
-interface Config {
-	fishOnJoin: boolean;
-	sneakWhileFishing: boolean;
-	upgradeFishingRodAutomatically: boolean;
-	server: ServerType;
-	whitelist: string[];
-	autopay_to: string;
-	log: boolean;
-	version: string;
-	accounts: {
-		alias: string;
-		username: string;
-		password: string;
-		auth: AuthType;
-	}[];
-}
+import { ServerType } from './typings';
+import type { Config } from './typings';
 
 const config: Config = {
 	fishOnJoin: true,
-	server: 'onyx',
+	server: ServerType.ONYX,
 	sneakWhileFishing: false,
 	upgradeFishingRodAutomatically: true,
 	whitelist: ['main_account', 'anoter_account'],

@@ -1,6 +1,33 @@
 import type { BotOptions } from 'mineflayer';
 import type { Item } from 'prismarine-item';
 
+export type AuthType = 'mojang' | 'microsoft';
+export enum ServerType {
+	ONYX = 'onyx',
+	RUBY = 'ruby',
+	AMBER = 'amber',
+	CHAOS = 'chaos',
+	GENESIS = 'genesis',
+	ORIGINS = 'origins',
+}
+
+export interface Config {
+	fishOnJoin: boolean;
+	sneakWhileFishing: boolean;
+	upgradeFishingRodAutomatically: boolean;
+	server: ServerType;
+	whitelist: string[];
+	autopay_to: string;
+	log: boolean;
+	version: string;
+	accounts: {
+		alias: string;
+		username: string;
+		password: string;
+		auth: AuthType;
+	}[];
+}
+
 export type Context = number;
 export type CommandFunction = (
 	ctx: Context,

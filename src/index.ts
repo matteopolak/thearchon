@@ -42,7 +42,7 @@ function start(payload: { options: BaseBotOptions }) {
 	worker.once('error', async () => {
 		worker.removeListener('message', messageHandler);
 
-		await sleep(3000);
+		await sleep(3_000);
 
 		start(payload);
 	});
@@ -50,7 +50,7 @@ function start(payload: { options: BaseBotOptions }) {
 	worker.once('exit', async () => {
 		worker.removeListener('message', messageHandler);
 
-		await sleep(3000);
+		await sleep(3_000);
 
 		start(payload);
 	});
