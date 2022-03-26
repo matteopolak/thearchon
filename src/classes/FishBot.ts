@@ -222,7 +222,7 @@ export default class FishBot extends BaseBot {
 		if (
 			best !== -1 &&
 			best < 4 &&
-			data.price >= this.balance - SURPLUS_MONEY_THRESHOLD
+			data.price <= this.balance - SURPLUS_MONEY_THRESHOLD
 		) {
 			this.logger.info(`Purchasing ${FISHING_RODS[best + 1]}`);
 
@@ -433,6 +433,7 @@ export default class FishBot extends BaseBot {
 
 		if (rod === null) return;
 
+		if (!this.checkedBalance) await this.getCurrentBalance(ctx, true);
 		if (rod.displayName !== this.client.heldItem?.displayName)
 			await this.client.equip(ctx, rod, 'hand');
 
