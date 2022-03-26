@@ -40,7 +40,7 @@ export default class FishBot extends BaseBot {
 
 		await super.init();
 
-		this._client._client.on('map', async (map: RawMapData) => {
+		this._bot._client.on('map', async (map: RawMapData) => {
 			if (this.state !== State.SOLVING_CAPTCHA) return;
 
 			map.columns = Math.abs(map.columns);
@@ -138,13 +138,13 @@ export default class FishBot extends BaseBot {
 					title ===
 					'{"extra":[{"color":"dark_aqua","text":"You Got a Bite!"}],"text":""}'
 				) {
-					this._client.off('title', listener);
+					this._bot.off('title', listener);
 
 					return resolve(true);
 				}
 			};
 
-			this._client.on('title', listener);
+			this._bot.on('title', listener);
 		});
 	}
 
@@ -288,9 +288,11 @@ export default class FishBot extends BaseBot {
 				best < 4 &&
 				data.price >= this.balance - SURPLUS_MONEY_THRESHOLD
 			) {
-				console.log(
-					`[${this.alias}] [PURCHASE] Purchasing ${FISHING_RODS[best + 1]}`,
-				);
+				if (this.logger) {
+					console.log(
+						`[${this.alias}] [PURCHASE] Purchasing ${FISHING_RODS[best + 1]}`,
+					);
+				}
 
 				await this.completeActionAndWaitForSlotItem(
 					ctx,
@@ -309,15 +311,19 @@ export default class FishBot extends BaseBot {
 				);
 			}
 		} else {
-			if (this.logger)
+			if (this.logger) {
 				console.log(
 					`[${this.alias}] [WARNING] Could not sell fish because the slot was not found`,
 				);
+			}
 		}
 
 		if (buySlot !== -1) {
 			const rodIndex = this.getBestFishingRod(true);
 			const baitSlot = ROD_TO_BAIT[rodIndex === -1 ? 0 : rodIndex];
+
+			if (this.logger)
+				console.log(`[${this.alias}] [PURCHASE] Purchasing bait`);
 
 			await this.client.clickWindow(ctx, buySlot, 0, 0);
 			await this.client.waitForTicks(ctx, 5);
@@ -394,19 +400,11 @@ export default class FishBot extends BaseBot {
 		return false;
 	}
 
-	public async fish(ctx: Context) {
-		try {
-			return this.startFishing(ctx);
-		} catch (e) {
-			console.log(`[${this.alias}] [ERROR] Error during fishing: ${e}`);
-		}
-	}
-
-	private async stopFishing() {
+	public async stopFishing() {
 		this.isFishing = false;
 	}
 
-	private async startFishing(_: Context) {
+	public async fish(_: Context) {
 		if (this.state === State.FISHING || this.state === State.SOLVING_CAPTCHA)
 			return false;
 
@@ -417,8 +415,6 @@ export default class FishBot extends BaseBot {
 		const rod = this.getBestFishingRod();
 
 		if (rod === null) return;
-
-		this.port.postMessage({ sellType: this.sellType, isFishing: true });
 
 		if (rod.displayName !== this.client.heldItem?.displayName)
 			await this.client.equip(ctx, rod, 'hand');
@@ -433,9 +429,13 @@ export default class FishBot extends BaseBot {
 			if (rod.displayName !== this.client.heldItem?.displayName)
 				await this.client.equip(ctx, rod, 'hand');
 
+			if (this.logger) console.log(`[${this.alias}] [FISHING] Casting...`);
+
 			this.client.activateItem(ctx);
 			await this.waitForBite(ctx);
 			this.client.activateItem(ctx);
+
+			if (this.logger) console.log(`[${this.alias}] [FISHING] Reeling...`);
 
 			await this.client.waitForTicks(ctx, 5);
 		}

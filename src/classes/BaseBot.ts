@@ -40,7 +40,7 @@ export default class BaseBot {
 	public whitelist: Set<string>;
 	public commands: Map<string, CommandFunction> = new Map();
 	public options: BaseBotOptions;
-	public _client: Bot;
+	public _bot: Bot;
 	public client: BaseState;
 	public captcha = {
 		startedAt: 0,
@@ -72,7 +72,7 @@ export default class BaseBot {
 
 	constructor(options: BaseBotOptions) {
 		this.options = options;
-		this._client = mineflayer.createBot(options);
+		this._bot = mineflayer.createBot(options);
 		this.client = new BaseState(this);
 		this.alias = options.alias;
 		this.logger = options.logger ?? config.log;
@@ -91,7 +91,7 @@ export default class BaseBot {
 		this.commands.set('pay', this.sendMoney.bind(this));
 		this.commands.set('exec', this.executeCommand.bind(this));
 
-		this._client.once('spawn', this.join.bind(this));
+		this._bot.once('spawn', this.join.bind(this));
 	}
 
 	get state() {
@@ -102,7 +102,7 @@ export default class BaseBot {
 		this.previousState = this._state;
 		++this.context;
 		// @ts-ignore
-		this._client.emit('context_changed');
+		this._bot.emit('context_changed');
 
 		this._state = value;
 	}
@@ -114,27 +114,27 @@ export default class BaseBot {
 			const listener = (packet: RawItem) => {
 				if (packet.slot !== slot || packet.item.blockId !== item) return;
 
-				this._client._client.off('set_slot', listener);
+				this._bot._client.off('set_slot', listener);
 				// @ts-ignore
-				this._client.off('context_changed', contextListener);
+				this._bot.off('context_changed', contextListener);
 
 				resolve(undefined);
 			};
 
 			const contextListener = () => {
-				this._client._client.off('set_slot', listener);
+				this._bot._client.off('set_slot', listener);
 
 				resolve(undefined);
 			};
 
-			this._client._client.on('set_slot', listener);
+			this._bot._client.on('set_slot', listener);
 			// @ts-ignore
-			this._client.once('context_changed', contextListener);
+			this._bot.once('context_changed', contextListener);
 
 			if (ctx !== this.context) {
-				this._client._client.off('set_slot', listener);
+				this._bot._client.off('set_slot', listener);
 				// @ts-ignore
-				this._client.off('context_changed', contextListener);
+				this._bot.off('context_changed', contextListener);
 
 				resolve(undefined);
 			}
@@ -161,7 +161,7 @@ export default class BaseBot {
 	}
 
 	public async addLoginHook(hook: (bot: BaseBot) => any) {
-		this._client.once('spawn', () => hook(this));
+		this._bot.once('spawn', () => hook(this));
 	}
 
 	public async init() {
@@ -177,7 +177,7 @@ export default class BaseBot {
 			)
 			.catch(() => {});
 
-		this._client.on('messagestr', async m => {
+		this._bot.on('messagestr', async m => {
 			if (m === 'You can also submit your answer with /code <code>') {
 				const { promise, resolve } = createPromiseResolvePair();
 
@@ -342,7 +342,7 @@ export default class BaseBot {
 		const balance: Promise<number> = new Promise(resolve => {
 			const listener = (m: string) => {
 				if (MOBCOINS_REGEX.test(m)) {
-					this._client.off('messagestr', listener);
+					this._bot.off('messagestr', listener);
 
 					const balanceString = m.match(MOBCOINS_REGEX)![1];
 
@@ -351,19 +351,19 @@ export default class BaseBot {
 			};
 
 			const context = () => {
-				this._client.off('messagestr', listener);
+				this._bot.off('messagestr', listener);
 
 				resolve(0);
 			};
 
-			this._client.on('messagestr', listener);
+			this._bot.on('messagestr', listener);
 			// @ts-ignore
-			this._client.once('context_changed', () => context);
+			this._bot.once('context_changed', () => context);
 
 			if (ctx !== this.context) {
 				// @ts-ignore
-				this._client.off('context_changed', context);
-				this._client.off('messagestr', listener);
+				this._bot.off('context_changed', context);
+				this._bot.off('messagestr', listener);
 
 				return resolve(0);
 			}
@@ -378,7 +378,7 @@ export default class BaseBot {
 		const balance: Promise<number> = new Promise(resolve => {
 			const listener = (m: string) => {
 				if (BALANCE_REGEX.test(m)) {
-					this._client.off('messagestr', listener);
+					this._bot.off('messagestr', listener);
 
 					const balanceString = m.match(BALANCE_REGEX)![1];
 					const balance = parseFloat(balanceString.replaceAll(',', ''));
@@ -391,20 +391,20 @@ export default class BaseBot {
 			};
 
 			const context = () => {
-				this._client.off('messagestr', listener);
+				this._bot.off('messagestr', listener);
 
 				resolve(0);
 			};
 
-			this._client.on('messagestr', listener);
+			this._bot.on('messagestr', listener);
 
 			// @ts-ignore
-			this._client.on('context_changed', context);
+			this._bot.on('context_changed', context);
 
 			if (ctx !== this.context) {
 				// @ts-ignore
-				this._client.off('context_changed', context);
-				this._client.off('messagestr', listener);
+				this._bot.off('context_changed', context);
+				this._bot.off('messagestr', listener);
 
 				return resolve(0);
 			}
@@ -428,7 +428,7 @@ export default class BaseBot {
 	}
 
 	private async lookAt(ctx: Context, username: string) {
-		const player = this._client.players[username];
+		const player = this._bot.players[username];
 
 		if (player) return this.client.lookAt(ctx, player.entity.position);
 	}
@@ -436,18 +436,18 @@ export default class BaseBot {
 	private async saveInventory() {
 		return fs.writeFile(
 			path.join(this.directory, 'inventory.json'),
-			JSON.stringify(this._client.inventory.slots, null, 2),
+			JSON.stringify(this._bot.inventory.slots, null, 2),
 		);
 	}
 
 	private async saveEntityList() {
 		await fs.writeFile(
 			path.join(this.directory, 'players.json'),
-			JSON.stringify(this._client.players, null, 2),
+			JSON.stringify(this._bot.players, null, 2),
 		);
 		await fs.writeFile(
 			path.join(this.directory, 'entities.json'),
-			JSON.stringify(this._client.entities, null, 2),
+			JSON.stringify(this._bot.entities, null, 2),
 		);
 	}
 
@@ -552,21 +552,21 @@ export default class BaseBot {
 
 		const waitForWindow: Promise<Window | undefined> = new Promise(resolve => {
 			const listener = (window?: Window) => {
-				this._client.off('windowOpen', listener);
+				this._bot.off('windowOpen', listener);
 				// @ts-ignore
-				this._client.off('context_changed', listener);
+				this._bot.off('context_changed', listener);
 
 				return resolve(window);
 			};
 
-			this._client.once('windowOpen', listener);
+			this._bot.once('windowOpen', listener);
 			// @ts-ignore
-			this._client.once('context_changed', listener);
+			this._bot.once('context_changed', listener);
 
 			if (ctx !== this.context) {
 				// @ts-ignore
-				this._client.off('context_changed', listener);
-				this._client.off('windowOpen', listener);
+				this._bot.off('context_changed', listener);
+				this._bot.off('windowOpen', listener);
 
 				return resolve(undefined);
 			}
@@ -580,7 +580,7 @@ export default class BaseBot {
 	}
 
 	public isInventoryFull() {
-		return !this._client.inventory.slots.some(
+		return !this._bot.inventory.slots.some(
 			(s, i) => i > 8 && i < 45 && (s === null || s.type === 0),
 		);
 	}

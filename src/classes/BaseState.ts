@@ -17,13 +17,13 @@ export default class BaseState {
 	waitForTicks(ctx: Context, ticks: number) {
 		if (ctx !== this.client.context) return;
 
-		return this.client._client.waitForTicks(ticks);
+		return this.client._bot.waitForTicks(ticks);
 	}
 
 	waitForChunksToLoad(ctx: Context) {
 		if (ctx !== this.client.context) return;
 
-		return this.client._client.waitForChunksToLoad();
+		return this.client._bot.waitForChunksToLoad();
 	}
 
 	awaitMessage(ctx: Context, ...args: string[] | RegExp[]) {
@@ -36,28 +36,28 @@ export default class BaseState {
 						x instanceof RegExp ? x.test(message) : message === x,
 					)
 				) {
-					this.client._client.off('messagestr', listener);
+					this.client._bot.off('messagestr', listener);
 					// @ts-ignore
-					this.client._client.off('context_changed', contextListener);
+					this.client._bot.off('context_changed', contextListener);
 
 					resolve(message);
 				}
 			};
 
 			const contextListener = () => {
-				this.client._client.off('messagestr', listener);
+				this.client._bot.off('messagestr', listener);
 
 				resolve(undefined);
 			};
 
-			this.client._client.on('messagestr', listener);
+			this.client._bot.on('messagestr', listener);
 			// @ts-ignore
-			this.client._client.once('context_changed', contextListener);
+			this.client._bot.once('context_changed', contextListener);
 
 			if (ctx !== this.client.context) {
-				this.client._client.off('messagestr', listener);
+				this.client._bot.off('messagestr', listener);
 				// @ts-ignore
-				this.client._client.off('context_changed', contextListener);
+				this.client._bot.off('context_changed', contextListener);
 
 				resolve(undefined);
 			}
@@ -67,43 +67,43 @@ export default class BaseState {
 	chat(ctx: Context, message: string) {
 		if (ctx !== this.client.context) return;
 
-		return this.client._client.chat(message);
+		return this.client._bot.chat(message);
 	}
 
 	lookAt(ctx: Context, point: Vec3, force?: boolean) {
 		if (ctx !== this.client.context) return;
 
-		return this.client._client.lookAt(point, force);
+		return this.client._bot.lookAt(point, force);
 	}
 
 	setControlState(ctx: Context, control: ControlState, state: boolean) {
 		if (ctx !== this.client.context) return;
 
-		return this.client._client.setControlState(control, state);
+		return this.client._bot.setControlState(control, state);
 	}
 
 	activateEntity(ctx: Context, entity: Entity) {
 		if (ctx !== this.client.context) return;
 
-		return this.client._client.activateEntity(entity);
+		return this.client._bot.activateEntity(entity);
 	}
 
 	clickWindow(ctx: Context, slot: number, mouseButton: number, mode: number) {
 		if (ctx !== this.client.context) return;
 
-		return this.client._client.clickWindow(slot, mouseButton, mode);
+		return this.client._bot.clickWindow(slot, mouseButton, mode);
 	}
 
 	closeWindow(ctx: Context, window: Window) {
 		if (ctx !== this.client.context) return;
 
-		return this.client._client.closeWindow(window);
+		return this.client._bot.closeWindow(window);
 	}
 
 	activateItem(ctx: Context, offhand?: boolean) {
 		if (ctx !== this.client.context) return;
 
-		return this.client._client.activateItem(offhand);
+		return this.client._bot.activateItem(offhand);
 	}
 
 	toss(
@@ -114,7 +114,7 @@ export default class BaseState {
 	) {
 		if (ctx !== this.client.context) return;
 
-		return this.client._client.toss(itemType, metadata, count);
+		return this.client._bot.toss(itemType, metadata, count);
 	}
 
 	equip(
@@ -124,18 +124,18 @@ export default class BaseState {
 	) {
 		if (ctx !== this.client.context) return;
 
-		return this.client._client.equip(item, destination);
+		return this.client._bot.equip(item, destination);
 	}
 
 	get heldItem() {
-		return this.client._client.heldItem;
+		return this.client._bot.heldItem;
 	}
 
 	get inventory() {
-		return this.client._client.inventory;
+		return this.client._bot.inventory;
 	}
 
 	get entities() {
-		return this.client._client.entities;
+		return this.client._bot.entities;
 	}
 }
