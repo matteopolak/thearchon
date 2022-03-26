@@ -81,6 +81,7 @@ export enum Destination {
 	FISHING = 'fishing',
 	FOREST = 'forest',
 	SPAWN = 'spawn',
+	UNKNOWN = 'unknown',
 }
 
 export interface RawMapData {

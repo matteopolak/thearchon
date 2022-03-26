@@ -360,15 +360,18 @@ export default class FishBot extends BaseBot {
 
 	private async checkFishingThresholds(ctx: Context) {
 		const inventory = this.getInventoryData();
+		let destination = Destination.UNKNOWN;
 
 		if (this.isInventoryFull()) {
 			await this.clearInventory(ctx);
+
+			destination = Destination.SPAWN;
 		}
 
 		if (inventory.count.bait === BAIT_THRESHOLD) {
 			await this.purchaseBait(ctx);
 
-			return true;
+			destination = Destination.FISHING;
 		} else if (
 			inventory.slots.fish >= FISH_THRESHOLD ||
 			inventory.count.fish >= FISH_COUNT_THRESHOLD
@@ -376,10 +379,10 @@ export default class FishBot extends BaseBot {
 			if (inventory.count.bait >= FISH_THRESHOLD) await this.sellFish(ctx);
 			else await this.sellFishAndPurchaseBait(ctx);
 
-			return true;
+			destination = Destination.FISHING;
 		}
 
-		return false;
+		return destination;
 	}
 
 	public async stopFishing() {
@@ -433,11 +436,15 @@ export default class FishBot extends BaseBot {
 		if (rod.displayName !== this.client.heldItem?.displayName)
 			await this.client.equip(ctx, rod, 'hand');
 
-		if (!(await this.checkFishingThresholds(ctx)))
+		if ((await this.checkFishingThresholds(ctx)) !== Destination.FISHING) {
 			await this.teleportToHome(ctx, Destination.FISHING);
+		}
 
 		while (this.isFishing && ctx === this.context) {
-			await this.checkFishingThresholds(ctx);
+			if ((await this.checkFishingThresholds(ctx)) === Destination.SPAWN) {
+				await this.teleportToHome(ctx, Destination.FISHING);
+			}
+
 			await this.client.waitForTicks(ctx, 5);
 
 			const rod = this.getBestFishingRod();
