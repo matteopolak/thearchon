@@ -64,12 +64,13 @@ export default class FishBot extends BaseBot {
 			const answer = unscramble(map);
 
 			if (answer.length === 5 && this.state === State.SOLVING_CAPTCHA) {
-				if (this.logger)
+				if (this.logger) {
 					console.log(
 						`[${this.alias}] [CAPTCHA] Possible answer found: ${answer.join(
 							'',
 						)}`,
 					);
+				}
 
 				this.state = State.IDLE;
 
@@ -195,10 +196,11 @@ export default class FishBot extends BaseBot {
 			} else inventory.slots.taken++;
 		}
 
-		if (this.logger)
+		if (this.logger) {
 			console.log(
 				`[${this.alias}] [INVENTORY] Fish: ${inventory.count.fish}/${inventory.slots.fish} Bait: ${inventory.count.bait}/${inventory.slots.bait}`,
 			);
+		}
 
 		return inventory;
 	}
@@ -230,9 +232,11 @@ export default class FishBot extends BaseBot {
 			best < 4 &&
 			data.price >= this.balance - SURPLUS_MONEY_THRESHOLD
 		) {
-			console.log(
-				`[${this.alias}] [PURCHASE] Purchasing ${FISHING_RODS[best + 1]}`,
-			);
+			if (this.logger) {
+				console.log(
+					`[${this.alias}] [PURCHASE] Purchasing ${FISHING_RODS[best + 1]}`,
+				);
+			}
 
 			await this.completeActionAndWaitForSlotItem(
 				ctx,

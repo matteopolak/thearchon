@@ -25,11 +25,9 @@ bot._bot.on('kicked', async reason => {
 });
 
 bot._bot.on('end', async reason => {
-	console.log(`[${bot.alias}] [INFO] Kicked: ${reason}`);
+	console.log(`[${bot.alias}] [INFO] Ended: ${reason}`);
 
 	process.exit();
 });
-
-bot._bot.on('title', console.log);
 
 bot.init();

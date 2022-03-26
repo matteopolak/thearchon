@@ -198,7 +198,8 @@ export default class BaseBot {
 					this.client.activateItem(ctx);
 				});
 
-				console.log(`[${this.alias}] Captcha started`);
+				if (this.logger)
+					console.log(`[${this.alias}] Captcha detected. Solving...`);
 
 				return (this.state = State.SOLVING_CAPTCHA);
 			}
@@ -226,11 +227,13 @@ export default class BaseBot {
 				if (this.checkedBalance === false) await this.getCurrentBalance(ctx);
 				else this.balance += value;
 
-				console.log(
-					`[${this.alias}] [SELL] Sold fish for ${currencyFormatter.format(
-						value,
-					)} :: Balance: ${currencyFormatter.format(this.balance)}`,
-				);
+				if (this.logger) {
+					console.log(
+						`[${this.alias}] [SELL] Sold fish for ${currencyFormatter.format(
+							value,
+						)} | Balance: ${currencyFormatter.format(this.balance)}`,
+					);
+				}
 
 				if (this.balance >= MONEY_THRESHOLD) {
 					const amount = Math.floor(this.balance - SURPLUS_MONEY_THRESHOLD);
@@ -264,10 +267,11 @@ export default class BaseBot {
 			const run = this.commands.get(command);
 
 			if (run !== undefined) {
-				if (this.logger)
+				if (this.logger) {
 					console.log(
 						`[${this.alias}] [COMMAND] ${sender} ran command '${command}'`,
 					);
+				}
 
 				try {
 					return run(this.context, sender, ...args);
