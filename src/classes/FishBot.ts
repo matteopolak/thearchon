@@ -75,6 +75,9 @@ export default class FishBot extends BaseBot {
 				);
 
 				if (this.captcha.fishing) {
+					await this.client.waitForChunksToLoad(this.context);
+
+					this.client.activateItem(this.context);
 					this.fish(ctx);
 				}
 			}
@@ -140,6 +143,7 @@ export default class FishBot extends BaseBot {
 					this._bot.off('title', listener);
 					// @ts-ignore
 					this._bot.off('context_changed', contextListener);
+					clearTimeout(timeout);
 
 					return resolve(true);
 				}
@@ -147,6 +151,7 @@ export default class FishBot extends BaseBot {
 
 			const contextListener = () => {
 				this._bot.off('title', listener);
+				clearTimeout(timeout);
 
 				resolve(false);
 			};
@@ -155,10 +160,19 @@ export default class FishBot extends BaseBot {
 			// @ts-ignore
 			this._bot.once('context_changed', contextListener);
 
+			const timeout = setTimeout(() => {
+				this._bot.off('title', listener);
+				// @ts-ignore
+				this._bot.off('context_changed', contextListener);
+
+				return resolve(true);
+			}, 60 * 1_000);
+
 			if (ctx !== this.context) {
 				this._bot.off('title', listener);
 				// @ts-ignore
 				this._bot.off('context_changed', contextListener);
+				clearTimeout(timeout);
 
 				resolve(false);
 			}
