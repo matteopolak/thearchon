@@ -434,7 +434,12 @@ export default class FishBot extends BaseBot {
 		if (rod === null) return;
 
 		if (!this.checkedBalance) await this.getCurrentBalance(ctx, true);
-		if (rod.displayName !== this.client.heldItem?.displayName)
+		if (
+			// @ts-ignore
+			rod?.nbt?.value?.display?.value?.Name?.value !==
+			// @ts-ignore
+			this.client.heldItem?.nbt?.value?.display?.value?.Name?.value
+		)
 			await this.client.equip(ctx, rod, 'hand');
 
 		if ((await this.checkFishingThresholds(ctx)) !== Destination.FISHING) {
@@ -451,7 +456,12 @@ export default class FishBot extends BaseBot {
 			const rod = this.getBestFishingRod();
 
 			if (rod === null) break;
-			if (rod.displayName !== this.client.heldItem?.displayName)
+			if (
+				// @ts-ignore
+				rod?.nbt?.value?.display?.value?.Name?.value !==
+				// @ts-ignore
+				this.client.heldItem?.nbt?.value?.display?.value?.Name?.value
+			)
 				await this.client.equip(ctx, rod, 'hand');
 
 			this.logger.info('Casting...');
