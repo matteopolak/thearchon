@@ -2,14 +2,10 @@ import { ServerType } from './typings';
 import type { Config } from './typings';
 
 const config: Config = {
-	fishOnJoin: true,
-	server: ServerType.ONYX,
-	sneakWhileFishing: false,
-	upgradeFishingRodAutomatically: true,
 	whitelist: ['main_account', 'anoter_account'],
 	autopay_to: 'main_account',
-	log: true,
 	version: '1.12.2',
+	server: ServerType.ONYX,
 	accounts: [
 		{
 			alias: 'username1',
@@ -24,6 +20,10 @@ const config: Config = {
 			auth: 'microsoft',
 		},
 	],
+	log: true,
+	fishOnJoin: true,
+	sneakWhileFishing: false,
+	upgradeFishingRodAutomatically: true,
 };
 
 export default config;

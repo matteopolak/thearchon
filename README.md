@@ -23,6 +23,12 @@ If you are setting this up for the first time, rename `src/config.example.ts` to
 | --- | --- |
 | `accounts` | The account information of the bots |
 | `autopay_to` | The username of the player to automatically pay when `MONEY_THRESHOLD` is met |
+| `fishOnJoin` | Whether to start fishing after joining the server with no further prompt |
+| `log` | Whether to log information to the console |
+| `server` | The name of the server to connect to |
+| `sneakWhileFishing` | Whether to sneak while fishing (for example, to hide underwater) |
+| `upgradeFishingRodAutomatically` | Whether to upgrade the fishing rod up to a **Mega Rod** whenever possible |
+| `version` | The version of Minecraft to connect with |
 | `whitelist` | The usernames of players that are allowed to execute commands |
 
 ## Installation

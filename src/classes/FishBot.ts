@@ -302,7 +302,10 @@ export default class FishBot extends BaseBot {
 
 		if (window === undefined) return;
 
-		if (await this.sellFishAction(ctx, window)) {
+		if (
+			(await this.sellFishAction(ctx, window)) &&
+			config.upgradeFishingRodAutomatically
+		) {
 			await this.upgradeRodAction(ctx, window);
 		}
 
@@ -328,7 +331,10 @@ export default class FishBot extends BaseBot {
 
 		if (window === undefined) return;
 
-		if (await this.sellFishAction(ctx, window)) {
+		if (
+			(await this.sellFishAction(ctx, window)) &&
+			config.upgradeFishingRodAutomatically
+		) {
 			await this.upgradeRodAction(ctx, window);
 		}
 
