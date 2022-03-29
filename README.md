@@ -16,6 +16,17 @@ Auto-fishing is against the rules, so using this tool will put you at risk of ge
 * Reconnects on server restarts
 * Automatically send fishing money to your bank account
 
+## Installation
+
+* Install [Node.js version 16.0.0](https://nodejs.org/en/download/) or higher
+* Ensure that yarn is installed (`npm install --global yarn`)
+* Ensure that TypeScript is installed  (`yarn global add typescript`)
+* Make appropriate changes to the configuration file
+* Clone the repository then run the following commands in the folder:
+> yarn install
+> npm start
+```
+
 ## Setup
 Configuration is done in `src/config.ts`.
 If you are setting this up for the first time, rename `src/config.example.ts` to `src/config.ts`.
@@ -30,13 +41,6 @@ If you are setting this up for the first time, rename `src/config.example.ts` to
 | `upgradeFishingRodAutomatically` | Whether to upgrade the fishing rod up to a **Mega Rod** whenever possible |
 | `version` | The version of Minecraft to connect with |
 | `whitelist` | The usernames of players that are allowed to execute commands |
-
-## Installation
-
-```console
-> yarn install
-> npm start
-```
 
 ## Commands
 These commands must be run in an McMMO party chat to which the bot(s) have access.
