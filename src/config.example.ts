@@ -1,5 +1,12 @@
 import { ServerType } from './typings';
-import type { Config } from './typings';
+import type { Config, DiscordConfig } from './typings';
+
+export const discordConfig: DiscordConfig = {
+	token: 'DISCORD_BOT_TOKEN_HERE',
+	prefix: '!',
+	enabled: false,
+	whitelist: ['USER_ID', 'USER_ID'],
+};
 
 const config: Config = {
 	whitelist: ['main_account', 'anoter_account'],

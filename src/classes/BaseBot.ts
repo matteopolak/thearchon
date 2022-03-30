@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
+import type { MessagePort } from 'worker_threads';
 
 import mineflayer from 'mineflayer';
 import type { Bot, BotOptions } from 'mineflayer';
@@ -18,7 +19,7 @@ import {
 	TELEPORT_REGEX,
 } from '../constants';
 import { Context, DestinationType, RawItem, SellType, State } from '../typings';
-import type { CommandFunction, Destination } from '../typings';
+import type { CommandFunction, Destination, ParentMessage } from '../typings';
 import { createPromiseResolvePair, currencyFormatter, sleep } from '../utils';
 import BaseState from './BaseState';
 import type FishBot from './FishBot';
@@ -49,6 +50,7 @@ export default class BaseBot {
 		resolve: () => {},
 		fishing: false,
 	};
+	public port: MessagePort;
 
 	public _state: State = State.IDLE;
 	public previousState: State = State.IDLE;
@@ -71,7 +73,7 @@ export default class BaseBot {
 
 	public fisher?: FishBot;
 
-	constructor(options: BaseBotOptions) {
+	constructor(options: BaseBotOptions, port: MessagePort) {
 		this.options = options;
 		this._bot = mineflayer.createBot(options);
 		this.client = new BaseState(this);
@@ -81,6 +83,7 @@ export default class BaseBot {
 		this.balance = 0;
 		this.checkedBalance = false;
 		this.logger = new Logger(options);
+		this.port = port;
 
 		this.commands.set('tp', this.teleportTo.bind(this));
 		this.commands.set('look', this.lookAt.bind(this));
@@ -93,6 +96,19 @@ export default class BaseBot {
 		this.commands.set('exec', this.executeCommand.bind(this));
 
 		this._bot.once('spawn', this.join.bind(this));
+		this.port.on('message', ({ command, args, sender }: ParentMessage) => {
+			const run = this.commands.get(command);
+
+			if (run !== undefined) {
+				this.logger.info(`${sender} ran command '${command}'`);
+
+				try {
+					return run(this.context, sender, ...args);
+				} catch (e: any) {
+					this.logger.error(e);
+				}
+			}
+		});
 	}
 
 	get state() {

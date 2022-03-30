@@ -11,6 +11,19 @@ export enum ServerType {
 	ORIGINS = 'origins',
 }
 
+export interface ParentMessage {
+	command: string;
+	args: string[];
+	sender: string;
+}
+
+export interface DiscordConfig {
+	token: string;
+	prefix: string;
+	enabled: boolean;
+	whitelist: string[];
+}
+
 export interface Config {
 	fishOnJoin: boolean;
 	sneakWhileFishing: boolean;

@@ -1,5 +1,11 @@
+import { Worker } from 'worker_threads';
+
+import chalk from 'chalk';
+
 import characters from './characters';
-import type { RawMapData } from './typings';
+import { WORKER_PATH } from './constants';
+import { SellType } from './typings';
+import type { BaseBotOptions, RawMapData } from './typings';
 
 const CHARACTER_WIDTH = 12;
 const CHARACTER_HEIGHT = 14;
@@ -105,4 +111,51 @@ export function createPromiseResolvePair(): {
 	const promise: Promise<void> = new Promise(r => (resolve = r));
 
 	return { promise, resolve };
+}
+
+export function startNewProcess(
+	payload: { options: BaseBotOptions },
+	workers: Map<string, Worker>,
+) {
+	console.log(
+		`${' '.repeat(17)}${chalk.bold(
+			chalk.cyan('Parent'),
+		)} Starting worker for ${chalk.yellow(payload.options.alias)}`,
+	);
+
+	const worker = new Worker(WORKER_PATH, {
+		workerData: payload,
+	});
+
+	workers.set(payload.options.alias, worker);
+
+	const messageHandler = (data: { isFishing: boolean; sellType: SellType }) => {
+		console.log(
+			`${' '.repeat(17)}${chalk.bold(chalk.cyan('Parent'))} ${chalk.yellow(
+				payload.options.alias,
+			)} is ${data.isFishing ? 'fishing' : 'not fishing'} and trading for ${
+				data.sellType === SellType.COINS ? 'coins' : 'mob coins'
+			}`,
+		);
+
+		payload.options.fish = data.isFishing;
+		payload.options.sellType = data.sellType;
+	};
+
+	worker.on('message', messageHandler);
+
+	worker.once('error', async error => {
+		console.error(payload.options.alias, error);
+
+		worker.removeListener('message', messageHandler);
+		worker.terminate();
+	});
+
+	worker.once('exit', async () => {
+		worker.removeListener('message', messageHandler);
+
+		await sleep(10_000);
+
+		startNewProcess(payload, workers);
+	});
 }

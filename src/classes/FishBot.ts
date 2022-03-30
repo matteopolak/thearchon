@@ -26,13 +26,11 @@ export default class FishBot extends BaseBot {
 	public isFishing = false;
 	public bestFishingRod: number = 0;
 
-	private port: MessagePort;
 	private sellType: SellType;
 
 	constructor(options: BaseBotOptions, port: MessagePort) {
-		super(options);
+		super(options, port);
 
-		this.port = port;
 		this.sellType = options.sellType ?? SellType.COINS;
 		this.fisher = this;
 	}

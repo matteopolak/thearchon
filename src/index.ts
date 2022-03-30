@@ -1,14 +1,15 @@
-import { Worker } from 'worker_threads';
+import type { Worker } from 'worker_threads';
 
-import chalk from 'chalk';
-
-import type { BaseBotOptions } from './classes/BaseBot';
-import config from './config';
-import { VERSION, WORKER_PATH } from './constants';
+import config, { discordConfig } from './config';
+import { VERSION } from './constants';
+import { create } from './discord';
 import { SellType } from './typings';
+import { startNewProcess } from './utils';
 
-function sleep(ms: number) {
-	return new Promise(r => setTimeout(r, ms));
+const workers = new Map<string, Worker>();
+
+if (discordConfig.enabled) {
+	create(discordConfig, workers);
 }
 
 const defaults = {
@@ -20,55 +21,16 @@ const defaults = {
 	hideErrors: true,
 };
 
-function start(payload: { options: BaseBotOptions }) {
-	console.log(
-		`${' '.repeat(17)}${chalk.bold(
-			chalk.cyan('Parent'),
-		)} Starting worker for ${chalk.yellow(payload.options.alias)}`,
-	);
-
-	const worker = new Worker(WORKER_PATH, {
-		workerData: payload,
-	});
-
-	const messageHandler = (data: { isFishing: boolean; sellType: SellType }) => {
-		console.log(
-			`${' '.repeat(17)}${chalk.bold(chalk.cyan('Parent'))} ${chalk.yellow(
-				payload.options.alias,
-			)} is ${data.isFishing ? 'fishing' : 'not fishing'} and trading for ${
-				data.sellType === SellType.COINS ? 'coins' : 'mob coins'
-			}`,
-		);
-
-		payload.options.fish = data.isFishing;
-		payload.options.sellType = data.sellType;
-	};
-
-	worker.on('message', messageHandler);
-
-	worker.once('error', async error => {
-		console.error(payload.options.alias, error);
-
-		worker.removeListener('message', messageHandler);
-		worker.terminate();
-	});
-
-	worker.once('exit', async () => {
-		worker.removeListener('message', messageHandler);
-
-		await sleep(10_000);
-
-		start(payload);
-	});
-}
-
 for (const options of config.accounts) {
-	start({
-		options: {
-			...defaults,
-			...options,
-			sellType: SellType.COINS,
-			fish: true,
+	startNewProcess(
+		{
+			options: {
+				...defaults,
+				...options,
+				sellType: SellType.COINS,
+				fish: true,
+			},
 		},
-	});
+		workers,
+	);
 }
