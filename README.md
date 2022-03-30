@@ -23,6 +23,7 @@ Auto-fishing is against the rules, so using this tool will put you at risk of ge
 * Ensure that TypeScript is installed  (`yarn global add typescript`)
 * Make appropriate changes to the configuration file
 * Clone the repository then run the following commands in the folder:
+```
 > yarn install
 > npm start
 ```
