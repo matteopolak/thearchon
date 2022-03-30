@@ -88,8 +88,10 @@ export default class BaseState {
 		return this.client._bot.setControlState(control, state);
 	}
 
-	activateEntity(ctx: Context, entity: Entity) {
+	async activateEntity(ctx: Context, entity: Entity) {
 		if (ctx !== this.client.context) return Promise.resolve();
+
+		await this.lookAt(ctx, entity.position, true);
 
 		return this.client._bot.activateEntity(entity);
 	}

@@ -58,7 +58,6 @@ export default class FishBot extends BaseBot {
 			)
 				return;
 
-			const ctx = this.context;
 			const answer = unscramble(map);
 
 			if (answer.length === 5 && this.state === State.SOLVING_CAPTCHA) {
@@ -66,13 +65,17 @@ export default class FishBot extends BaseBot {
 
 				this.state = State.IDLE;
 
+				const ctx = this.context;
+
 				await this.completeActionAndWaitForMessage(
-					this.context,
-					() => this.command(this.context, `/code ${answer.join('')}`),
+					ctx,
+					() => this.command(ctx, `/code ${answer.join('')}`),
 					'Great job! You solved the captcha and can continue playing.',
 				);
 
 				if (this.captcha.fishing) {
+					this.isFishing = false;
+
 					await Promise.race([
 						this.client.waitForTicks(ctx, 80),
 						this.client.waitForChunksToLoad(ctx),
@@ -331,7 +334,7 @@ export default class FishBot extends BaseBot {
 		this.client.closeWindow(ctx, window);
 		if (goBack && data.moved)
 			await this.teleportToHome(ctx, Destination.FISHING);
-		else this.client.look(ctx, data.yaw, data.pitch);
+		else this.client.look(ctx, data.yaw, data.pitch, true);
 	}
 
 	private async purchaseBait(ctx: Context) {
@@ -383,7 +386,7 @@ export default class FishBot extends BaseBot {
 		this.client.closeWindow(ctx, window);
 
 		if (data.moved) await this.teleportToHome(ctx, Destination.FISHING);
-		else this.client.look(ctx, data.yaw, data.pitch);
+		else this.client.look(ctx, data.yaw, data.pitch, true);
 	}
 
 	private sellFishAndPurchaseBait(ctx: Context) {
