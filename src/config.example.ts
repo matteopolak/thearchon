@@ -9,21 +9,21 @@ export const discordConfig: DiscordConfig = {
 };
 
 const config: Config = {
-	whitelist: ['main_account', 'anoter_account'],
-	autopay_to: 'main_account',
+	whitelist: ['username', 'username'],
+	autopay_to: 'username',
 	version: '1.12.2',
 	server: ServerType.ONYX,
 	accounts: [
 		{
-			alias: 'username1',
-			username: 'email1@gmail.com',
-			password: 'password1',
+			alias: 'username',
+			username: 'handle@gmail.com',
+			password: 'password',
 			auth: 'mojang',
 		},
 		{
-			alias: 'username2',
-			username: 'microsoft@outlook.com',
-			password: 'password2',
+			alias: 'username',
+			username: 'handle@outlook.com',
+			password: 'password',
 			auth: 'microsoft',
 		},
 	],
