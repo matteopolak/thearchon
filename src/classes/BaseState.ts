@@ -76,6 +76,12 @@ export default class BaseState {
 		return this.client._bot.lookAt(point, force);
 	}
 
+	look(ctx: Context, yaw: number, pitch: number, force?: boolean) {
+		if (ctx !== this.client.context) return Promise.resolve();
+
+		return this.client._bot.look(yaw, pitch, force);
+	}
+
 	setControlState(ctx: Context, control: ControlState, state: boolean) {
 		if (ctx !== this.client.context) return;
 

@@ -152,6 +152,8 @@ export const FISHING_ROD_DATA: FishingRodData[] =
 
 export const VERSION = config.version;
 export const ROD_TO_BAIT = [9, 11, 13, 15, 15];
+export const CAST_SOUND_NAME =
+	VERSION === '1.12.2' ? 'entity.splash_potion.throw' : 'random.bow';
 
 export const WORKER_PATH = path.join(__dirname, 'worker.js');
 

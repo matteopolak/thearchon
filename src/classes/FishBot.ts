@@ -9,6 +9,7 @@ import type { Vec3 } from 'vec3';
 import config from '../config';
 import {
 	BAIT_THRESHOLD,
+	CAST_SOUND_NAME,
 	FISHING_RODS,
 	FISHING_ROD_DATA,
 	FISH_COUNT_THRESHOLD,
@@ -73,9 +74,11 @@ export default class FishBot extends BaseBot {
 				);
 
 				if (this.captcha.fishing) {
-					await this.client.waitForChunksToLoad(this.context);
+					await Promise.race([
+						this.client.waitForTicks(ctx, 80),
+						this.client.waitForChunksToLoad(ctx),
+					]);
 
-					this.client.activateItem(this.context);
 					this.fish(ctx);
 				}
 			}
@@ -285,7 +288,11 @@ export default class FishBot extends BaseBot {
 	private async sellFish(ctx: Context, goBack = true) {
 		if (ctx !== this.context) return;
 
-		let moved = false;
+		const data = {
+			moved: false,
+			pitch: this._bot.entity.pitch,
+			yaw: this._bot.entity.yaw,
+		};
 
 		const window = await this.completeActionAndWaitForWindow(ctx, async () => {
 			const entity = Object.values(this.client.entities).find(
@@ -296,7 +303,7 @@ export default class FishBot extends BaseBot {
 			);
 
 			if (!entity) {
-				moved = true;
+				data.moved = true;
 				await this.teleportToHome(ctx, Destination.FOREST);
 
 				const entity = Object.values(this.client.entities).find(
@@ -323,13 +330,19 @@ export default class FishBot extends BaseBot {
 		}
 
 		this.client.closeWindow(ctx, window);
-		if (goBack && moved) await this.teleportToHome(ctx, Destination.FISHING);
+		if (goBack && data.moved)
+			await this.teleportToHome(ctx, Destination.FISHING);
+		else this.client.look(ctx, data.yaw, data.pitch);
 	}
 
 	private async purchaseBait(ctx: Context) {
 		if (ctx !== this.context) return;
 
-		let moved = false;
+		const data = {
+			moved: false,
+			pitch: this._bot.entity.pitch,
+			yaw: this._bot.entity.yaw,
+		};
 
 		const window = await this.completeActionAndWaitForWindow(ctx, async () => {
 			const entity = Object.values(this.client.entities).find(
@@ -340,7 +353,7 @@ export default class FishBot extends BaseBot {
 			);
 
 			if (!entity) {
-				moved = true;
+				data.moved = true;
 				await this.teleportToHome(ctx, Destination.FOREST);
 
 				const entity = Object.values(this.client.entities).find(
@@ -369,7 +382,9 @@ export default class FishBot extends BaseBot {
 		await this.purchaseBaitAction(ctx);
 
 		this.client.closeWindow(ctx, window);
-		if (moved) await this.teleportToHome(ctx, Destination.FISHING);
+
+		if (data.moved) await this.teleportToHome(ctx, Destination.FISHING);
+		else this.client.look(ctx, data.yaw, data.pitch);
 	}
 
 	private sellFishAndPurchaseBait(ctx: Context) {
@@ -445,7 +460,7 @@ export default class FishBot extends BaseBot {
 
 		const listener = (name: string, position: Vec3) => {
 			if (
-				name === 'entity.splash_potion.throw' &&
+				name === CAST_SOUND_NAME &&
 				position.distanceTo(this.client.entity.position) < 1
 			) {
 				cast = false;

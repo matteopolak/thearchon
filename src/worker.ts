@@ -36,4 +36,7 @@ bot._bot.on('end', async reason => {
 	process.exit();
 });
 
+bot._bot.on('soundEffectHeard', console.log);
+bot._bot.on('hardcodedSoundEffectHeard', console.log);
+
 bot.init();
