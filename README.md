@@ -1,5 +1,6 @@
 # Auto-Fisher for TheArchon 🎣
 ![Build Status](https://github.com/matteopolak/thearchon/actions/workflows/check.yml/badge.svg)
+[![Discord Chat](https://img.shields.io/discord/958781045841485834.svg)](https://discord.gg/VCC2UvcKuH)  
 [![License][license-image]][license-url]<br>
 
 [license-url]: https://opensource.org/licenses/MIT
