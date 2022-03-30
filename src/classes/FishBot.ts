@@ -291,7 +291,7 @@ export default class FishBot extends BaseBot {
 			const entity = Object.values(this.client.entities).find(
 				e =>
 					e.username !== undefined &&
-					e.username.endsWith('Fishmonger') &&
+					e.username.includes('Fish') &&
 					e.position.distanceTo(this.client.entity.position) < 4,
 			);
 
@@ -302,7 +302,7 @@ export default class FishBot extends BaseBot {
 				const entity = Object.values(this.client.entities).find(
 					e =>
 						e.username !== undefined &&
-						e.username.endsWith('Fishmonger') &&
+						e.username.includes('Fish') &&
 						e.position.distanceTo(this.client.entity.position) < 4,
 				);
 
@@ -335,7 +335,7 @@ export default class FishBot extends BaseBot {
 			const entity = Object.values(this.client.entities).find(
 				e =>
 					e.username !== undefined &&
-					e.username.endsWith('Fishmonger') &&
+					e.username.includes('Fish') &&
 					e.position.distanceTo(this.client.entity.position) < 4,
 			);
 
@@ -346,7 +346,7 @@ export default class FishBot extends BaseBot {
 				const entity = Object.values(this.client.entities).find(
 					e =>
 						e.username !== undefined &&
-						e.username.endsWith('Fishmonger') &&
+						e.username.includes('Fish') &&
 						e.position.distanceTo(this.client.entity.position) < 4,
 				);
 
