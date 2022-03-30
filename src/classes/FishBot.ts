@@ -9,7 +9,6 @@ import type { Vec3 } from 'vec3';
 import config from '../config';
 import {
 	BAIT_THRESHOLD,
-	CAST_SOUND_NAME,
 	FISHING_RODS,
 	FISHING_ROD_DATA,
 	FISH_COUNT_THRESHOLD,
@@ -460,7 +459,7 @@ export default class FishBot extends BaseBot {
 
 		const listener = (name: string, position: Vec3) => {
 			if (
-				name === CAST_SOUND_NAME &&
+				(name === 'entity.splash_potion.throw' || name === 'random.bow') &&
 				position.distanceTo(this.client.entity.position) < 1
 			) {
 				cast = false;
