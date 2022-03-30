@@ -285,15 +285,30 @@ export default class FishBot extends BaseBot {
 	private async sellFish(ctx: Context, goBack = true) {
 		if (ctx !== this.context) return;
 
-		await this.teleportToHome(ctx, Destination.FOREST);
+		let moved = false;
 
 		const window = await this.completeActionAndWaitForWindow(ctx, async () => {
 			const entity = Object.values(this.client.entities).find(
-				e => e.username !== undefined && e.username.endsWith('Fishmonger'),
+				e =>
+					e.username !== undefined &&
+					e.username.endsWith('Fishmonger') &&
+					e.position.distanceTo(this.client.entity.position) < 4,
 			);
 
-			if (!entity) process.exit();
-			else {
+			if (!entity) {
+				moved = true;
+				await this.teleportToHome(ctx, Destination.FOREST);
+
+				const entity = Object.values(this.client.entities).find(
+					e =>
+						e.username !== undefined &&
+						e.username.endsWith('Fishmonger') &&
+						e.position.distanceTo(this.client.entity.position) < 4,
+				);
+
+				if (!entity) process.exit();
+				else await this.client.activateEntity(ctx, entity);
+			} else {
 				await this.client.activateEntity(ctx, entity);
 			}
 		});
@@ -308,21 +323,36 @@ export default class FishBot extends BaseBot {
 		}
 
 		this.client.closeWindow(ctx, window);
-		if (goBack) await this.teleportToHome(ctx, Destination.FISHING);
+		if (goBack && moved) await this.teleportToHome(ctx, Destination.FISHING);
 	}
 
 	private async purchaseBait(ctx: Context) {
 		if (ctx !== this.context) return;
 
-		await this.teleportToHome(ctx, Destination.FOREST);
+		let moved = false;
 
 		const window = await this.completeActionAndWaitForWindow(ctx, async () => {
 			const entity = Object.values(this.client.entities).find(
-				e => e.username !== undefined && e.username.endsWith('Fishmonger'),
+				e =>
+					e.username !== undefined &&
+					e.username.endsWith('Fishmonger') &&
+					e.position.distanceTo(this.client.entity.position) < 4,
 			);
 
-			if (!entity) process.exit();
-			else {
+			if (!entity) {
+				moved = true;
+				await this.teleportToHome(ctx, Destination.FOREST);
+
+				const entity = Object.values(this.client.entities).find(
+					e =>
+						e.username !== undefined &&
+						e.username.endsWith('Fishmonger') &&
+						e.position.distanceTo(this.client.entity.position) < 4,
+				);
+
+				if (!entity) process.exit();
+				else await this.client.activateEntity(ctx, entity);
+			} else {
 				await this.client.activateEntity(ctx, entity);
 			}
 		});
@@ -339,7 +369,7 @@ export default class FishBot extends BaseBot {
 		await this.purchaseBaitAction(ctx);
 
 		this.client.closeWindow(ctx, window);
-		await this.teleportToHome(ctx, Destination.FISHING);
+		if (moved) await this.teleportToHome(ctx, Destination.FISHING);
 	}
 
 	private sellFishAndPurchaseBait(ctx: Context) {
@@ -409,6 +439,7 @@ export default class FishBot extends BaseBot {
 
 	private async cast(ctx: Context) {
 		if (ctx !== this.context) return;
+		if (!config.smartCasting) return this.client.activateItem(ctx);
 
 		let cast = true;
 

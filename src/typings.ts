@@ -31,6 +31,7 @@ export interface Config {
 	server: ServerType;
 	whitelist: string[];
 	autopay_to: string;
+	smartCasting: boolean;
 	log: boolean;
 	version: string;
 	accounts: {

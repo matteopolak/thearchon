@@ -31,6 +31,7 @@ const config: Config = {
 	fishOnJoin: true,
 	sneakWhileFishing: false,
 	upgradeFishingRodAutomatically: true,
+	smartCasting: true,
 };
 
 export default config;
