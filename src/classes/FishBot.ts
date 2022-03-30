@@ -334,7 +334,7 @@ export default class FishBot extends BaseBot {
 		this.client.closeWindow(ctx, window);
 		if (goBack && data.moved)
 			await this.teleportToHome(ctx, Destination.FISHING);
-		else this.client.look(ctx, data.yaw, data.pitch, true);
+		else this.client.look(ctx, data.yaw, data.pitch);
 	}
 
 	private async purchaseBait(ctx: Context) {

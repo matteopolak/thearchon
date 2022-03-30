@@ -91,7 +91,7 @@ export default class BaseState {
 	async activateEntity(ctx: Context, entity: Entity) {
 		if (ctx !== this.client.context) return Promise.resolve();
 
-		await this.lookAt(ctx, entity.position, true);
+		await this.lookAt(ctx, entity.position);
 
 		return this.client._bot.activateEntity(entity);
 	}
