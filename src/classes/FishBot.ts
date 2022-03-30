@@ -23,7 +23,6 @@ import BaseBot from './BaseBot';
 import type { BaseBotOptions } from './BaseBot';
 
 export default class FishBot extends BaseBot {
-	public isFishing = false;
 	public bestFishingRod: number = 0;
 
 	private sellType: SellType;
@@ -74,8 +73,6 @@ export default class FishBot extends BaseBot {
 				);
 
 				if (this.captcha.fishing) {
-					this.isFishing = false;
-
 					await Promise.race([
 						this.client.waitForTicks(ctx, 80),
 						this.client.waitForChunksToLoad(ctx),
@@ -103,7 +100,7 @@ export default class FishBot extends BaseBot {
 		this.sellType = type;
 		this.port.postMessage({
 			sellType: this.sellType,
-			isFishing: this.isFishing,
+			isFishing: this.state === State.FISHING,
 		});
 	}
 
@@ -451,7 +448,7 @@ export default class FishBot extends BaseBot {
 	}
 
 	public async stopFishing() {
-		this.isFishing = false;
+		if (this.state === State.FISHING) this.state = State.IDLE;
 	}
 
 	private async cast(ctx: Context) {
@@ -488,11 +485,17 @@ export default class FishBot extends BaseBot {
 	}
 
 	public async fish(_: Context) {
+		console.log(
+			this.state === State.FISHING,
+			this.state === State.SOLVING_CAPTCHA,
+		);
+
 		if (this.state === State.FISHING || this.state === State.SOLVING_CAPTCHA)
 			return false;
 
+		console.log('good');
+
 		this.state = State.FISHING;
-		this.isFishing = true;
 
 		const ctx = this.context;
 		const rod = this.getBestFishingRod();
@@ -512,7 +515,7 @@ export default class FishBot extends BaseBot {
 			await this.teleportToHome(ctx, Destination.FISHING);
 		}
 
-		while (this.isFishing && ctx === this.context) {
+		while (ctx === this.context) {
 			if ((await this.checkFishingThresholds(ctx)) === Destination.SPAWN) {
 				await this.teleportToHome(ctx, Destination.FISHING);
 			}

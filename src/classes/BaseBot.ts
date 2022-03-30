@@ -204,7 +204,7 @@ export default class BaseBot {
 			) {
 				const { promise, resolve } = createPromiseResolvePair();
 
-				this.captcha.fishing = this.fisher?.isFishing ?? false;
+				this.captcha.fishing = this.state === State.FISHING;
 				this.captcha.promise = promise;
 				this.captcha.resolve = resolve;
 				this.captcha.startedAt = Date.now();
