@@ -76,10 +76,12 @@ export default class BaseState {
 		return this.client._bot.lookAt(point, force);
 	}
 
-	look(ctx: Context, yaw: number, pitch: number, force?: boolean) {
+	async look(ctx: Context, yaw: number, pitch: number, force?: boolean) {
 		if (ctx !== this.client.context) return Promise.resolve();
 
-		return this.client._bot.look(yaw, pitch, force);
+		await this.client._bot.look(yaw, pitch);
+
+		if (force) await this.client._bot.look(yaw, pitch, force);
 	}
 
 	setControlState(ctx: Context, control: ControlState, state: boolean) {
@@ -91,7 +93,7 @@ export default class BaseState {
 	async activateEntity(ctx: Context, entity: Entity) {
 		if (ctx !== this.client.context) return Promise.resolve();
 
-		await this.lookAt(ctx, entity.position);
+		await this.lookAt(ctx, entity.position, true);
 
 		return this.client._bot.activateEntity(entity);
 	}
