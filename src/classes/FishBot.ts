@@ -1,5 +1,3 @@
-import fs from 'fs/promises';
-import path from 'path';
 import type { MessagePort } from 'worker_threads';
 
 import type { Item } from 'prismarine-item';
@@ -252,11 +250,6 @@ export default class FishBot extends BaseBot {
 				() => this.client.clickWindow(ctx, 14, 0, 0),
 				data.slot,
 				346,
-			);
-
-			await fs.writeFile(
-				path.join(this.directory, `window-${Date.now()}.json`),
-				JSON.stringify(window, null, 2),
 			);
 
 			await this.client.clickWindow(ctx, data.slot, 0, 0);
