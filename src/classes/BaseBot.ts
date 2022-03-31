@@ -350,9 +350,8 @@ export default class BaseBot {
 				const response = await generateResponse(message);
 
 				if (response) {
-					const wait = 2_000 + response.length * 450;
+					const wait = 2_000 + response.length * 250;
 
-					console.log(wait, response, response.length);
 					await sleep(wait);
 
 					return this.command(ctx, `/msg ${name} ${response}`);
