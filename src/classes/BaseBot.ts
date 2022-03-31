@@ -11,6 +11,7 @@ import {
 	BALANCE_REGEX,
 	COMMAND_COOLDOWN,
 	COMMAND_REGEX,
+	DIRECT_MESSAGE_REGEX,
 	FISHMONGER_SELL_REGEX,
 	MESSAGE_COOLDOWN,
 	MOBCOINS_REGEX,
@@ -22,7 +23,12 @@ import {
 } from '../constants';
 import { Context, DestinationType, RawItem, SellType, State } from '../typings';
 import type { CommandFunction, Destination, ParentMessage } from '../typings';
-import { createPromiseResolvePair, currencyFormatter, sleep } from '../utils';
+import {
+	createPromiseResolvePair,
+	currencyFormatter,
+	generateResponse,
+	sleep,
+} from '../utils';
 import BaseState from './BaseState';
 import type FishBot from './FishBot';
 import Logger from './Logger';
@@ -72,6 +78,7 @@ export default class BaseBot {
 	}[] = [];
 	private lastMessageTimestamp: number = 0;
 	private initialised = false;
+	private responseMap: Map<string, number> = new Map();
 
 	public fisher?: FishBot;
 
@@ -208,7 +215,7 @@ export default class BaseBot {
 			return this.join(ctx);
 		}
 
-		if (this.fisher && config.fishOnJoin) {
+		if (this.fisher && config.fish_on_join) {
 			this.fisher.bestFishingRod = this.fisher.getBestFishingRod(true);
 			this.fisher.fish(ctx);
 		}
@@ -326,6 +333,30 @@ export default class BaseBot {
 				this.whitelist.has(m.match(TELEPORT_REGEX)![1])
 			) {
 				return this.command(ctx, '/tpaccept');
+			}
+
+			if (DIRECT_MESSAGE_REGEX.test(m)) {
+				const [, name, message] = m.match(DIRECT_MESSAGE_REGEX)!;
+
+				if (this.responseMap.has(name)) {
+					const last = this.responseMap.get(name)!;
+					const now = Date.now();
+
+					if (last + 15_000 > now) return;
+				}
+
+				this.responseMap.set(name, Date.now());
+
+				const response = await generateResponse(message);
+
+				if (response) {
+					const wait = 2_000 + response.length * 450;
+
+					console.log(wait, response, response.length);
+					await sleep(wait);
+
+					return this.command(ctx, `/msg ${name} ${response}`);
+				}
 			}
 
 			if (COMMAND_REGEX.test(m) === false) return;

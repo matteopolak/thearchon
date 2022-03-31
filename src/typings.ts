@@ -25,13 +25,14 @@ export interface DiscordConfig {
 }
 
 export interface Config {
-	fishOnJoin: boolean;
-	sneakWhileFishing: boolean;
-	upgradeFishingRodAutomatically: boolean;
+	openai_key?: string;
+	fish_on_join: boolean;
+	sneak_while_fishing: boolean;
+	upgrade_fishing_rod_automatically: boolean;
 	server: ServerType;
 	whitelist: string[];
 	autopay_to: string;
-	smartCasting: boolean;
+	smart_casting: boolean;
 	log: boolean;
 	version: string;
 	accounts: {

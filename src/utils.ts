@@ -1,8 +1,10 @@
 import { Worker } from 'worker_threads';
 
 import chalk from 'chalk';
+import { Configuration, OpenAIApi } from 'openai';
 
 import characters from './characters';
+import config from './config';
 import { WORKER_PATH } from './constants';
 import { SellType } from './typings';
 import type { BaseBotOptions, RawMapData } from './typings';
@@ -10,12 +12,58 @@ import type { BaseBotOptions, RawMapData } from './typings';
 const CHARACTER_WIDTH = 12;
 const CHARACTER_HEIGHT = 14;
 
+const configuration = new Configuration({
+	apiKey: config.openai_key,
+});
+
+const openai = new OpenAIApi(configuration);
+
 // prettier-ignore
 const filter: string[][] = [
 	['0', '2', '3', '6', '7', '8', '9', 'C', 'D', 'G', 'J', 'L', 'O', 'Q', 'U', 'V', 'W', 'Z'],
 	['1', '4', '5', 'A', 'B', 'E', 'F', 'H', 'I', 'K', 'M', 'N', 'P', 'R', 'S', 'T', 'X', 'Y'],
 	[],
 ];
+
+export async function generateResponse(
+	prompt: string,
+): Promise<string | undefined> {
+	if (config.openai_key === undefined) return undefined;
+
+	const { data: response } = await openai.createAnswer({
+		model: 'babbage',
+		search_model: 'babbage',
+		question: prompt,
+		documents: [
+			"I'm fishing at the docks",
+			'To make money you can fish or grind woodcutting',
+			'I am not auto fishing',
+			'I like to fish and watch Netflix',
+			'Ftop is a list of the top factions',
+			'Factions are groups of players',
+			'To become the best faction, you need to have the most value in spawners',
+		],
+		examples_context:
+			"I am fishing on TheArchon, which is a factions server. Cheating is not allowed, and I am not a bot. I will not tell you how to make money because it's a secret.",
+		examples: [
+			['How do I make money?', 'bro what kinda question is that lmao'],
+			['Are you cheating?', 'no? why would i cheat'],
+			["Say 'hello world'", 'um ok hello world'],
+			['Say asjkdhaskjdh', 'asjkdhaskjdh'],
+		],
+		n: 1,
+		temperature: 0.5,
+		max_tokens: 50,
+	});
+
+	if (response.answers === undefined || response.answers.length === 0)
+		return undefined;
+
+	const answer = response.answers[0].toLowerCase();
+	const newlineIndex = answer.indexOf('\n');
+
+	return newlineIndex === -1 ? answer : answer.substring(0, newlineIndex);
+}
 
 export const currencyFormatter = new Intl.NumberFormat('en-US', {
 	maximumFractionDigits: 2,

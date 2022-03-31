@@ -83,13 +83,13 @@ export default class FishBot extends BaseBot {
 	}
 
 	public async teleportToHome(ctx: Context, name: Destination) {
-		if (name === Destination.FOREST && config.sneakWhileFishing) {
+		if (name === Destination.FOREST && config.sneak_while_fishing) {
 			this.client.setControlState(ctx, 'sneak', false);
 		}
 
 		await super.teleport(ctx, name, DestinationType.HOME);
 
-		if (name === Destination.FISHING && config.sneakWhileFishing) {
+		if (name === Destination.FISHING && config.sneak_while_fishing) {
 			this.client.setControlState(ctx, 'sneak', true);
 		}
 	}
@@ -312,7 +312,7 @@ export default class FishBot extends BaseBot {
 
 		if (
 			(await this.sellFishAction(ctx, window)) &&
-			config.upgradeFishingRodAutomatically
+			config.upgrade_fishing_rod_automatically
 		) {
 			await this.upgradeRodAction(ctx, window);
 		}
@@ -353,7 +353,7 @@ export default class FishBot extends BaseBot {
 
 		if (
 			(await this.sellFishAction(ctx, window)) &&
-			config.upgradeFishingRodAutomatically
+			config.upgrade_fishing_rod_automatically
 		) {
 			await this.upgradeRodAction(ctx, window);
 		}
@@ -441,7 +441,7 @@ export default class FishBot extends BaseBot {
 
 	private async cast(ctx: Context) {
 		if (ctx !== this.context) return;
-		if (!config.smartCasting) return this.client.activateItem(ctx);
+		if (!config.smart_casting) return this.client.activateItem(ctx);
 
 		let cast = true;
 
