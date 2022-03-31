@@ -22,18 +22,29 @@ export function create(config: DiscordConfig, workers: Map<string, Worker>) {
 		if (!message.content.startsWith(config.prefix)) return;
 		if (!config.whitelist.includes(message.author.id)) return;
 
-		const [command, ...args] = message.content
+		const [command, username, ...args] = message.content
 			.slice(config.prefix.length)
 			.split(/ +/);
+
+		if (!command || !username) {
+			return void message.channel.send(
+				`Please provide the command in the following form:\n\`${config.prefix}<command> <username> [arguments]\``,
+			);
+		}
+
 		const payload: ParentMessage = {
 			command,
 			args,
-			sender: message.author.tag,
+			sender: username,
 		};
 
 		for (const worker of workers.values()) {
 			worker.postMessage(payload);
 		}
+
+		return void message.channel.send(
+			`Executed command \`${command}\` with username \`${username}\`.`,
+		);
 	});
 
 	client.login(config.token);
