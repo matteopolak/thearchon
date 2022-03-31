@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import type { MessagePort } from 'worker_threads';
 
+import chalk from 'chalk';
 import mineflayer from 'mineflayer';
 import type { Bot, BotOptions } from 'mineflayer';
 import type { Window } from 'prismarine-windows';
@@ -351,6 +352,12 @@ export default class BaseBot {
 
 				if (response) {
 					const wait = 2_000 + response.length * 250;
+
+					this.logger.info(
+						`Responding to ${name} (in ${wait}ms): ${chalk.underline(
+							response,
+						)}`,
+					);
 
 					await sleep(wait);
 

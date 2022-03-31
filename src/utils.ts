@@ -36,24 +36,25 @@ export async function generateResponse(
 		question: prompt,
 		documents: [
 			"I'm fishing at the docks",
-			'To make money you can fish or grind woodcutting',
-			'I am not auto fishing',
 			'I like to fish and watch Netflix',
 			'Ftop is a list of the top factions',
 			'Factions are groups of players',
 			'To become the best faction, you need to have the most value in spawners',
+			"I'm currently here and present",
 		],
 		examples_context:
-			"I am fishing on TheArchon, which is a factions server. Cheating is not allowed, and I am not a bot. I will not tell you how to make money because it's a secret.",
+			"I am fishing on TheArchon, which is a factions server. Cheating is not allowed. I will not tell you how to make money because it's a secret.",
 		examples: [
-			['How do I make money?', 'bro what kinda question is that lmao'],
 			['Are you cheating?', 'no? why would i cheat'],
 			["Say 'hello world'", 'um ok hello world'],
 			['Say asjkdhaskjdh', 'asjkdhaskjdh'],
+			['How do I make money?', 'idk but fishing is pretty good'],
+			['I love you', 'ok + L'],
+			['Can you give me some money', 'no get it yourself'],
 		],
 		n: 1,
 		temperature: 0.5,
-		max_tokens: 50,
+		max_tokens: 25,
 	});
 
 	if (response.answers === undefined || response.answers.length === 0)
