@@ -303,6 +303,7 @@ export default class BaseBot {
 						data: {
 							message,
 							sender: name,
+							type: 'message',
 						},
 					});
 				}
@@ -378,6 +379,7 @@ export default class BaseBot {
 						data: {
 							message,
 							sender: name,
+							type: 'direct message',
 						},
 					});
 				}

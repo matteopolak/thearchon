@@ -173,10 +173,6 @@ export function startNewProcess(
 	workers: Map<string, Worker>,
 	client: Client | null,
 ) {
-	const channel = discordConfig.channels.notifications
-		? client?.channels.cache.get(discordConfig.channels.notifications)
-		: null;
-
 	console.log(
 		`${' '.repeat(17)}${chalk.bold(
 			chalk.cyan('Parent'),
@@ -207,13 +203,17 @@ export function startNewProcess(
 			return;
 		}
 
+		const channel = discordConfig.channels.notifications
+			? client?.channels.cache.get(discordConfig.channels.notifications)
+			: undefined;
+
 		if (channel?.type === 'GUILD_TEXT') {
 			channel.send(
 				`${discordConfig.whitelist
 					.map(u => `<@${u}>`)
 					.join(' ')}\n**NOTIFICATION**: \`${
 					payload.options.alias
-				}\` has been mentioned in a message from \`${
+				}\` has been mentioned in a ${packet.data.type} from \`${
 					packet.data.sender
 				}\`:\n> ${packet.data.message}`,
 			);

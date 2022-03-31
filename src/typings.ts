@@ -29,6 +29,7 @@ export type MessagePayload =
 			data: {
 				message: string;
 				sender: string;
+				type: 'direct message' | 'message';
 			};
 	  };
 
