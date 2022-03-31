@@ -31,7 +31,7 @@ export async function generateResponse(
 	if (config.openai_key === undefined) return undefined;
 
 	const { data: response } = await openai.createAnswer({
-		model: 'babbage',
+		model: 'davinci',
 		search_model: 'babbage',
 		question: prompt,
 		documents: [
@@ -51,6 +51,11 @@ export async function generateResponse(
 			['How do I make money?', 'idk but fishing is pretty good'],
 			['I love you', 'ok + L'],
 			['Can you give me some money', 'no get it yourself'],
+			["What's 20+40", '60'],
+			['What is 3 times 6', '18'],
+			['What is 5 times 5', '25'],
+			["What's 38*10", '380'],
+			["What's 1x1", '1'],
 		],
 		n: 1,
 		temperature: 0.5,
@@ -60,7 +65,7 @@ export async function generateResponse(
 	if (response.answers === undefined || response.answers.length === 0)
 		return undefined;
 
-	const answer = response.answers[0].toLowerCase();
+	const answer = response.answers[0];
 	const newlineIndex = answer.indexOf('\n');
 
 	return newlineIndex === -1 ? answer : answer.substring(0, newlineIndex);
