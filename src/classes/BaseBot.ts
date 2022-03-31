@@ -293,7 +293,7 @@ export default class BaseBot {
 					)} | Balance: ${currencyFormatter.format(this.balance)}`,
 				);
 
-				if (this.balance >= MONEY_THRESHOLD) {
+				if (this.balance >= MONEY_THRESHOLD && config.autopay_to) {
 					const amount = Math.floor(this.balance - SURPLUS_MONEY_THRESHOLD);
 
 					this.balance -= amount;

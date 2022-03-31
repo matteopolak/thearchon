@@ -31,7 +31,7 @@ export interface Config {
 	upgrade_fishing_rod_automatically: boolean;
 	server: ServerType;
 	whitelist: string[];
-	autopay_to: string;
+	autopay_to?: string;
 	smart_casting: boolean;
 	log: boolean;
 	version: string;
