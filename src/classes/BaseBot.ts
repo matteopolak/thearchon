@@ -289,7 +289,7 @@ export default class BaseBot {
 
 			if (CHAT_MESSAGE_REGEX.test(m)) {
 				const [, name, message] = m.match(CHAT_MESSAGE_REGEX)!;
-				const lower = this._bot.entity.username!;
+				const lower = this._bot.entity.username!.toLowerCase();
 
 				if (!message.toLowerCase().includes(lower)) return;
 
