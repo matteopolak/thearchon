@@ -407,7 +407,9 @@ export default class FishBot extends BaseBot {
 		homeContainsShop: boolean,
 	) {
 		const inventory = this.getInventoryData();
-		let destination = Destination.UNKNOWN;
+		let destination = homeContainsShop
+			? Destination.FISHING
+			: Destination.UNKNOWN;
 
 		if (this.isInventoryFull()) {
 			await this.clearInventory(ctx, homeContainsShop);
