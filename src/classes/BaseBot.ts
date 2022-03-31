@@ -354,7 +354,7 @@ export default class BaseBot {
 					const wait = 2_000 + response.length * 250;
 
 					this.logger.info(
-						`Responding to ${name} (in ${wait}ms): ${chalk.underline(
+						`Responding to ${name} (in ${wait}ms) from prompt '${message}': ${chalk.underline(
 							response,
 						)}`,
 					);
