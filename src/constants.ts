@@ -157,7 +157,7 @@ export const WORKER_PATH = path.join(__dirname, 'worker.js');
 
 export const FISH_THRESHOLD = 24;
 export const FISH_COUNT_THRESHOLD = 50;
-export const BAIT_THRESHOLD = 0;
+export const BAIT_THRESHOLD = 5;
 
 export const MESSAGE_COOLDOWN = 1_500;
 export const COMMAND_COOLDOWN = 3_100;
