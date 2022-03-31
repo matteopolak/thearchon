@@ -65,6 +65,7 @@ export default class FishBot extends BaseBot {
 				this.state = State.IDLE;
 
 				const ctx = this.context;
+				const promise = this.waitForItem(ctx, 346);
 
 				await this.completeActionAndWaitForMessage(
 					ctx,
@@ -73,10 +74,7 @@ export default class FishBot extends BaseBot {
 				);
 
 				if (this.captcha.fishing) {
-					await Promise.race([
-						this.client.waitForTicks(ctx, 80),
-						this.client.waitForChunksToLoad(ctx),
-					]);
+					await promise;
 
 					this.fish(ctx);
 				}
@@ -485,15 +483,8 @@ export default class FishBot extends BaseBot {
 	}
 
 	public async fish(_: Context) {
-		console.log(
-			this.state === State.FISHING,
-			this.state === State.SOLVING_CAPTCHA,
-		);
-
 		if (this.state === State.FISHING || this.state === State.SOLVING_CAPTCHA)
 			return false;
-
-		console.log('good');
 
 		this.state = State.FISHING;
 

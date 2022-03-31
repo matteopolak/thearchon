@@ -124,6 +124,40 @@ export default class BaseBot {
 		this._state = value;
 	}
 
+	public async waitForItem(ctx: Context, item: number) {
+		if (ctx !== this.context) return;
+
+		return new Promise<undefined>(resolve => {
+			const listener = (packet: RawItem) => {
+				if (packet.item.blockId !== item) return;
+
+				this._bot._client.off('set_slot', listener);
+				// @ts-ignore
+				this._bot.off('context_changed', contextListener);
+
+				resolve(undefined);
+			};
+
+			const contextListener = () => {
+				this._bot._client.off('set_slot', listener);
+
+				resolve(undefined);
+			};
+
+			this._bot._client.on('set_slot', listener);
+			// @ts-ignore
+			this._bot.once('context_changed', contextListener);
+
+			if (ctx !== this.context) {
+				this._bot._client.off('set_slot', listener);
+				// @ts-ignore
+				this._bot.off('context_changed', contextListener);
+
+				resolve(undefined);
+			}
+		});
+	}
+
 	public async waitForSlotItem(ctx: Context, slot: number, item: number) {
 		if (ctx !== this.context) return;
 
@@ -446,10 +480,10 @@ export default class BaseBot {
 		return Math.max(await balance, 0);
 	}
 
-	private async sendMoney(ctx: Context, username: string) {
+	private async sendMoney(ctx: Context, username?: string) {
 		const balance = await this.getCurrentBalance(ctx);
 
-		if (balance > 0) {
+		if (balance > 0 && username) {
 			const amount = Math.floor(balance);
 
 			this.balance -= amount;
@@ -458,8 +492,8 @@ export default class BaseBot {
 		}
 	}
 
-	private async teleportTo(ctx: Context, username: string) {
-		return this.command(ctx, `/tpa ${username}`);
+	private async teleportTo(ctx: Context, username?: string) {
+		if (username) return this.command(ctx, `/tpa ${username}`);
 	}
 
 	private async lookAt(ctx: Context, username: string) {
