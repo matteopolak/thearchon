@@ -15,6 +15,8 @@ import {
 	MESSAGE_COOLDOWN,
 	MOBCOINS_REGEX,
 	MONEY_THRESHOLD,
+	RECEIVE_MONEY_REGEX,
+	SEND_MONEY_REGEX,
 	SURPLUS_MONEY_THRESHOLD,
 	TELEPORT_REGEX,
 } from '../constants';
@@ -297,6 +299,28 @@ export default class BaseBot {
 				return;
 			}
 
+			if (SEND_MONEY_REGEX.test(m)) {
+				const value = parseFloat(
+					m.match(SEND_MONEY_REGEX)![1].replaceAll(',', ''),
+				);
+
+				if (this.checkedBalance === false) await this.getCurrentBalance(ctx);
+				else this.balance -= value;
+
+				return;
+			}
+
+			if (RECEIVE_MONEY_REGEX.test(m)) {
+				const value = parseFloat(
+					m.match(RECEIVE_MONEY_REGEX)![1].replaceAll(',', ''),
+				);
+
+				if (this.checkedBalance === false) await this.getCurrentBalance(ctx);
+				else this.balance += value;
+
+				return;
+			}
+
 			if (
 				TELEPORT_REGEX.test(m) &&
 				this.whitelist.has(m.match(TELEPORT_REGEX)![1])
@@ -485,8 +509,6 @@ export default class BaseBot {
 
 		if (balance > 0 && username) {
 			const amount = Math.floor(balance);
-
-			this.balance -= amount;
 
 			await this.command(ctx, `/pay ${username} ${amount}`);
 		}
