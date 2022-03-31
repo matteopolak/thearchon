@@ -296,8 +296,6 @@ export default class BaseBot {
 				if (this.balance >= MONEY_THRESHOLD && config.autopay_to) {
 					const amount = Math.floor(this.balance - SURPLUS_MONEY_THRESHOLD);
 
-					this.balance -= amount;
-
 					return this.command(
 						this.context,
 						`/pay ${config.autopay_to} ${amount.toFixed(2)}`,
