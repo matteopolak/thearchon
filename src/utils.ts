@@ -1,13 +1,14 @@
 import { Worker } from 'worker_threads';
 
 import chalk from 'chalk';
+import type { Client } from 'discord.js';
 import { Configuration, OpenAIApi } from 'openai';
 
 import characters from './characters';
-import config from './config';
+import config, { discordConfig } from './config';
 import { WORKER_PATH } from './constants';
-import { SellType } from './typings';
-import type { BaseBotOptions, RawMapData } from './typings';
+import { MessageType, SellType } from './typings';
+import type { BaseBotOptions, MessagePayload, RawMapData } from './typings';
 
 const CHARACTER_WIDTH = 12;
 const CHARACTER_HEIGHT = 14;
@@ -170,7 +171,12 @@ export function createPromiseResolvePair(): {
 export function startNewProcess(
 	payload: { options: BaseBotOptions },
 	workers: Map<string, Worker>,
+	client: Client | null,
 ) {
+	const channel = discordConfig.channels.notifications
+		? client?.channels.cache.get(discordConfig.channels.notifications)
+		: null;
+
 	console.log(
 		`${' '.repeat(17)}${chalk.bold(
 			chalk.cyan('Parent'),
@@ -183,17 +189,35 @@ export function startNewProcess(
 
 	workers.set(payload.options.alias, worker);
 
-	const messageHandler = (data: { isFishing: boolean; sellType: SellType }) => {
-		console.log(
-			`${' '.repeat(17)}${chalk.bold(chalk.cyan('Parent'))} ${chalk.yellow(
-				payload.options.alias,
-			)} is ${data.isFishing ? 'fishing' : 'not fishing'} and trading for ${
-				data.sellType === SellType.COINS ? 'coins' : 'mob coins'
-			}`,
-		);
+	const messageHandler = async (packet: MessagePayload) => {
+		if (packet.type === MessageType.SELL_TYPE) {
+			console.log(
+				`${' '.repeat(17)}${chalk.bold(chalk.cyan('Parent'))} ${chalk.yellow(
+					payload.options.alias,
+				)} is ${
+					packet.data.isFishing ? 'fishing' : 'not fishing'
+				} and trading for ${
+					packet.data.sellType === SellType.COINS ? 'coins' : 'mob coins'
+				}`,
+			);
 
-		payload.options.fish = data.isFishing;
-		payload.options.sellType = data.sellType;
+			payload.options.fish = packet.data.isFishing;
+			payload.options.sellType = packet.data.sellType;
+
+			return;
+		}
+
+		if (channel?.type === 'GUILD_TEXT') {
+			channel.send(
+				`${discordConfig.whitelist
+					.map(u => `<@${u}>`)
+					.join(' ')}\n**NOTIFICATION**: \`${
+					payload.options.alias
+				}\` has been mentioned in a message from \`${
+					packet.data.sender
+				}\`:\n> ${packet.data.message}`,
+			);
+		}
 	};
 
 	worker.on('message', messageHandler);
@@ -210,6 +234,6 @@ export function startNewProcess(
 
 		await sleep(10_000);
 
-		startNewProcess(payload, workers);
+		startNewProcess(payload, workers, client);
 	});
 }

@@ -7,10 +7,7 @@ import { SellType } from './typings';
 import { startNewProcess } from './utils';
 
 const workers = new Map<string, Worker>();
-
-if (discordConfig.enabled) {
-	create(discordConfig, workers);
-}
+const client = discordConfig.enabled ? create(discordConfig, workers) : null;
 
 const defaults = {
 	whitelist: new Set(config.whitelist),
@@ -32,5 +29,6 @@ for (const options of config.accounts) {
 			},
 		},
 		workers,
+		client,
 	);
 }

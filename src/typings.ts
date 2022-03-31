@@ -11,6 +11,27 @@ export enum ServerType {
 	ORIGINS = 'origins',
 }
 
+export enum MessageType {
+	SELL_TYPE,
+	NOTIFICATION,
+}
+
+export type MessagePayload =
+	| {
+			type: MessageType.SELL_TYPE;
+			data: {
+				isFishing: boolean;
+				sellType: SellType;
+			};
+	  }
+	| {
+			type: MessageType.NOTIFICATION;
+			data: {
+				message: string;
+				sender: string;
+			};
+	  };
+
 export interface ParentMessage {
 	command: string;
 	args: string[];
@@ -22,18 +43,16 @@ export interface DiscordConfig {
 	prefix: string;
 	enabled: boolean;
 	whitelist: string[];
+	channels: Partial<{
+		notifications: string;
+	}>;
 }
 
 export interface Config {
 	openai_key?: string;
-	fish_on_join: boolean;
-	sneak_while_fishing: boolean;
-	upgrade_fishing_rod_automatically: boolean;
 	server: ServerType;
 	whitelist: string[];
 	autopay_to?: string;
-	smart_casting: boolean;
-	log: boolean;
 	version: string;
 	accounts: {
 		alias: string;
@@ -41,6 +60,13 @@ export interface Config {
 		password: string;
 		auth: AuthType;
 	}[];
+	smart_casting: boolean;
+	log: boolean;
+	fish_on_join: boolean;
+	sneak_while_fishing: boolean;
+	upgrade_fishing_rod_automatically: boolean;
+	stop_fishing_on_mention: boolean;
+	notify_on_mention: boolean;
 }
 
 export type Context = number;

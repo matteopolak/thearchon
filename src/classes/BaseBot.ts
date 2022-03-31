@@ -10,6 +10,7 @@ import type { Window } from 'prismarine-windows';
 import config from '../config';
 import {
 	BALANCE_REGEX,
+	CHAT_MESSAGE_REGEX,
 	COMMAND_COOLDOWN,
 	COMMAND_REGEX,
 	DIRECT_MESSAGE_REGEX,
@@ -22,7 +23,14 @@ import {
 	SURPLUS_MONEY_THRESHOLD,
 	TELEPORT_REGEX,
 } from '../constants';
-import { Context, DestinationType, RawItem, SellType, State } from '../typings';
+import {
+	Context,
+	DestinationType,
+	MessageType,
+	RawItem,
+	SellType,
+	State,
+} from '../typings';
 import type { CommandFunction, Destination, ParentMessage } from '../typings';
 import {
 	createPromiseResolvePair,
@@ -279,6 +287,24 @@ export default class BaseBot {
 				return process.exit();
 			}
 
+			if (CHAT_MESSAGE_REGEX.test(m)) {
+				const [, name, message] = m.match(CHAT_MESSAGE_REGEX)!;
+
+				if (config.stop_fishing_on_mention) {
+					this.state = State.IDLE;
+				}
+
+				if (config.notify_on_mention) {
+					this.port.postMessage({
+						type: MessageType.NOTIFICATION,
+						data: {
+							message,
+							sender: name,
+						},
+					});
+				}
+			}
+
 			if (FISHMONGER_SELL_REGEX.test(m)) {
 				const value = parseFloat(
 					m.match(FISHMONGER_SELL_REGEX)![1].replaceAll(',', ''),
@@ -336,6 +362,20 @@ export default class BaseBot {
 
 			if (DIRECT_MESSAGE_REGEX.test(m)) {
 				const [, name, message] = m.match(DIRECT_MESSAGE_REGEX)!;
+
+				if (config.stop_fishing_on_mention) {
+					this.state = State.IDLE;
+				}
+
+				if (config.notify_on_mention) {
+					this.port.postMessage({
+						type: MessageType.NOTIFICATION,
+						data: {
+							message,
+							sender: name,
+						},
+					});
+				}
 
 				if (this.responseMap.has(name)) {
 					const last = this.responseMap.get(name)!;

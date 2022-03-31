@@ -11,6 +11,11 @@ export const discordConfig: DiscordConfig = {
 	enabled: false,
 	// A list of user IDs that are allowed to execute commands
 	whitelist: ['USER_ID', 'USER_ID'],
+	channels: {
+		// The ID of the channel to send notifications to
+		// This is required when `notify_on_mention` is `true`
+		notifications: 'CHANNEL_ID',
+	},
 };
 
 const config: Config = {
@@ -50,6 +55,10 @@ const config: Config = {
 	upgrade_fishing_rod_automatically: true,
 	// Whether to listen for the rod cast sound when casting
 	smart_casting: true,
+	// Whether to stop fishing when the bot is mentioned in chat or sent a direct message
+	stop_fishing_on_mention: false,
+	// Whether to notify all users in `whitelist` (on Discord) when the bot is mentioned
+	notify_on_mention: true,
 };
 
 export default config;

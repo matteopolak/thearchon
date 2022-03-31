@@ -169,6 +169,8 @@ export const MOBCOINS_REGEX = /^You have ([\d,\.]+) MobCoins/;
 export const FISHMONGER_SELL_REGEX = /^You sold all your fish for \$([\d,\.]+)/;
 export const SEND_MONEY_REGEX = /^\$([\d,\.]+) has been sent to \w{1,16}\./;
 export const DIRECT_MESSAGE_REGEX = /^(?:\[\w+\] )?\((\w{1,16}) ➥ me\) (.+)/;
+export const CHAT_MESSAGE_REGEX =
+	/^(?:\[\w{3,10}\] )(?:\[\d+\] )\[\w+\] (\w{1,16}): (.+)/;
 export const RECEIVE_MONEY_REGEX =
 	/^\$([\d,\.]+) has been received from \w{1,16}\./;
 export const MONEY_THRESHOLD = 5_000_000;

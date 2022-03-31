@@ -48,4 +48,6 @@ export function create(config: DiscordConfig, workers: Map<string, Worker>) {
 	});
 
 	client.login(config.token);
+
+	return client;
 }

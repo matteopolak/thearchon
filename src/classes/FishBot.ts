@@ -16,7 +16,13 @@ import {
 	ROD_TO_BAIT,
 	SURPLUS_MONEY_THRESHOLD,
 } from '../constants';
-import { Destination, DestinationType, SellType, State } from '../typings';
+import {
+	Destination,
+	DestinationType,
+	MessageType,
+	SellType,
+	State,
+} from '../typings';
 import type { Context, InventoryData, RawMapData } from '../typings';
 import { currencyFormatter, unscramble } from '../utils';
 import BaseBot from './BaseBot';
@@ -97,8 +103,11 @@ export default class FishBot extends BaseBot {
 	private async setSellType(type: SellType) {
 		this.sellType = type;
 		this.port.postMessage({
-			sellType: this.sellType,
-			isFishing: this.state === State.FISHING,
+			type: MessageType.SELL_TYPE,
+			data: {
+				sellType: this.sellType,
+				isFishing: this.state === State.FISHING,
+			},
 		});
 	}
 
