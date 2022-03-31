@@ -289,6 +289,9 @@ export default class BaseBot {
 
 			if (CHAT_MESSAGE_REGEX.test(m)) {
 				const [, name, message] = m.match(CHAT_MESSAGE_REGEX)!;
+				const lower = this._bot.entity.username!;
+
+				if (!message.toLowerCase().includes(lower)) return;
 
 				if (config.stop_fishing_on_mention) {
 					this.state = State.IDLE;
@@ -303,6 +306,8 @@ export default class BaseBot {
 						},
 					});
 				}
+
+				return;
 			}
 
 			if (FISHMONGER_SELL_REGEX.test(m)) {
@@ -401,6 +406,8 @@ export default class BaseBot {
 
 					return this.command(ctx, `/msg ${name} ${response}`);
 				}
+
+				return;
 			}
 
 			if (COMMAND_REGEX.test(m) === false) return;
