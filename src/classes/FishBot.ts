@@ -306,7 +306,7 @@ export default class FishBot extends BaseBot {
 					e.position.distanceTo(this.client.entity.position) < 4,
 			);
 
-			if (!entity) process.exit();
+			if (!entity) process.exit(0);
 			else await this.client.activateEntity(ctx, entity);
 		});
 
@@ -347,7 +347,7 @@ export default class FishBot extends BaseBot {
 					e.position.distanceTo(this.client.entity.position) < 4,
 			);
 
-			if (!entity) process.exit();
+			if (!entity) process.exit(0);
 			else await this.client.activateEntity(ctx, entity);
 		});
 

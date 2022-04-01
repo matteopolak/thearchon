@@ -284,7 +284,7 @@ export default class BaseBot {
 			}
 
 			if (m.startsWith('TheArchon » This server is rebooting')) {
-				return process.exit();
+				return process.exit(0);
 			}
 
 			if (CHAT_MESSAGE_REGEX.test(m)) {

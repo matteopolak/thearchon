@@ -27,13 +27,13 @@ bot._bot.on('messagestr', (m, _, json) => {
 bot._bot.on('kicked', async reason => {
 	bot.logger.error(`Kicked: ${chalk.redBright(reason)}`);
 
-	process.exit();
+	process.exit(0);
 });
 
 bot._bot.on('end', async reason => {
 	bot.logger.error(`Ended: ${chalk.redBright(reason)}`);
 
-	process.exit();
+	process.exit(reason === 'socketClosed' ? 1 : 0);
 });
 
 bot.init();

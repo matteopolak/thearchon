@@ -229,11 +229,19 @@ export function startNewProcess(
 		worker.terminate();
 	});
 
-	worker.once('exit', async () => {
+	worker.once('exit', async code => {
 		worker.removeListener('message', messageHandler);
 
-		await sleep(10_000);
+		if (code === 0) {
+			await sleep(10_000);
 
-		startNewProcess(payload, workers, client);
+			startNewProcess(payload, workers, client);
+		} else {
+			console.log(
+				`${' '.repeat(17)}${chalk.bold(
+					chalk.cyan('Parent'),
+				)} Permanently stopping worker ${chalk.yellow(payload.options.alias)}`,
+			);
+		}
 	});
 }
