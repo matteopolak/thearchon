@@ -419,7 +419,7 @@ export default class FishBot extends BaseBot {
 			destination = homeContainsShop ? Destination.FISHING : Destination.SPAWN;
 		}
 
-		if (inventory.count.bait === BAIT_THRESHOLD) {
+		if (inventory.count.bait <= BAIT_THRESHOLD) {
 			await this.purchaseBait(ctx, homeContainsShop);
 
 			destination = Destination.FISHING;

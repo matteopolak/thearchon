@@ -388,7 +388,7 @@ export default class BaseBot {
 					const last = this.responseMap.get(name)!;
 					const now = Date.now();
 
-					if (last + 15_000 > now) return;
+					if (last + 5_000 > now) return;
 				}
 
 				this.responseMap.set(name, Date.now());
