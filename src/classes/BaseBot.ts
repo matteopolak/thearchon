@@ -589,7 +589,9 @@ export default class BaseBot {
 	}
 
 	private async sendMoney(ctx: Context, username?: string) {
-		const balance = await this.getCurrentBalance(ctx);
+		if (!this.checkedBalance) await this.getCurrentBalance(ctx);
+
+		const balance = this.balance - SURPLUS_MONEY_THRESHOLD;
 
 		if (balance > 0 && username) {
 			const amount = Math.floor(balance);
