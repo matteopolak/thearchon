@@ -57,8 +57,6 @@ const config: Config = {
 		smart_casting: true,
 		// Whether to stop fishing when the bot is mentioned in chat or sent a direct message
 		stop_fishing_on_mention: false,
-		// Whether to randomly move while fishing
-		random_movement: false,
 	},
 	// Whether to log information in the console
 	log: true,

@@ -23,14 +23,13 @@ import {
 	State,
 } from '../typings';
 import type { Context, InventoryData, RawMapData } from '../typings';
-import { currencyFormatter, random, unscramble } from '../utils';
+import { currencyFormatter, unscramble } from '../utils';
 import BaseBot from './BaseBot';
 
 export default class FishBot extends BaseBot {
 	public bestFishingRod: number = 0;
 
 	private sellType: SellType;
-	private randomMovements: ((ctx: Context) => PromiseLike<void>)[] = [];
 
 	constructor(options: BaseBotOptions, port: MessagePort) {
 		super(options, port);
@@ -45,24 +44,6 @@ export default class FishBot extends BaseBot {
 		this.commands.set('clear', this.clearCommand.bind(this));
 		this.commands.set('stop', this.stopFishing.bind(this));
 		this.commands.set('sell', this.setSellTypeCommand.bind(this));
-
-		if (!config.fishing.sneak_while_fishing) {
-			this.randomMovements.push(async ctx => {
-				for (let i = 0; i < 4; ++i) {
-					this.client.setControlState(ctx, 'sneak', true);
-					await this.client.waitForTicks(ctx, 2);
-
-					this.client.setControlState(ctx, 'sneak', false);
-					await this.client.waitForTicks(ctx, 2);
-				}
-			});
-		}
-
-		this.randomMovements.push(async ctx => {
-			this.client.setControlState(ctx, 'jump', true);
-			await this.client.waitForTicks(ctx, 1);
-			this.client.setControlState(ctx, 'jump', false);
-		});
 
 		await super.init();
 
@@ -502,17 +483,6 @@ export default class FishBot extends BaseBot {
 		);
 	}
 
-	private async randomMovement(ctx: Context, iteration: number) {
-		if (ctx.id !== this._context.id || random(25) >= iteration % 25)
-			return false;
-
-		this.logger.info('Random movement started');
-		await this.randomMovements[random(this.randomMovements.length)](ctx);
-		this.logger.info('Random movement ended');
-
-		return true;
-	}
-
 	public async fish(_: Context) {
 		if (this.state === State.FISHING || this.state === State.SOLVING_CAPTCHA)
 			return false;
@@ -560,9 +530,7 @@ export default class FishBot extends BaseBot {
 				await this.teleportToHome(ctx, Destination.FISHING);
 			}
 
-			if (config.fishing.random_movement && (await this.randomMovement(ctx, i)))
-				i = 0;
-			else await this.client.waitForTicks(ctx, 5);
+			await this.client.waitForTicks(ctx, 5);
 
 			ctx.allow_reaction = true;
 
