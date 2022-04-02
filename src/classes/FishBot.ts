@@ -577,13 +577,14 @@ export default class FishBot extends BaseBot {
 				await this.teleportToHome(ctx, Destination.FISHING);
 			}
 
+			if (config.fishing.random_movement) this.randomMovement(ctx, i);
+
 			ctx.allow_reaction = true;
 			await this.client.waitForTicks(ctx, 5);
 
 			const rod = this.getBestFishingRod();
 
 			if (rod === null) break;
-			if (config.fishing.random_movement) this.randomMovement(ctx, i);
 			if (
 				// @ts-ignore
 				rod?.nbt?.value?.display?.value?.Name?.value !==
