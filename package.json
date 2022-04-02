@@ -1,10 +1,10 @@
 {
 	"name": "@matteopolak/thearchon",
-	"version": "2.0.0",
+	"version": "2.5.0",
 	"description": "",
 	"main": "src/index.ts",
 	"scripts": {
-		"start": "tsc && node ./dist/index.js",
+		"start": "tsc && node --no-warnings ./dist/index.js",
 		"fix": "prettier --write src/**/*.ts && eslint --fix src",
 		"check:style": "prettier --check src/**/*.ts && eslint src",
 		"check:tsc": "tsc --noEmit",
