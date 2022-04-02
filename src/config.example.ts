@@ -48,7 +48,7 @@ const config: Config = {
 	// Whether to log information in the console
 	log: true,
 	// Whether to start fishing immediately
-	fish_on_join: true,
+	fish_on_join: false,
 	// Whether to sneak while fishing
 	sneak_while_fishing: false,
 	// Whether to upgrade the fishing rod automatically
@@ -58,7 +58,7 @@ const config: Config = {
 	// Whether to stop fishing when the bot is mentioned in chat or sent a direct message
 	stop_fishing_on_mention: false,
 	// Whether to notify all users in `whitelist` (on Discord) when the bot is mentioned
-	notify_on_mention: true,
+	notify_on_mention: false,
 	// Whether to look around when the bot's position or rotation is changed externally
 	react_to_external_move: false,
 };
