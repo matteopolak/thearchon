@@ -33,16 +33,19 @@ const config: Config = {
 	// A list of Minecraft accounts to use
 	accounts: [
 		{
+			// The alias to use for the account
 			alias: 'username',
+			// The email of the account
 			username: 'handle@gmail.com',
+			// The password for the account
 			password: 'password',
+			// The authentication service to use. Either `mojang` or `microsoft`
 			auth: 'mojang',
-		},
-		{
-			alias: 'username',
-			username: 'handle@outlook.com',
-			password: 'password',
-			auth: 'microsoft',
+			// The proxy to use (optional)
+			proxy: '192.168.1.1:5050',
+			// The protocol to use (required when specifying `proxy`)
+			// Options: `http`, `https`, `socks`, `socks5`, `socks4`, `pac`
+			protocol: 'http',
 		},
 	],
 	// Fishing-related settings

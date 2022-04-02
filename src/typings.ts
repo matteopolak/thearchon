@@ -50,18 +50,29 @@ export interface DiscordConfig {
 	}>;
 }
 
+export type Account =
+	| {
+			alias: string;
+			username: string;
+			password: string;
+			auth: AuthType;
+	  }
+	| {
+			alias: string;
+			username: string;
+			password: string;
+			auth: AuthType;
+			proxy: string;
+			protocol: string;
+	  };
+
 export interface Config {
 	openai_key?: string;
 	server: ServerType;
 	whitelist: string[];
 	autopay_to?: string;
 	version: string;
-	accounts: {
-		alias: string;
-		username: string;
-		password: string;
-		auth: AuthType;
-	}[];
+	accounts: Account[];
 	fishing: {
 		smart_casting: boolean;
 		fish_on_join: boolean;
@@ -114,6 +125,8 @@ export type BaseBotOptions = BotOptions & {
 	logger?: boolean;
 	sell_type?: SellType;
 	fish?: boolean;
+	proxy?: string;
+	protocol?: string;
 };
 
 export enum State {
