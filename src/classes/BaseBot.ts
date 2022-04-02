@@ -178,6 +178,14 @@ export default class BaseBot {
 					this.client.entity.yaw !== ctx.fishing.yaw ||
 					this.client.entity.position.distanceTo(ctx.fishing.position) > 0.1
 				) {
+					this.logger.warn(
+						`Unusual movement. Detected yaw/pitch/movement change: ${
+							ctx.fishing.pitch - this.client.entity.yaw
+						}/${
+							ctx.fishing.yaw - this.client.entity.pitch
+						}/${this.client.entity.position.distanceTo(ctx.fishing.position)}`,
+					);
+
 					this._bot.off('move', listener);
 					// @ts-ignore
 					this._bot.off('context_changed', contextListener);

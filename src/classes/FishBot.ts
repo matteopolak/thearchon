@@ -520,7 +520,7 @@ export default class FishBot extends BaseBot {
 			await this.teleportToHome(ctx, Destination.FISHING);
 		}
 
-		while (ctx === this.context) {
+		while (ctx.id === this._context.id) {
 			ctx.allow_reaction = false;
 
 			if (

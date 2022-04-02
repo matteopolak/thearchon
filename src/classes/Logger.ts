@@ -7,15 +7,19 @@ export default class Logger {
 	private name: string;
 	private infoPrefix: string;
 	private errorPrefix: string;
+	private warnPrefix: string;
 
 	constructor(options: BaseBotOptions) {
 		this.options = options;
 		this.name = this.options.alias.padStart(16, ' ');
-		this.infoPrefix = `${chalk.yellow(this.name)}   ${chalk.bold(
+		this.infoPrefix = `${chalk.gray(this.name)}   ${chalk.bold(
 			chalk.blue('Info'),
 		)}`;
-		this.errorPrefix = `${chalk.yellow(this.name)}  ${chalk.bold(
+		this.errorPrefix = `${chalk.gray(this.name)}  ${chalk.bold(
 			chalk.red('Error'),
+		)}`;
+		this.warnPrefix = `${chalk.gray(this.name)} ${chalk.bold(
+			chalk.yellow('Warn'),
 		)}`;
 	}
 
@@ -29,5 +33,11 @@ export default class Logger {
 		if (!this.options.logger) return;
 
 		console.log(`${this.errorPrefix} ${message}`);
+	}
+
+	warn(message: string) {
+		if (!this.options.logger) return;
+
+		console.log(`${this.warnPrefix} ${message}`);
 	}
 }
