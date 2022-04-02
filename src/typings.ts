@@ -95,6 +95,7 @@ export type Context = {
 		yaw: number;
 		position: Vec3;
 	};
+	location: Location;
 };
 
 export type CommandFunction = (
@@ -136,7 +137,7 @@ export enum State {
 	CLEARING_INVENTORY,
 }
 
-export enum DestinationType {
+export enum LocationType {
 	HOME,
 	WARP,
 	RAW,
@@ -147,7 +148,7 @@ export enum SellType {
 	MOB_COINS = 'Gold Ingot',
 }
 
-export enum Destination {
+export enum Location {
 	FISHING = 'fishing',
 	FOREST = 'forest',
 	SPAWN = 'spawn',

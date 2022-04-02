@@ -16,8 +16,8 @@ import {
 } from '../constants';
 import {
 	BaseBotOptions,
-	Destination,
-	DestinationType,
+	Location,
+	LocationType,
 	MessageType,
 	SellType,
 	State,
@@ -86,14 +86,16 @@ export default class FishBot extends BaseBot {
 		});
 	}
 
-	public async teleportToHome(ctx: Context, name: Destination) {
-		if (name === Destination.FOREST && config.fishing.sneak_while_fishing) {
+	public async teleportToHome(ctx: Context, name: Location) {
+		if (ctx.location === name || ctx.id !== this.contextId) return;
+
+		if (name === Location.FOREST && config.fishing.sneak_while_fishing) {
 			this.client.setControlState(ctx, 'sneak', false);
 		}
 
-		await super.teleport(ctx, name, DestinationType.HOME);
+		await super.teleport(ctx, name, LocationType.HOME);
 
-		if (name === Destination.FISHING && config.fishing.sneak_while_fishing) {
+		if (name === Location.FISHING && config.fishing.sneak_while_fishing) {
 			this.client.setControlState(ctx, 'sneak', true);
 		}
 	}
@@ -137,7 +139,7 @@ export default class FishBot extends BaseBot {
 	}
 
 	private waitForBite(ctx: Context) {
-		if (ctx.id !== this._context.id) return Promise.resolve();
+		if (ctx.id !== this.contextId) return Promise.resolve();
 
 		return new Promise(resolve => {
 			const listener = (title: string) => {
@@ -173,7 +175,7 @@ export default class FishBot extends BaseBot {
 				return resolve(true);
 			}, 60 * 1_000);
 
-			if (ctx.id !== this._context.id) {
+			if (ctx.id !== this.contextId) {
 				this._bot.off('title', listener);
 				// @ts-ignore
 				this._bot.off('context_changed', contextListener);
@@ -217,10 +219,12 @@ export default class FishBot extends BaseBot {
 	}
 
 	private async sellFishAction(ctx: Context, window: Window) {
-		if (ctx.id !== this._context.id) return;
+		if (ctx.id !== this.contextId) return;
 
+		const slotName =
+			this.balance < SURPLUS_MONEY_THRESHOLD ? SellType.COINS : this.sellType;
 		const sellSlot =
-			window.slots.find(i => i.displayName === this.sellType)?.slot ?? -1;
+			window.slots.find(i => i.displayName === slotName)?.slot ?? -1;
 
 		if (sellSlot !== -1) {
 			await this.client.clickWindow(ctx, sellSlot, 0, 0);
@@ -233,7 +237,7 @@ export default class FishBot extends BaseBot {
 	}
 
 	private async upgradeRodAction(ctx: Context, window: Window) {
-		if (ctx.id !== this._context.id) return;
+		if (ctx.id !== this.contextId) return;
 
 		const best = this.getBestFishingRod(true);
 		const data = FISHING_ROD_DATA[best < 4 ? best + 1 : 0];
@@ -268,7 +272,7 @@ export default class FishBot extends BaseBot {
 	}
 
 	private async purchaseBaitAction(ctx: Context) {
-		if (ctx.id !== this._context.id) return;
+		if (ctx.id !== this.contextId) return;
 
 		const rodIndex = this.getBestFishingRod(true);
 		const baitSlot = ROD_TO_BAIT[rodIndex === -1 ? 0 : rodIndex];
@@ -285,18 +289,16 @@ export default class FishBot extends BaseBot {
 	}
 
 	private async sellFish(ctx: Context, homeContainsShop: boolean) {
-		if (ctx.id !== this._context.id) return;
+		if (ctx.id !== this.contextId) return;
 
 		const data = {
-			moved: false,
-			pitch: this._bot.entity.pitch,
-			yaw: this._bot.entity.yaw,
+			pitch: this.client.entity.pitch,
+			yaw: this.client.entity.yaw,
 		};
 
 		const window = await this.completeActionAndWaitForWindow(ctx, async () => {
 			if (!homeContainsShop) {
-				data.moved = true;
-				await this.teleportToHome(ctx, Destination.FOREST);
+				await this.teleportToHome(ctx, Location.FOREST);
 			}
 
 			const entity = Object.values(this.client.entities).find(
@@ -321,25 +323,24 @@ export default class FishBot extends BaseBot {
 
 		this.client.closeWindow(ctx, window);
 
-		if (data.moved) await this.teleportToHome(ctx, Destination.FISHING);
-		else this.client.look(ctx, data.yaw, data.pitch, true);
+		if (ctx.location === Location.FISHING)
+			return this.client.look(ctx, data.yaw, data.pitch, true);
 	}
 
 	private async purchaseBait(ctx: Context, homeContainsShop: boolean) {
-		if (ctx.id !== this._context.id) return;
+		if (ctx.id !== this.contextId) return;
+
+		await this.teleportToHome(
+			ctx,
+			homeContainsShop ? Location.FISHING : Location.FOREST,
+		);
 
 		const data = {
-			moved: false,
-			pitch: this._bot.entity.pitch,
-			yaw: this._bot.entity.yaw,
+			pitch: this.client.entity.pitch,
+			yaw: this.client.entity.yaw,
 		};
 
 		const window = await this.completeActionAndWaitForWindow(ctx, async () => {
-			if (!homeContainsShop) {
-				data.moved = true;
-				await this.teleportToHome(ctx, Destination.FOREST);
-			}
-
 			const entity = Object.values(this.client.entities).find(
 				e =>
 					e.username !== undefined &&
@@ -364,8 +365,8 @@ export default class FishBot extends BaseBot {
 
 		this.client.closeWindow(ctx, window);
 
-		if (data.moved) await this.teleportToHome(ctx, Destination.FISHING);
-		else this.client.look(ctx, data.yaw, data.pitch, true);
+		if (ctx.location === Location.FISHING)
+			return this.client.look(ctx, data.yaw, data.pitch, true);
 	}
 
 	private sellFishAndPurchaseBait(ctx: Context, homeContainsShop: boolean) {
@@ -377,11 +378,11 @@ export default class FishBot extends BaseBot {
 
 		this.state = State.CLEARING_INVENTORY;
 
-		return this.clearInventory(ctx, false);
+		return this.clearInventory(ctx);
 	}
 
-	private async clearInventory(ctx: Context, homeContainsShop: boolean) {
-		await this.teleport(ctx, Destination.SPAWN, DestinationType.RAW);
+	private async clearInventory(ctx: Context) {
+		await this.teleport(ctx, Location.SPAWN, LocationType.RAW);
 
 		for (const item of this.client.inventory.slots) {
 			if (item === null || item.slot < 9 || item.slot > 44) continue;
@@ -400,8 +401,6 @@ export default class FishBot extends BaseBot {
 				await this.client.waitForTicks(ctx, 10);
 			}
 		}
-
-		if (homeContainsShop) await this.teleportToHome(ctx, Destination.FISHING);
 	}
 
 	private async checkFishingThresholds(
@@ -409,20 +408,13 @@ export default class FishBot extends BaseBot {
 		homeContainsShop: boolean,
 	) {
 		const inventory = this.getInventoryData();
-		let destination = homeContainsShop
-			? Destination.FISHING
-			: Destination.UNKNOWN;
 
 		if (this.isInventoryFull()) {
-			await this.clearInventory(ctx, homeContainsShop);
-
-			destination = homeContainsShop ? Destination.FISHING : Destination.SPAWN;
+			await this.clearInventory(ctx);
 		}
 
 		if (inventory.count.bait <= BAIT_THRESHOLD) {
 			await this.purchaseBait(ctx, homeContainsShop);
-
-			destination = Destination.FISHING;
 		} else if (
 			inventory.slots.fish >= FISH_THRESHOLD ||
 			inventory.count.fish >= FISH_COUNT_THRESHOLD
@@ -430,11 +422,9 @@ export default class FishBot extends BaseBot {
 			if (inventory.count.bait >= FISH_THRESHOLD)
 				await this.sellFish(ctx, homeContainsShop);
 			else await this.sellFishAndPurchaseBait(ctx, homeContainsShop);
-
-			destination = Destination.FISHING;
 		}
 
-		return destination;
+		return ctx.location;
 	}
 
 	public async stopFishing() {
@@ -442,7 +432,7 @@ export default class FishBot extends BaseBot {
 	}
 
 	private async cast(ctx: Context) {
-		if (ctx.id !== this._context.id) return;
+		if (ctx.id !== this.contextId) return;
 		if (!config.fishing.smart_casting) return this.client.activateItem(ctx);
 
 		let cast = true;
@@ -503,7 +493,7 @@ export default class FishBot extends BaseBot {
 		)
 			await this.client.equip(ctx, rod, 'hand');
 
-		await this.teleportToHome(ctx, Destination.FISHING);
+		await this.teleportToHome(ctx, Location.FISHING);
 
 		const homeContainsShop = this.getFishMonger() !== undefined;
 
@@ -515,19 +505,19 @@ export default class FishBot extends BaseBot {
 
 		if (
 			(await this.checkFishingThresholds(ctx, homeContainsShop)) !==
-			Destination.FISHING
+			Location.FISHING
 		) {
-			await this.teleportToHome(ctx, Destination.FISHING);
+			await this.teleportToHome(ctx, Location.FISHING);
 		}
 
-		for (let i = 0; ctx.id === this._context.id; ++i) {
+		for (let i = 0; ctx.id === this.contextId; ++i) {
 			ctx.allow_reaction = false;
 
 			if (
-				(await this.checkFishingThresholds(ctx, homeContainsShop)) ===
-				Destination.SPAWN
+				(await this.checkFishingThresholds(ctx, homeContainsShop)) !==
+				Location.FISHING
 			) {
-				await this.teleportToHome(ctx, Destination.FISHING);
+				await this.teleportToHome(ctx, Location.FISHING);
 			}
 
 			await this.client.waitForTicks(ctx, 5);

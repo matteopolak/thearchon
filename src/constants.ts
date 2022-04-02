@@ -166,7 +166,10 @@ export const COMMAND_REGEX = /^\((\w{3,16})\)\s(.+)$/;
 export const TELEPORT_REGEX = /^(\w{3,16}) has requested to teleport to you\.$/;
 export const BALANCE_REGEX = /^Your balance is \$([\d,\.]+)/;
 export const MOBCOINS_REGEX = /^You have ([\d,\.]+) MobCoins/;
-export const FISHMONGER_SELL_REGEX = /^You sold all your fish for \$([\d,\.]+)/;
+export const FISHMONGER_COINS_SELL_REGEX =
+	/^You sold all your fish for \$([\d,\.]+)/;
+export const FISHMONGER_MOBCOINS_SELL_REGEX =
+	/^You sold all your fish for ([\d,\.]+) MobCoins/;
 export const SEND_MONEY_REGEX = /^\$([\d,\.]+) has been sent to \w{1,16}\./;
 export const DIRECT_MESSAGE_REGEX = /^(?:\[\w+\] )?\((\w{1,16}) ➥ me\) (.+)/;
 export const CHAT_MESSAGE_REGEX =

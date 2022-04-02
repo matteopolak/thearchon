@@ -15,7 +15,8 @@ import {
 	COMMAND_COOLDOWN,
 	COMMAND_REGEX,
 	DIRECT_MESSAGE_REGEX,
-	FISHMONGER_SELL_REGEX,
+	FISHMONGER_COINS_SELL_REGEX,
+	FISHMONGER_MOBCOINS_SELL_REGEX,
 	MESSAGE_COOLDOWN,
 	MOBCOINS_REGEX,
 	MONEY_THRESHOLD,
@@ -27,12 +28,12 @@ import {
 import {
 	BaseBotOptions,
 	Context,
-	DestinationType,
+	LocationType,
 	MessageType,
 	RawItem,
 	State,
 } from '../typings';
-import type { CommandFunction, Destination, ParentMessage } from '../typings';
+import { CommandFunction, Location, ParentMessage } from '../typings';
 import {
 	createPromiseResolvePair,
 	currencyFormatter,
@@ -64,16 +65,7 @@ export default class BaseBot {
 
 	public previousState: State = State.IDLE;
 	public _state: State = State.IDLE;
-	public _context: Context = {
-		id: 0,
-		allow_reaction: false,
-		reacting_to_movement: false,
-		fishing: {
-			pitch: 0,
-			yaw: 0,
-			position: new Vec3(0, 0, 0),
-		},
-	};
+	public contextId: number = 0;
 
 	private commandQueue: {
 		message: string;
@@ -134,14 +126,15 @@ export default class BaseBot {
 
 	get context(): Context {
 		return {
-			id: this._context.id,
-			allow_reaction: this._context.allow_reaction,
-			reacting_to_movement: this._context.reacting_to_movement,
+			id: this.contextId,
+			allow_reaction: false,
+			reacting_to_movement: false,
 			fishing: {
 				pitch: 0,
 				yaw: 0,
 				position: new Vec3(0, 0, 0),
 			},
+			location: Location.UNKNOWN,
 		};
 	}
 
@@ -150,7 +143,7 @@ export default class BaseBot {
 	}
 
 	set state(value: State) {
-		++this._context.id;
+		++this.contextId;
 		// @ts-ignore
 		this._bot.emit('context_changed');
 
@@ -183,7 +176,7 @@ export default class BaseBot {
 					this._bot.off('context_changed', contextListener);
 
 					this.state = State.IDLE;
-					await this.client.lookAround(this._context);
+					await this.client.lookAround(this.context);
 
 					if (this.fisher) {
 						this.fisher.fish(ctx);
@@ -202,7 +195,7 @@ export default class BaseBot {
 		// @ts-ignore
 		this._bot.once('context_changed', contextListener);
 
-		if (ctx.id !== this._context.id) {
+		if (ctx.id !== this.contextId) {
 			this._bot.off('move', listener);
 			// @ts-ignore
 			this._bot.off('context_changed', contextListener);
@@ -210,7 +203,7 @@ export default class BaseBot {
 	}
 
 	public async waitForItem(ctx: Context, item: number) {
-		if (ctx.id !== this._context.id) return;
+		if (ctx.id !== this.contextId) return;
 
 		return new Promise<undefined>(resolve => {
 			const listener = (packet: RawItem) => {
@@ -233,7 +226,7 @@ export default class BaseBot {
 			// @ts-ignore
 			this._bot.once('context_changed', contextListener);
 
-			if (ctx.id !== this._context.id) {
+			if (ctx.id !== this.contextId) {
 				this._bot._client.off('set_slot', listener);
 				// @ts-ignore
 				this._bot.off('context_changed', contextListener);
@@ -244,7 +237,7 @@ export default class BaseBot {
 	}
 
 	public async waitForSlotItem(ctx: Context, slot: number, item: number) {
-		if (ctx.id !== this._context.id) return;
+		if (ctx.id !== this.contextId) return;
 
 		return new Promise<undefined>(resolve => {
 			const listener = (packet: RawItem) => {
@@ -267,7 +260,7 @@ export default class BaseBot {
 			// @ts-ignore
 			this._bot.once('context_changed', contextListener);
 
-			if (ctx.id !== this._context.id) {
+			if (ctx.id !== this.contextId) {
 				this._bot._client.off('set_slot', listener);
 				// @ts-ignore
 				this._bot.off('context_changed', contextListener);
@@ -378,18 +371,18 @@ export default class BaseBot {
 				return;
 			}
 
-			if (FISHMONGER_SELL_REGEX.test(m)) {
+			if (FISHMONGER_COINS_SELL_REGEX.test(m)) {
 				const value = parseFloat(
-					m.match(FISHMONGER_SELL_REGEX)![1].replaceAll(',', ''),
+					m.match(FISHMONGER_COINS_SELL_REGEX)![1].replaceAll(',', ''),
 				);
 
 				if (this.checkedBalance === false) await this.getCurrentBalance(ctx);
 				else this.balance += value;
 
 				this.logger.info(
-					`Sold fish for ${currencyFormatter.format(
+					`Sold fish for $${currencyFormatter.format(
 						value,
-					)} | Balance: ${currencyFormatter.format(this.balance)}`,
+					)} : Balance: $${currencyFormatter.format(this.balance)}`,
 				);
 
 				if (this.balance >= MONEY_THRESHOLD && config.autopay_to) {
@@ -400,6 +393,18 @@ export default class BaseBot {
 						`/pay ${config.autopay_to} ${amount.toFixed(2)}`,
 					);
 				}
+
+				return;
+			}
+
+			if (FISHMONGER_MOBCOINS_SELL_REGEX.test(m)) {
+				const value = parseFloat(
+					m.match(FISHMONGER_MOBCOINS_SELL_REGEX)![1].replaceAll(',', ''),
+				);
+
+				this.logger.info(
+					`Sold fish for ${currencyFormatter.format(value)} MobCoins`,
+				);
 
 				return;
 			}
@@ -600,7 +605,7 @@ export default class BaseBot {
 			// @ts-ignore
 			this._bot.once('context_changed', () => context);
 
-			if (ctx.id !== this._context.id) {
+			if (ctx.id !== this.contextId) {
 				// @ts-ignore
 				this._bot.off('context_changed', context);
 				this._bot.off('messagestr', listener);
@@ -641,7 +646,7 @@ export default class BaseBot {
 			// @ts-ignore
 			this._bot.on('context_changed', context);
 
-			if (ctx.id !== this._context.id) {
+			if (ctx.id !== this.contextId) {
 				// @ts-ignore
 				this._bot.off('context_changed', context);
 				this._bot.off('messagestr', listener);
@@ -716,12 +721,12 @@ export default class BaseBot {
 	}
 
 	public async command(ctx: Context, message: string): Promise<void> {
-		if (!message || ctx.id !== this._context.id) return;
+		if (!message || ctx.id !== this.contextId) return;
 		return this.addCommandToQueue(ctx, message);
 	}
 
 	public async chat(ctx: Context, message: string): Promise<void> {
-		if (!message || ctx.id !== this._context.id) return;
+		if (!message || ctx.id !== this.contextId) return;
 		return this.addMessageToQueue(ctx, message);
 	}
 
@@ -764,19 +769,19 @@ export default class BaseBot {
 
 	public async teleport(
 		ctx: Context,
-		name: Destination,
-		type: DestinationType = DestinationType.HOME,
+		name: Location,
+		type: LocationType = LocationType.HOME,
 	) {
-		if (ctx.id !== this._context.id) return;
+		if (ctx.id !== this.contextId) return;
 
 		await this.completeActionAndWaitForMessage(
 			ctx,
 			() => {
 				this.command(
 					ctx,
-					type === DestinationType.HOME
+					type === LocationType.HOME
 						? `/home ${name}`
-						: type === DestinationType.WARP
+						: type === LocationType.WARP
 						? `/warp ${name}`
 						: `/${name}`,
 				);
@@ -786,13 +791,15 @@ export default class BaseBot {
 
 		await this.client.waitForTicks(ctx, 20);
 		await this.client.waitForChunksToLoad(ctx);
+
+		ctx.location = name;
 	}
 
 	public async completeActionAndWaitForWindow(
 		ctx: Context,
 		action: (ctx: Context) => any,
 	): Promise<Window | undefined> {
-		if (ctx.id !== this._context.id) return;
+		if (ctx.id !== this.contextId) return;
 
 		const waitForWindow: Promise<Window | undefined> = new Promise(resolve => {
 			const listener = (window?: Window) => {
@@ -807,7 +814,7 @@ export default class BaseBot {
 			// @ts-ignore
 			this._bot.once('context_changed', listener);
 
-			if (ctx.id !== this._context.id) {
+			if (ctx.id !== this.contextId) {
 				// @ts-ignore
 				this._bot.off('context_changed', listener);
 				this._bot.off('windowOpen', listener);
