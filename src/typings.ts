@@ -20,8 +20,8 @@ export type MessagePayload =
 	| {
 			type: MessageType.SELL_TYPE;
 			data: {
-				isFishing: boolean;
-				sellType: SellType;
+				is_fishing: boolean;
+				sell_type: SellType;
 			};
 	  }
 	| {
@@ -68,9 +68,15 @@ export interface Config {
 	upgrade_fishing_rod_automatically: boolean;
 	stop_fishing_on_mention: boolean;
 	notify_on_mention: boolean;
+	react_to_external_teleport: boolean;
 }
 
-export type Context = number;
+export type Context = {
+	id: number;
+	reacting_to_movement: boolean;
+	allow_reaction: boolean;
+};
+
 export type CommandFunction = (
 	ctx: Context,
 	username: string,
@@ -97,7 +103,7 @@ export type BaseBotOptions = BotOptions & {
 	alias: string;
 	whitelist?: Set<string>;
 	logger?: boolean;
-	sellType?: SellType;
+	sell_type?: SellType;
 	fish?: boolean;
 };
 

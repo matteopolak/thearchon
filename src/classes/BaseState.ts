@@ -15,19 +15,19 @@ export default class BaseState {
 	}
 
 	waitForTicks(ctx: Context, ticks: number) {
-		if (ctx !== this.client.context) return Promise.resolve();
+		if (ctx.id !== this.client.context.id) return Promise.resolve();
 
 		return this.client._bot.waitForTicks(ticks);
 	}
 
 	waitForChunksToLoad(ctx: Context) {
-		if (ctx !== this.client.context) return Promise.resolve();
+		if (ctx.id !== this.client.context.id) return Promise.resolve();
 
 		return this.client._bot.waitForChunksToLoad();
 	}
 
 	awaitMessage(ctx: Context, ...args: string[] | RegExp[]) {
-		if (ctx !== this.client.context) return Promise.resolve();
+		if (ctx.id !== this.client.context.id) return Promise.resolve();
 
 		return new Promise<string | undefined>(resolve => {
 			const listener = (message: string) => {
@@ -54,7 +54,7 @@ export default class BaseState {
 			// @ts-ignore
 			this.client._bot.once('context_changed', contextListener);
 
-			if (ctx !== this.client.context) {
+			if (ctx.id !== this.client.context.id) {
 				this.client._bot.off('messagestr', listener);
 				// @ts-ignore
 				this.client._bot.off('context_changed', contextListener);
@@ -65,33 +65,48 @@ export default class BaseState {
 	}
 
 	chat(ctx: Context, message: string) {
-		if (ctx !== this.client.context) return Promise.resolve();
+		if (ctx.id !== this.client.context.id) return Promise.resolve();
 
 		return this.client._bot.chat(message);
 	}
 
 	lookAt(ctx: Context, point: Vec3, force?: boolean) {
-		if (ctx !== this.client.context) return Promise.resolve();
+		if (ctx.id !== this.client.context.id) return Promise.resolve();
 
 		return this.client._bot.lookAt(point, force);
 	}
 
 	async look(ctx: Context, yaw: number, pitch: number, force?: boolean) {
-		if (ctx !== this.client.context) return Promise.resolve();
+		if (ctx.id !== this.client.context.id) return Promise.resolve();
 
 		await this.client._bot.look(yaw, pitch);
 
 		if (force) await this.client._bot.look(yaw, pitch, force);
 	}
 
+	async lookAround(ctx: Context) {
+		ctx.reacting_to_movement = true;
+
+		const pitch = this.entity.pitch;
+		const yaw = this.entity.yaw;
+
+		await this.look(ctx, yaw - Math.PI * 0.3, pitch + Math.PI * 0.2);
+		await this.waitForTicks(ctx, 2);
+		await this.look(ctx, yaw - Math.PI * 1.2, Math.PI * 0.5);
+		await this.waitForTicks(ctx, 2);
+		await this.look(ctx, yaw, pitch);
+
+		ctx.reacting_to_movement = false;
+	}
+
 	setControlState(ctx: Context, control: ControlState, state: boolean) {
-		if (ctx !== this.client.context) return;
+		if (ctx.id !== this.client.context.id) return;
 
 		return this.client._bot.setControlState(control, state);
 	}
 
 	async activateEntity(ctx: Context, entity: Entity) {
-		if (ctx !== this.client.context) return Promise.resolve();
+		if (ctx.id !== this.client.context.id) return Promise.resolve();
 
 		await this.lookAt(ctx, entity.position, true);
 
@@ -99,19 +114,19 @@ export default class BaseState {
 	}
 
 	clickWindow(ctx: Context, slot: number, mouseButton: number, mode: number) {
-		if (ctx !== this.client.context) return Promise.resolve();
+		if (ctx.id !== this.client.context.id) return Promise.resolve();
 
 		return this.client._bot.clickWindow(slot, mouseButton, mode);
 	}
 
 	closeWindow(ctx: Context, window: Window) {
-		if (ctx !== this.client.context) return;
+		if (ctx.id !== this.client.context.id) return;
 
 		return this.client._bot.closeWindow(window);
 	}
 
 	activateItem(ctx: Context, offhand?: boolean) {
-		if (ctx !== this.client.context) return;
+		if (ctx.id !== this.client.context.id) return;
 
 		return this.client._bot.activateItem(offhand);
 	}
@@ -122,7 +137,7 @@ export default class BaseState {
 		metadata: number | null,
 		count: number | null,
 	) {
-		if (ctx !== this.client.context) return Promise.resolve();
+		if (ctx.id !== this.client.context.id) return Promise.resolve();
 
 		return this.client._bot.toss(itemType, metadata, count);
 	}
@@ -132,7 +147,7 @@ export default class BaseState {
 		item: number | Item,
 		destination: EquipmentDestination | null,
 	) {
-		if (ctx !== this.client.context) return Promise.resolve();
+		if (ctx.id !== this.client.context.id) return Promise.resolve();
 
 		return this.client._bot.equip(item, destination);
 	}

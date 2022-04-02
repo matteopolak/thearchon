@@ -18,10 +18,16 @@ console.log(
 
 const logFileLocation = path.join(bot.directory, 'latest.log');
 
-bot._bot.on('messagestr', (m, _, json) => {
-	if (m.startsWith('██')) return;
+bot._bot.on('messagestr', message => {
+	if (message.startsWith('██')) return;
 
-	fs.appendFile(logFileLocation, `${m} ::: ${JSON.stringify(json)}\n`);
+	const date = new Date();
+	const format = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+
+	fs.appendFile(
+		logFileLocation,
+		`[${format}] [Client thread/INFO] ${message}\n`,
+	);
 });
 
 bot._bot.on('kicked', async reason => {

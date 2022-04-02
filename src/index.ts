@@ -24,7 +24,7 @@ for (const options of config.accounts) {
 			options: {
 				...defaults,
 				...options,
-				sellType: SellType.COINS,
+				sell_type: SellType.COINS,
 				fish: true,
 			},
 		},

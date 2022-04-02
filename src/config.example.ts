@@ -59,6 +59,8 @@ const config: Config = {
 	stop_fishing_on_mention: false,
 	// Whether to notify all users in `whitelist` (on Discord) when the bot is mentioned
 	notify_on_mention: true,
+	// Whether to look around when the bot's position or rotation is externally changed
+	react_to_external_teleport: false,
 };
 
 export default config;

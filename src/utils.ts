@@ -191,14 +191,14 @@ export function startNewProcess(
 				`${' '.repeat(17)}${chalk.bold(chalk.cyan('Parent'))} ${chalk.yellow(
 					payload.options.alias,
 				)} is ${
-					packet.data.isFishing ? 'fishing' : 'not fishing'
+					packet.data.is_fishing ? 'fishing' : 'not fishing'
 				} and trading for ${
-					packet.data.sellType === SellType.COINS ? 'coins' : 'mob coins'
+					packet.data.sell_type === SellType.COINS ? 'coins' : 'mob coins'
 				}`,
 			);
 
-			payload.options.fish = packet.data.isFishing;
-			payload.options.sellType = packet.data.sellType;
+			payload.options.fish = packet.data.is_fishing;
+			payload.options.sell_type = packet.data.sell_type;
 
 			return;
 		}
