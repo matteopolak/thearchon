@@ -39,17 +39,6 @@ export default class FishBot extends BaseBot {
 		this.fisher = this;
 	}
 
-	private async circle(ctx: Context) {
-		const yaw = this.client.entity.yaw;
-		const pitch = this.client.entity.pitch;
-
-		for (let i = 1; i < 4; ++i) {
-			await this.client.look(ctx, yaw + i * Math.PI * 0.5, Math.PI * 0.25);
-		}
-
-		await this.client.look(ctx, yaw, pitch, true);
-	}
-
 	public async init() {
 		this.commands.set('fish', this.fish.bind(this));
 		this.commands.set('value', this.showFishValue.bind(this));
@@ -68,23 +57,6 @@ export default class FishBot extends BaseBot {
 				}
 			});
 		}
-
-		this.randomMovements.push(async ctx => {
-			const promise = this.circle(ctx);
-
-			for (let i = 1; i < 5; ++i) {
-				await this.client.waitForTicks(ctx, 8);
-				this.client.activateItem(ctx);
-				await this.client.waitForTicks(ctx, 4);
-				this.client.activateItem(ctx);
-			}
-
-			await promise;
-
-			this.client.setControlState(ctx, 'jump', true);
-			await this.client.waitForTicks(ctx, 1);
-			this.client.setControlState(ctx, 'jump', false);
-		});
 
 		this.randomMovements.push(async ctx => {
 			this.client.setControlState(ctx, 'jump', true);
