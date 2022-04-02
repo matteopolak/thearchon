@@ -86,6 +86,12 @@ export default class FishBot extends BaseBot {
 			this.client.setControlState(ctx, 'jump', false);
 		});
 
+		this.randomMovements.push(async ctx => {
+			this.client.setControlState(ctx, 'jump', true);
+			await this.client.waitForTicks(ctx, 1);
+			this.client.setControlState(ctx, 'jump', false);
+		});
+
 		await super.init();
 
 		this._bot._client.on('map', async (map: RawMapData) => {
@@ -525,9 +531,12 @@ export default class FishBot extends BaseBot {
 	}
 
 	private async randomMovement(ctx: Context, iteration: number) {
-		if (ctx.id !== this._context.id || random(25) < iteration % 25) return;
+		if (ctx.id !== this._context.id || random(25) < iteration % 25)
+			return this.client.waitForTicks(ctx, 5);
 
+		this.logger.info('Random movement started');
 		await this.randomMovements[random(this.randomMovements.length)](ctx);
+		this.logger.info('Random movement ended');
 	}
 
 	public async fish(_: Context) {
@@ -578,9 +587,9 @@ export default class FishBot extends BaseBot {
 			}
 
 			if (config.fishing.random_movement) await this.randomMovement(ctx, i);
+			else await this.client.waitForTicks(ctx, 5);
 
 			ctx.allow_reaction = true;
-			await this.client.waitForTicks(ctx, 5);
 
 			const rod = this.getBestFishingRod();
 
