@@ -577,7 +577,7 @@ export default class FishBot extends BaseBot {
 				await this.teleportToHome(ctx, Destination.FISHING);
 			}
 
-			if (config.fishing.random_movement) this.randomMovement(ctx, i);
+			if (config.fishing.random_movement) await this.randomMovement(ctx, i);
 
 			ctx.allow_reaction = true;
 			await this.client.waitForTicks(ctx, 5);
