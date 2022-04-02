@@ -6,7 +6,7 @@ import chalk from 'chalk';
 import mineflayer from 'mineflayer';
 import type { Bot, BotOptions } from 'mineflayer';
 import type { Window } from 'prismarine-windows';
-import type { Vec3 } from 'vec3';
+import { Vec3 } from 'vec3';
 
 import config from '../config';
 import {
@@ -76,6 +76,11 @@ export default class BaseBot {
 		id: 0,
 		allow_reaction: false,
 		reacting_to_movement: false,
+		fishing: {
+			pitch: 0,
+			yaw: 0,
+			position: new Vec3(0, 0, 0),
+		},
 	};
 
 	private commandQueue: {
@@ -95,17 +100,6 @@ export default class BaseBot {
 	private responseMap: Map<string, number> = new Map();
 
 	public fisher?: FishBot;
-	public location:
-		| {
-				pitch?: number;
-				yaw?: number;
-				position?: Vec3;
-		  }
-		| {
-				pitch: number;
-				yaw: number;
-				position: Vec3;
-		  } = {};
 
 	constructor(options: BaseBotOptions, port: MessagePort) {
 		this.options = options;
@@ -151,6 +145,11 @@ export default class BaseBot {
 			id: this._context.id,
 			allow_reaction: this._context.allow_reaction,
 			reacting_to_movement: this._context.reacting_to_movement,
+			fishing: {
+				pitch: 0,
+				yaw: 0,
+				position: new Vec3(0, 0, 0),
+			},
 		};
 	}
 
@@ -170,22 +169,21 @@ export default class BaseBot {
 	createMoveHandler(ctx: Context) {
 		const listener = async () => {
 			if (
-				this.location.position &&
 				!ctx.reacting_to_movement &&
 				ctx.allow_reaction &&
 				this.state === State.FISHING
 			) {
 				if (
-					this.client.entity.pitch !== this.location.pitch ||
-					this.client.entity.yaw !== this.location.yaw ||
-					this.client.entity.position.distanceTo(this.location.position) > 0.1
+					this.client.entity.pitch !== ctx.fishing.pitch ||
+					this.client.entity.yaw !== ctx.fishing.yaw ||
+					this.client.entity.position.distanceTo(ctx.fishing.position) > 0.1
 				) {
 					this._bot.off('move', listener);
 					// @ts-ignore
 					this._bot.off('context_changed', contextListener);
 
-					await this.client.lookAround(ctx);
 					this.state = State.IDLE;
+					await this.client.lookAround(this._context);
 
 					if (this.fisher) {
 						this.fisher.fish(ctx);
@@ -194,10 +192,6 @@ export default class BaseBot {
 					return;
 				}
 			}
-
-			this.location.pitch = this.client.entity.pitch;
-			this.location.yaw = this.client.entity.yaw;
-			this.location.position = this.client.entity.position;
 		};
 
 		const contextListener = () => {
@@ -208,7 +202,7 @@ export default class BaseBot {
 		// @ts-ignore
 		this._bot.once('context_changed', contextListener);
 
-		if (ctx.id !== this.context.id) {
+		if (ctx.id !== this._context.id) {
 			this._bot.off('move', listener);
 			// @ts-ignore
 			this._bot.off('context_changed', contextListener);
@@ -216,7 +210,7 @@ export default class BaseBot {
 	}
 
 	public async waitForItem(ctx: Context, item: number) {
-		if (ctx.id !== this.context.id) return;
+		if (ctx.id !== this._context.id) return;
 
 		return new Promise<undefined>(resolve => {
 			const listener = (packet: RawItem) => {
@@ -239,7 +233,7 @@ export default class BaseBot {
 			// @ts-ignore
 			this._bot.once('context_changed', contextListener);
 
-			if (ctx.id !== this.context.id) {
+			if (ctx.id !== this._context.id) {
 				this._bot._client.off('set_slot', listener);
 				// @ts-ignore
 				this._bot.off('context_changed', contextListener);
@@ -250,7 +244,7 @@ export default class BaseBot {
 	}
 
 	public async waitForSlotItem(ctx: Context, slot: number, item: number) {
-		if (ctx.id !== this.context.id) return;
+		if (ctx.id !== this._context.id) return;
 
 		return new Promise<undefined>(resolve => {
 			const listener = (packet: RawItem) => {
@@ -273,7 +267,7 @@ export default class BaseBot {
 			// @ts-ignore
 			this._bot.once('context_changed', contextListener);
 
-			if (ctx.id !== this.context.id) {
+			if (ctx.id !== this._context.id) {
 				this._bot._client.off('set_slot', listener);
 				// @ts-ignore
 				this._bot.off('context_changed', contextListener);
@@ -606,7 +600,7 @@ export default class BaseBot {
 			// @ts-ignore
 			this._bot.once('context_changed', () => context);
 
-			if (ctx.id !== this.context.id) {
+			if (ctx.id !== this._context.id) {
 				// @ts-ignore
 				this._bot.off('context_changed', context);
 				this._bot.off('messagestr', listener);
@@ -647,7 +641,7 @@ export default class BaseBot {
 			// @ts-ignore
 			this._bot.on('context_changed', context);
 
-			if (ctx.id !== this.context.id) {
+			if (ctx.id !== this._context.id) {
 				// @ts-ignore
 				this._bot.off('context_changed', context);
 				this._bot.off('messagestr', listener);
@@ -722,12 +716,12 @@ export default class BaseBot {
 	}
 
 	public async command(ctx: Context, message: string): Promise<void> {
-		if (!message || ctx.id !== this.context.id) return;
+		if (!message || ctx.id !== this._context.id) return;
 		return this.addCommandToQueue(ctx, message);
 	}
 
 	public async chat(ctx: Context, message: string): Promise<void> {
-		if (!message || ctx.id !== this.context.id) return;
+		if (!message || ctx.id !== this._context.id) return;
 		return this.addMessageToQueue(ctx, message);
 	}
 
@@ -773,7 +767,7 @@ export default class BaseBot {
 		name: Destination,
 		type: DestinationType = DestinationType.HOME,
 	) {
-		if (ctx.id !== this.context.id) return;
+		if (ctx.id !== this._context.id) return;
 
 		await this.completeActionAndWaitForMessage(
 			ctx,
@@ -798,7 +792,7 @@ export default class BaseBot {
 		ctx: Context,
 		action: (ctx: Context) => any,
 	): Promise<Window | undefined> {
-		if (ctx.id !== this.context.id) return;
+		if (ctx.id !== this._context.id) return;
 
 		const waitForWindow: Promise<Window | undefined> = new Promise(resolve => {
 			const listener = (window?: Window) => {
@@ -813,7 +807,7 @@ export default class BaseBot {
 			// @ts-ignore
 			this._bot.once('context_changed', listener);
 
-			if (ctx.id !== this.context.id) {
+			if (ctx.id !== this._context.id) {
 				// @ts-ignore
 				this._bot.off('context_changed', listener);
 				this._bot.off('windowOpen', listener);

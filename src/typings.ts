@@ -1,5 +1,6 @@
 import type { BotOptions } from 'mineflayer';
 import type { Item } from 'prismarine-item';
+import type { Vec3 } from 'vec3';
 
 export type AuthType = 'mojang' | 'microsoft';
 export enum ServerType {
@@ -68,13 +69,18 @@ export interface Config {
 	upgrade_fishing_rod_automatically: boolean;
 	stop_fishing_on_mention: boolean;
 	notify_on_mention: boolean;
-	react_to_external_teleport: boolean;
+	react_to_external_move: boolean;
 }
 
 export type Context = {
 	id: number;
 	reacting_to_movement: boolean;
 	allow_reaction: boolean;
+	fishing: {
+		pitch: number;
+		yaw: number;
+		position: Vec3;
+	};
 };
 
 export type CommandFunction = (

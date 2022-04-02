@@ -137,7 +137,7 @@ export default class FishBot extends BaseBot {
 	}
 
 	private waitForBite(ctx: Context) {
-		if (ctx.id !== this.context.id) return Promise.resolve();
+		if (ctx.id !== this._context.id) return Promise.resolve();
 
 		return new Promise(resolve => {
 			const listener = (title: string) => {
@@ -173,7 +173,7 @@ export default class FishBot extends BaseBot {
 				return resolve(true);
 			}, 60 * 1_000);
 
-			if (ctx.id !== this.context.id) {
+			if (ctx.id !== this._context.id) {
 				this._bot.off('title', listener);
 				// @ts-ignore
 				this._bot.off('context_changed', contextListener);
@@ -217,7 +217,7 @@ export default class FishBot extends BaseBot {
 	}
 
 	private async sellFishAction(ctx: Context, window: Window) {
-		if (ctx.id !== this.context.id) return;
+		if (ctx.id !== this._context.id) return;
 
 		const sellSlot =
 			window.slots.find(i => i.displayName === this.sellType)?.slot ?? -1;
@@ -233,7 +233,7 @@ export default class FishBot extends BaseBot {
 	}
 
 	private async upgradeRodAction(ctx: Context, window: Window) {
-		if (ctx.id !== this.context.id) return;
+		if (ctx.id !== this._context.id) return;
 
 		const best = this.getBestFishingRod(true);
 		const data = FISHING_ROD_DATA[best < 4 ? best + 1 : 0];
@@ -268,7 +268,7 @@ export default class FishBot extends BaseBot {
 	}
 
 	private async purchaseBaitAction(ctx: Context) {
-		if (ctx.id !== this.context.id) return;
+		if (ctx.id !== this._context.id) return;
 
 		const rodIndex = this.getBestFishingRod(true);
 		const baitSlot = ROD_TO_BAIT[rodIndex === -1 ? 0 : rodIndex];
@@ -285,7 +285,7 @@ export default class FishBot extends BaseBot {
 	}
 
 	private async sellFish(ctx: Context, homeContainsShop: boolean) {
-		if (ctx.id !== this.context.id) return;
+		if (ctx.id !== this._context.id) return;
 
 		const data = {
 			moved: false,
@@ -326,7 +326,7 @@ export default class FishBot extends BaseBot {
 	}
 
 	private async purchaseBait(ctx: Context, homeContainsShop: boolean) {
-		if (ctx.id !== this.context.id) return;
+		if (ctx.id !== this._context.id) return;
 
 		const data = {
 			moved: false,
@@ -442,7 +442,7 @@ export default class FishBot extends BaseBot {
 	}
 
 	private async cast(ctx: Context) {
-		if (ctx.id !== this.context.id) return;
+		if (ctx.id !== this._context.id) return;
 		if (!config.smart_casting) return this.client.activateItem(ctx);
 
 		let cast = true;
@@ -503,11 +503,15 @@ export default class FishBot extends BaseBot {
 		)
 			await this.client.equip(ctx, rod, 'hand');
 
-		if (config.react_to_external_teleport) this.createMoveHandler(ctx);
-
 		await this.teleportToHome(ctx, Destination.FISHING);
 
 		const homeContainsShop = this.getFishMonger() !== undefined;
+
+		ctx.fishing.pitch = this.client.entity.pitch;
+		ctx.fishing.yaw = this.client.entity.yaw;
+		ctx.fishing.position = this.client.entity.position;
+
+		if (config.react_to_external_move) this.createMoveHandler(ctx);
 
 		if (
 			(await this.checkFishingThresholds(ctx, homeContainsShop)) !==
