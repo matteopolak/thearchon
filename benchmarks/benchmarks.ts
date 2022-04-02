@@ -1,8 +1,9 @@
-import Benchmark from 'benchmark';
 import fs from 'fs';
-import * as utils from './solve_captcha';
+
+import Benchmark from 'benchmark';
 
 import type { RawMapData } from '../src/typings';
+import * as utils from './solve_captcha';
 
 const suite = new Benchmark.Suite('captcha_test', {
 	async: true,
