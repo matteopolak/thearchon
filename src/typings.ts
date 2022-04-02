@@ -62,14 +62,18 @@ export interface Config {
 		password: string;
 		auth: AuthType;
 	}[];
-	smart_casting: boolean;
+	fishing: {
+		smart_casting: boolean;
+		fish_on_join: boolean;
+		sneak_while_fishing: boolean;
+		upgrade_fishing_rod_automatically: boolean;
+		stop_fishing_on_mention: boolean;
+		random_movement: boolean;
+	};
 	log: boolean;
-	fish_on_join: boolean;
-	sneak_while_fishing: boolean;
-	upgrade_fishing_rod_automatically: boolean;
-	stop_fishing_on_mention: boolean;
 	notify_on_mention: boolean;
 	react_to_external_move: boolean;
+	minimize_memory_usage: boolean;
 }
 
 export type Context = {

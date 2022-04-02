@@ -4,7 +4,7 @@ import type { MessagePort } from 'worker_threads';
 
 import chalk from 'chalk';
 import mineflayer from 'mineflayer';
-import type { Bot, BotOptions } from 'mineflayer';
+import type { Bot } from 'mineflayer';
 import type { Window } from 'prismarine-windows';
 import { Vec3 } from 'vec3';
 
@@ -25,11 +25,11 @@ import {
 	TELEPORT_REGEX,
 } from '../constants';
 import {
+	BaseBotOptions,
 	Context,
 	DestinationType,
 	MessageType,
 	RawItem,
-	SellType,
 	State,
 } from '../typings';
 import type { CommandFunction, Destination, ParentMessage } from '../typings';
@@ -42,14 +42,6 @@ import {
 import BaseState from './BaseState';
 import type FishBot from './FishBot';
 import Logger from './Logger';
-
-export type BaseBotOptions = BotOptions & {
-	alias: string;
-	whitelist?: Set<string>;
-	logger?: boolean;
-	sellType?: SellType;
-	fish?: boolean;
-};
 
 export default class BaseBot {
 	public balance: number;
@@ -176,7 +168,7 @@ export default class BaseBot {
 				if (
 					this.client.entity.pitch !== ctx.fishing.pitch ||
 					this.client.entity.yaw !== ctx.fishing.yaw ||
-					this.client.entity.position.distanceTo(ctx.fishing.position) > 0.1
+					this.client.entity.position.xzDistanceTo(ctx.fishing.position) > 0.1
 				) {
 					this.logger.warn(
 						`Unusual movement. Detected yaw/pitch/movement change: ${
@@ -299,7 +291,7 @@ export default class BaseBot {
 			return this.join(ctx);
 		}
 
-		if (this.fisher && config.fish_on_join) {
+		if (this.fisher && config.fishing.fish_on_join) {
 			this.fisher.bestFishingRod = this.fisher.getBestFishingRod(true);
 			this.fisher.fish(ctx);
 		}
@@ -368,7 +360,7 @@ export default class BaseBot {
 
 				if (!message.toLowerCase().includes(lower)) return;
 
-				if (config.stop_fishing_on_mention) {
+				if (config.fishing.stop_fishing_on_mention) {
 					this.state = State.IDLE;
 				}
 
@@ -444,7 +436,7 @@ export default class BaseBot {
 			if (DIRECT_MESSAGE_REGEX.test(m)) {
 				const [, name, message] = m.match(DIRECT_MESSAGE_REGEX)!;
 
-				if (config.stop_fishing_on_mention) {
+				if (config.fishing.stop_fishing_on_mention) {
 					this.state = State.IDLE;
 				}
 

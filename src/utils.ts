@@ -26,6 +26,10 @@ const filter: string[][] = [
 	[],
 ];
 
+export function random(max: number, min: number = 0) {
+	return Math.floor(Math.random() * (max - min)) + min;
+}
+
 export async function generateResponse(
 	prompt: string,
 ): Promise<string | undefined> {

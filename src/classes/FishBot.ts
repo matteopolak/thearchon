@@ -15,6 +15,7 @@ import {
 	SURPLUS_MONEY_THRESHOLD,
 } from '../constants';
 import {
+	BaseBotOptions,
 	Destination,
 	DestinationType,
 	MessageType,
@@ -22,20 +23,31 @@ import {
 	State,
 } from '../typings';
 import type { Context, InventoryData, RawMapData } from '../typings';
-import { currencyFormatter, unscramble } from '../utils';
+import { currencyFormatter, random, unscramble } from '../utils';
 import BaseBot from './BaseBot';
-import type { BaseBotOptions } from './BaseBot';
 
 export default class FishBot extends BaseBot {
 	public bestFishingRod: number = 0;
 
 	private sellType: SellType;
+	private randomMovements: ((ctx: Context) => PromiseLike<void>)[] = [];
 
 	constructor(options: BaseBotOptions, port: MessagePort) {
 		super(options, port);
 
-		this.sellType = options.sellType ?? SellType.COINS;
+		this.sellType = options.sell_type ?? SellType.COINS;
 		this.fisher = this;
+	}
+
+	private async circle(ctx: Context) {
+		const yaw = this.client.entity.yaw;
+		const pitch = this.client.entity.pitch;
+
+		for (let i = 1; i < 4; ++i) {
+			await this.client.look(ctx, yaw + i * Math.PI * 0.5, Math.PI * 0.25);
+		}
+
+		await this.client.look(ctx, yaw, pitch, true);
 	}
 
 	public async init() {
@@ -44,6 +56,35 @@ export default class FishBot extends BaseBot {
 		this.commands.set('clear', this.clearCommand.bind(this));
 		this.commands.set('stop', this.stopFishing.bind(this));
 		this.commands.set('sell', this.setSellTypeCommand.bind(this));
+
+		if (!config.fishing.sneak_while_fishing) {
+			this.randomMovements.push(async ctx => {
+				for (let i = 0; i < 4; ++i) {
+					this.client.setControlState(ctx, 'sneak', true);
+					await this.client.waitForTicks(ctx, 2);
+
+					this.client.setControlState(ctx, 'sneak', false);
+					await this.client.waitForTicks(ctx, 2);
+				}
+			});
+		}
+
+		this.randomMovements.push(async ctx => {
+			const promise = this.circle(ctx);
+
+			for (let i = 1; i < 5; ++i) {
+				await this.client.waitForTicks(ctx, 8);
+				this.client.activateItem(ctx);
+				await this.client.waitForTicks(ctx, 4);
+				this.client.activateItem(ctx);
+			}
+
+			await promise;
+
+			this.client.setControlState(ctx, 'jump', true);
+			await this.client.waitForTicks(ctx, 1);
+			this.client.setControlState(ctx, 'jump', false);
+		});
 
 		await super.init();
 
@@ -87,13 +128,13 @@ export default class FishBot extends BaseBot {
 	}
 
 	public async teleportToHome(ctx: Context, name: Destination) {
-		if (name === Destination.FOREST && config.sneak_while_fishing) {
+		if (name === Destination.FOREST && config.fishing.sneak_while_fishing) {
 			this.client.setControlState(ctx, 'sneak', false);
 		}
 
 		await super.teleport(ctx, name, DestinationType.HOME);
 
-		if (name === Destination.FISHING && config.sneak_while_fishing) {
+		if (name === Destination.FISHING && config.fishing.sneak_while_fishing) {
 			this.client.setControlState(ctx, 'sneak', true);
 		}
 	}
@@ -314,7 +355,7 @@ export default class FishBot extends BaseBot {
 
 		if (
 			(await this.sellFishAction(ctx, window)) &&
-			config.upgrade_fishing_rod_automatically
+			config.fishing.upgrade_fishing_rod_automatically
 		) {
 			await this.upgradeRodAction(ctx, window);
 		}
@@ -355,7 +396,7 @@ export default class FishBot extends BaseBot {
 
 		if (
 			(await this.sellFishAction(ctx, window)) &&
-			config.upgrade_fishing_rod_automatically
+			config.fishing.upgrade_fishing_rod_automatically
 		) {
 			await this.upgradeRodAction(ctx, window);
 		}
@@ -443,7 +484,7 @@ export default class FishBot extends BaseBot {
 
 	private async cast(ctx: Context) {
 		if (ctx.id !== this._context.id) return;
-		if (!config.smart_casting) return this.client.activateItem(ctx);
+		if (!config.fishing.smart_casting) return this.client.activateItem(ctx);
 
 		let cast = true;
 
@@ -483,6 +524,12 @@ export default class FishBot extends BaseBot {
 		);
 	}
 
+	private async randomMovement(ctx: Context, iteration: number) {
+		if (ctx.id !== this._context.id || random(25) < iteration % 25) return;
+
+		await this.randomMovements[random(this.randomMovements.length)](ctx);
+	}
+
 	public async fish(_: Context) {
 		if (this.state === State.FISHING || this.state === State.SOLVING_CAPTCHA)
 			return false;
@@ -520,7 +567,7 @@ export default class FishBot extends BaseBot {
 			await this.teleportToHome(ctx, Destination.FISHING);
 		}
 
-		while (ctx.id === this._context.id) {
+		for (let i = 0; ctx.id === this._context.id; ++i) {
 			ctx.allow_reaction = false;
 
 			if (
@@ -536,6 +583,7 @@ export default class FishBot extends BaseBot {
 			const rod = this.getBestFishingRod();
 
 			if (rod === null) break;
+			if (config.fishing.random_movement) this.randomMovement(ctx, i);
 			if (
 				// @ts-ignore
 				rod?.nbt?.value?.display?.value?.Name?.value !==

@@ -45,22 +45,29 @@ const config: Config = {
 			auth: 'microsoft',
 		},
 	],
+	// Fishing-related settings
+	fishing: {
+		// Whether to start fishing immediately
+		fish_on_join: false,
+		// Whether to sneak while fishing
+		sneak_while_fishing: false,
+		// Whether to upgrade the fishing rod automatically
+		upgrade_fishing_rod_automatically: true,
+		// Whether to listen for the rod cast sound when casting
+		smart_casting: true,
+		// Whether to stop fishing when the bot is mentioned in chat or sent a direct message
+		stop_fishing_on_mention: false,
+		// Whether to randomly move while fishing
+		random_movement: false,
+	},
 	// Whether to log information in the console
 	log: true,
-	// Whether to start fishing immediately
-	fish_on_join: false,
-	// Whether to sneak while fishing
-	sneak_while_fishing: false,
-	// Whether to upgrade the fishing rod automatically
-	upgrade_fishing_rod_automatically: true,
-	// Whether to listen for the rod cast sound when casting
-	smart_casting: true,
-	// Whether to stop fishing when the bot is mentioned in chat or sent a direct message
-	stop_fishing_on_mention: false,
 	// Whether to notify all users in `whitelist` (on Discord) when the bot is mentioned
 	notify_on_mention: false,
 	// Whether to look around when the bot's position or rotation is changed externally
 	react_to_external_move: false,
+	// Whether to minimize memory usage
+	minimize_memory_usage: false,
 };
 
 export default config;
