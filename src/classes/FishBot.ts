@@ -531,12 +531,14 @@ export default class FishBot extends BaseBot {
 	}
 
 	private async randomMovement(ctx: Context, iteration: number) {
-		if (ctx.id !== this._context.id || random(25) < iteration % 25)
-			return this.client.waitForTicks(ctx, 5);
+		if (ctx.id !== this._context.id || random(25) >= iteration % 25)
+			return false;
 
 		this.logger.info('Random movement started');
 		await this.randomMovements[random(this.randomMovements.length)](ctx);
 		this.logger.info('Random movement ended');
+
+		return true;
 	}
 
 	public async fish(_: Context) {
@@ -586,7 +588,8 @@ export default class FishBot extends BaseBot {
 				await this.teleportToHome(ctx, Destination.FISHING);
 			}
 
-			if (config.fishing.random_movement) await this.randomMovement(ctx, i);
+			if (config.fishing.random_movement && (await this.randomMovement(ctx, i)))
+				i = 0;
 			else await this.client.waitForTicks(ctx, 5);
 
 			ctx.allow_reaction = true;
