@@ -18,7 +18,7 @@ export default class Logger {
 		this.errorPrefix = `${chalk.gray(this.name)}  ${chalk.bold(
 			chalk.red('Error'),
 		)}`;
-		this.warnPrefix = `${chalk.gray(this.name)} ${chalk.bold(
+		this.warnPrefix = `${chalk.gray(this.name)}   ${chalk.bold(
 			chalk.yellow('Warn'),
 		)}`;
 	}
