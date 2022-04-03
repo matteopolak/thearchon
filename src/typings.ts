@@ -62,6 +62,9 @@ export type Account =
 			username: string;
 			password: string;
 			auth: AuthType;
+			proxy: `${
+				| 'socks4'
+				| 'socks5'}://${number}.${number}.${number}.${number}:${number}`;
 	  };
 
 export interface Config {
@@ -124,6 +127,7 @@ export type BaseBotOptions = BotOptions & {
 	logger?: boolean;
 	sell_type?: SellType;
 	fish?: boolean;
+	proxy?: string;
 };
 
 export enum State {

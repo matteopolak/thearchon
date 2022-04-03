@@ -11,7 +11,7 @@ const client = discordConfig.enabled ? create(discordConfig, workers) : null;
 const defaults: Partial<BaseBotOptions> = {
 	whitelist: new Set(config.whitelist),
 	logger: config.log,
-	host: 'best.thearchon.net',
+	host: 'archonhq.net',
 	port: 25565,
 	version: '1.12.2',
 	hideErrors: true,
