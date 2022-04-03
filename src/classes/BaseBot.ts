@@ -60,6 +60,7 @@ export default class BaseBot {
 		promise: Promise.resolve(),
 		resolve: () => {},
 		fishing: false,
+		solving: false,
 	};
 	public port: MessagePort;
 

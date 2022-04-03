@@ -48,7 +48,7 @@ export default class FishBot extends BaseBot {
 		await super.init();
 
 		this._bot._client.on('map', async (map: RawMapData) => {
-			if (this.state !== State.SOLVING_CAPTCHA) return;
+			if (this.captcha.solving || this.state !== State.SOLVING_CAPTCHA) return;
 
 			if (
 				!map.data?.length ||
@@ -61,6 +61,7 @@ export default class FishBot extends BaseBot {
 			)
 				return;
 
+			this.captcha.solving = true;
 			const answer = unscramble(map);
 
 			if (answer.length === 5 && this.state === State.SOLVING_CAPTCHA) {
@@ -80,9 +81,15 @@ export default class FishBot extends BaseBot {
 				if (this.captcha.fishing) {
 					await promise;
 
+					if (config.fishing.sneak_while_fishing) {
+						this.client.setControlState(ctx, 'sneak', true);
+					}
+
 					this.fish(ctx);
 				}
 			}
+
+			this.captcha.solving = false;
 		});
 	}
 
