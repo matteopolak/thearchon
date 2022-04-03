@@ -1,7 +1,6 @@
 import type { Worker } from 'worker_threads';
 
 import config, { discordConfig } from './config';
-import { VERSION } from './constants';
 import { create } from './discord';
 import { BaseBotOptions, SellType } from './typings';
 import { startNewProcess } from './utils';
@@ -14,7 +13,7 @@ const defaults: Partial<BaseBotOptions> = {
 	logger: config.log,
 	host: 'best.thearchon.net',
 	port: 25565,
-	version: VERSION,
+	version: '1.12.2',
 	hideErrors: true,
 	viewDistance: config.minimize_memory_usage ? 'tiny' : 'far',
 };
