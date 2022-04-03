@@ -52,12 +52,16 @@ bot._bot.on('messagestr', message => {
 	if (message.startsWith('██')) return;
 
 	const date = new Date();
-	const format = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+	const format = `${date.getHours().toString().padStart(2, '0')}:${date
+		.getMinutes()
+		.toString()
+		.padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
 
-	fs.appendFile(
-		logFileLocation,
-		`[${format}] [Client thread/INFO] ${message}\n`,
-	);
+	const messages = message
+		.split('\n')
+		.map(message => `[${format}] [Client thread/INFO] ${message}`);
+
+	fs.appendFile(logFileLocation, messages.join('\n'));
 });
 
 bot._bot.on('kicked', async reason => {
