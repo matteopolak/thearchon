@@ -1,40 +1,46 @@
 import fs from 'fs/promises';
-import http from 'http';
 import path from 'path';
 import { parentPort, workerData } from 'worker_threads';
 
 import chalk from 'chalk';
 import { createClient } from 'minecraft-protocol';
-import ProxyAgent from 'proxy-agent';
+import { SocksClient } from 'socks';
+import { SocksProxyAgent } from 'socks-proxy-agent';
 
 import FishBot from './classes/FishBot';
 import type { BaseBotOptions } from './typings';
 
 const { options }: { options: BaseBotOptions } = workerData;
 
-if (options.proxy && options.protocol) {
-	const [proxyHost, proxyPort] = options.proxy.split(':');
+if (options.proxy !== undefined) {
+	const [proxyHost, _proxyPort] = options.proxy.slice(9).split(':');
+	const proxyPort = parseInt(_proxyPort);
+
+	console.log(proxyHost, proxyPort);
 
 	options.client = createClient({
 		username: options.username,
 		password: options.password,
 		host: options.host,
 		port: options.port,
-		connect: client => {
-			const req = http.request({
-				host: proxyHost,
-				port: parseInt(proxyPort),
-				method: 'CONNECT',
-				path: `${options.host}:${options.port}`,
+		connect: async client => {
+			const info = await SocksClient.createConnection({
+				proxy: {
+					host: proxyHost,
+					port: proxyPort,
+					type: parseInt(options.proxy![5]) as 4 | 5,
+				},
+				command: 'connect',
+				destination: {
+					host: options.host!,
+					port: options.port!,
+				},
 			});
 
-			req.end();
-			req.on('connect', (_, stream) => {
-				client.setSocket(stream);
-				client.emit('connect');
-			});
+			client.setSocket(info.socket);
+			client.emit('connect');
 		},
-		agent: new ProxyAgent(`${options.protocol}://${options.proxy}`),
+		agent: new SocksProxyAgent(options.proxy),
 	});
 }
 
