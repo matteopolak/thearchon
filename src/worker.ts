@@ -16,8 +16,6 @@ if (options.proxy !== undefined) {
 	const [proxyHost, _proxyPort] = options.proxy.slice(9).split(':');
 	const proxyPort = parseInt(_proxyPort);
 
-	console.log(proxyHost, proxyPort);
-
 	options.client = createClient({
 		username: options.username,
 		password: options.password,
@@ -49,7 +47,7 @@ const bot = new FishBot(options, parentPort!);
 console.log(
 	`${' '.repeat(17)}${chalk.bold(chalk.cyan('Worker'))} Starting ${chalk.yellow(
 		options.alias,
-	)}`,
+	)}${options.proxy ? ` with proxy ${chalk.yellow(options.proxy)}` : ''}`,
 );
 
 const logFileLocation = path.join(bot.directory, 'latest.log');

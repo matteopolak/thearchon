@@ -41,6 +41,9 @@ const config: Config = {
 			password: 'password',
 			// The authentication service to use. Either `mojang` or `microsoft`
 			auth: 'mojang',
+			// The proxy to use (optional)
+			// Protocols: `socks4` or `socks5`
+			proxy: 'socks5://192.168.1.1:5050',
 		},
 	],
 	// Fishing-related settings
