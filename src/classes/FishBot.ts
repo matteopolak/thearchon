@@ -465,10 +465,10 @@ export default class FishBot extends BaseBot {
 		// @ts-ignore
 		this._bot.once('context_changed', contextListener);
 
-		while (cast) {
+		do {
 			this.client.activateItem(ctx);
 			await this.client.waitForTicks(ctx, 10);
-		}
+		} while (cast);
 	}
 
 	public getFishMonger() {
