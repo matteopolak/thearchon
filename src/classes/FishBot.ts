@@ -23,7 +23,7 @@ import {
 	State,
 } from '../typings';
 import type { Context, InventoryData, RawMapData } from '../typings';
-import { currencyFormatter, unscramble } from '../utils';
+import { currencyFormatter, sleep, unscramble } from '../utils';
 import BaseBot from './BaseBot';
 
 export default class FishBot extends BaseBot {
@@ -71,6 +71,7 @@ export default class FishBot extends BaseBot {
 				const ctx = this.context;
 				const promise = this.waitForItem(ctx, 346);
 
+				await sleep(this.captcha.startedAt - Date.now() + 2_000);
 				await this.completeActionAndWaitForMessage(
 					ctx,
 					() => this.command(ctx, `/code ${answer.join('')}`),

@@ -156,8 +156,8 @@ export function unscramble(json: RawMapData) {
 	return characters;
 }
 
-export function sleep(ms: number): Promise<true> | undefined {
-	if (ms <= 0) return;
+export function sleep(ms: number): Promise<true> {
+	if (ms <= 0) return Promise.resolve(true);
 
 	return new Promise(r => setTimeout(r, ms, true));
 }
