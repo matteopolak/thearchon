@@ -52,10 +52,9 @@ export default class FishBot extends BaseBot {
 
 			if (
 				!map.data?.length ||
-				map.columns === 128 ||
-				map.rows === 128 ||
-				map.columns === -128 ||
-				map.rows === -128 ||
+				map.columns === map.rows ||
+				map.columns <= 0 ||
+				map.rows <= 0 ||
 				!map.columns ||
 				!map.rows
 			)
