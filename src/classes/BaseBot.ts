@@ -21,6 +21,7 @@ import {
 	MOBCOINS_REGEX,
 	MONEY_THRESHOLD,
 	RECEIVE_MONEY_REGEX,
+	RENEW_CAPTCHA_INTERVAL_TICKS,
 	SEND_MONEY_REGEX,
 	SURPLUS_MONEY_THRESHOLD,
 	TELEPORT_REGEX,
@@ -67,6 +68,7 @@ export default class BaseBot {
 	public previousState: State = State.IDLE;
 	public _state: State = State.IDLE;
 	public contextId: number = 0;
+	public joinedAt: number = 0;
 
 	private commandQueue: {
 		message: string;
@@ -279,6 +281,8 @@ export default class BaseBot {
 			/^Unable to connect to \w+: Server restarting/,
 		);
 
+		this.joinedAt = Date.now();
+
 		if (message !== 'You have no new mail.') {
 			await this.client.waitForTicks(ctx, 200);
 
@@ -321,16 +325,21 @@ export default class BaseBot {
 				this.captcha.promise = promise;
 				this.captcha.resolve = resolve;
 				this.captcha.startedAt = Date.now();
+				this.state = State.SOLVING_CAPTCHA;
 
-				this.client.waitForTicks(ctx, 20 * 15).then(() => {
-					if (this.state !== State.SOLVING_CAPTCHA) return;
+				const ctx = this.context;
 
-					this.client.activateItem(ctx);
-				});
+				this.client.setTickInterval(
+					ctx,
+					() => {
+						this.client.activateItem(ctx);
+					},
+					RENEW_CAPTCHA_INTERVAL_TICKS,
+				);
 
 				this.logger.info('Captcha detected. Solving...');
 
-				return (this.state = State.SOLVING_CAPTCHA);
+				return;
 			}
 
 			if (
