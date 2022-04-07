@@ -3,7 +3,7 @@ import type { Item } from 'prismarine-item';
 import type { Vec3 } from 'vec3';
 
 export type AuthType = 'mojang' | 'microsoft';
-export enum ServerType {
+export const enum ServerType {
 	ONYX = 'onyx',
 	RUBY = 'ruby',
 	AMBER = 'amber',
@@ -12,7 +12,7 @@ export enum ServerType {
 	ORIGINS = 'origins',
 }
 
-export enum MessageType {
+export const enum MessageType {
 	SELL_TYPE,
 	NOTIFICATION,
 }
@@ -130,25 +130,25 @@ export type BaseBotOptions = BotOptions & {
 	proxy?: string;
 };
 
-export enum State {
+export const enum State {
 	IDLE,
 	FISHING,
 	SOLVING_CAPTCHA,
 	CLEARING_INVENTORY,
 }
 
-export enum LocationType {
+export const enum LocationType {
 	HOME,
 	WARP,
 	RAW,
 }
 
-export enum SellType {
+export const enum SellType {
 	COINS = 'Chest',
 	MOB_COINS = 'Gold Ingot',
 }
 
-export enum Location {
+export const enum Location {
 	FISHING = 'fishing',
 	FOREST = 'forest',
 	SPAWN = 'spawn',
