@@ -44,6 +44,9 @@ const config: Config = {
 			// The proxy to use (optional)
 			// Protocols: `socks4` or `socks5`
 			proxy: 'socks5://192.168.1.1:5050',
+			// The channels where commands will affect this bot (optionak)
+			// Only used when Discord integration is enabled
+			channels: ['CHANNEL_ID', 'CHANNEL_ID'],
 		},
 	],
 	// Fishing-related settings

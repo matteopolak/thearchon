@@ -50,22 +50,16 @@ export interface DiscordConfig {
 	}>;
 }
 
-export type Account =
-	| {
-			alias: string;
-			username: string;
-			password: string;
-			auth: AuthType;
-	  }
-	| {
-			alias: string;
-			username: string;
-			password: string;
-			auth: AuthType;
-			proxy: `${
-				| 'socks4'
-				| 'socks5'}://${number}.${number}.${number}.${number}:${number}`;
-	  };
+export type Account = {
+	alias: string;
+	username: string;
+	password: string;
+	auth: AuthType;
+	channels?: string[];
+	proxy?: `${
+		| 'socks4'
+		| 'socks5'}://${number}.${number}.${number}.${number}:${number}`;
+};
 
 export interface Config {
 	openai_key?: string;
