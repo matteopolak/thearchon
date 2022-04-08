@@ -527,8 +527,6 @@ export default class FishBot extends BaseBot {
 				await this.teleportToHome(ctx, Location.FISHING);
 			}
 
-			await this.client.waitForTicks(ctx, 5);
-
 			ctx.allow_reaction = true;
 
 			const rod = this.getBestFishingRod();
@@ -546,11 +544,12 @@ export default class FishBot extends BaseBot {
 
 			await this.cast(ctx);
 			await this.waitForBite(ctx);
-			this.client.activateItem(ctx);
+
+			await this.completeActionAndWaitForItem(ctx, () =>
+				this.client.activateItem(ctx),
+			);
 
 			this.logger.info('Reeling...');
-
-			await this.client.waitForTicks(ctx, 5);
 		}
 
 		return true;

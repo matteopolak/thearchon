@@ -205,12 +205,12 @@ export default class BaseBot {
 		}
 	}
 
-	public async waitForItem(ctx: Context, item: number) {
+	public async waitForItem(ctx: Context, item?: number) {
 		if (ctx.id !== this.contextId) return;
 
 		return new Promise<undefined>(resolve => {
 			const listener = (packet: RawItem) => {
-				if (packet.item.blockId !== item) return;
+				if (item !== undefined && packet.item.blockId !== item) return;
 
 				this._bot._client.off('set_slot', listener);
 				// @ts-ignore
@@ -777,6 +777,18 @@ export default class BaseBot {
 		return promise;
 	}
 
+	public async completeActionAndWaitForItem(
+		ctx: Context,
+		action: () => any,
+		item?: number,
+	) {
+		const promise = this.waitForItem(ctx, item);
+
+		await action();
+
+		return promise;
+	}
+
 	public async teleport(
 		ctx: Context,
 		name: Location,
@@ -801,6 +813,7 @@ export default class BaseBot {
 
 		await this.client.waitForTicks(ctx, 20);
 		await this.client.waitForChunksToLoad(ctx);
+		await this.client.waitForTicks(ctx, 5);
 
 		ctx.location = name;
 	}
