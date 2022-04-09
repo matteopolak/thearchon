@@ -278,16 +278,19 @@ export default class BaseBot {
 	}
 
 	public async join(ctx: Context = this.context): Promise<void> {
+		if (ctx.id !== this.contextId) return;
+
 		const message = await this.completeActionAndWaitForMessages(
 			ctx,
 			() => this.command(ctx, `/${config.server}`),
 			/^You have no new mail\./,
 			/^Unable to connect to \w+: Server restarting/,
+			/^Connection to \w+ timed out\./,
 		);
 
 		this.joinedAt = Date.now();
 
-		if (message !== 'You have no new mail.') {
+		if (message !== 'You have no new mail.' && message !== null) {
 			await this.client.waitForTicks(ctx, 200);
 
 			return this.join(ctx);
@@ -349,7 +352,6 @@ export default class BaseBot {
 
 				const ctx = this.context;
 
-				this.client.activateItem(ctx);
 				if (Date.now() - this.joinedAt < 5_000) this.client.activateItem(ctx);
 
 				this.client.setInterval(

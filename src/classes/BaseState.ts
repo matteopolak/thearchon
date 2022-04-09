@@ -47,9 +47,9 @@ export default class BaseState {
 	}
 
 	awaitMessage(ctx: Context, ...args: string[] | RegExp[]) {
-		if (ctx.id !== this.client.contextId) return Promise.resolve();
+		if (ctx.id !== this.client.contextId) return Promise.resolve(null);
 
-		return new Promise<string | undefined>(resolve => {
+		return new Promise<string | null>(resolve => {
 			const listener = (message: string) => {
 				if (
 					args.some(x =>
@@ -67,7 +67,7 @@ export default class BaseState {
 			const contextListener = () => {
 				this.client._bot.off('messagestr', listener);
 
-				resolve(undefined);
+				resolve(null);
 			};
 
 			this.client._bot.on('messagestr', listener);
@@ -79,7 +79,7 @@ export default class BaseState {
 				// @ts-ignore
 				this.client._bot.off('context_changed', contextListener);
 
-				resolve(undefined);
+				resolve(null);
 			}
 		});
 	}

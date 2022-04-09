@@ -51,12 +51,12 @@ export default class FishBot extends BaseBot {
 
 		this._bot._client.on('map', async (map: RawMapData) => {
 			if (this.captcha.solving || this.state !== State.SOLVING_CAPTCHA) return;
-			if (map.rows === undefined) return this.client.activateItem(this.context);
 
 			if (
 				!map.data?.length ||
 				map.columns === map.rows ||
 				map.columns <= 0 ||
+				!map.rows ||
 				map.rows <= 0 ||
 				!map.columns ||
 				!map.rows
