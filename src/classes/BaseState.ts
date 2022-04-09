@@ -94,8 +94,8 @@ export default class BaseState {
 	async lookAround(ctx: Context) {
 		ctx.reacting_to_movement = true;
 
-		const pitch = this.entity.pitch;
-		const yaw = this.entity.yaw;
+		const pitch = ctx.fishing?.pitch ?? this.entity.pitch;
+		const yaw = ctx.fishing?.yaw ?? this.entity.yaw;
 
 		await this.look(ctx, yaw - Math.PI * 0.3, pitch + Math.PI * 0.2);
 		await this.waitForTicks(ctx, 2);

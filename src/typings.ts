@@ -84,7 +84,7 @@ export type Context = {
 	id: number;
 	reacting_to_movement: boolean;
 	allow_reaction: boolean;
-	fishing: {
+	fishing?: {
 		pitch: number;
 		yaw: number;
 		position: Vec3;

@@ -6,7 +6,6 @@ import chalk from 'chalk';
 import mineflayer from 'mineflayer';
 import type { Bot } from 'mineflayer';
 import type { Window } from 'prismarine-windows';
-import { Vec3 } from 'vec3';
 
 import config from '../config';
 import {
@@ -132,11 +131,6 @@ export default class BaseBot {
 			id: this.contextId,
 			allow_reaction: false,
 			reacting_to_movement: false,
-			fishing: {
-				pitch: 0,
-				yaw: 0,
-				position: new Vec3(0, 0, 0),
-			},
 			location: Location.UNKNOWN,
 		};
 	}
@@ -162,16 +156,16 @@ export default class BaseBot {
 				this.state === State.FISHING
 			) {
 				if (
-					this.client.entity.pitch !== ctx.fishing.pitch ||
-					this.client.entity.yaw !== ctx.fishing.yaw ||
-					this.client.entity.position.xzDistanceTo(ctx.fishing.position) > 0.1
+					this.client.entity.pitch !== ctx.fishing!.pitch ||
+					this.client.entity.yaw !== ctx.fishing!.yaw ||
+					this.client.entity.position.xzDistanceTo(ctx.fishing!.position) > 0.1
 				) {
 					this.logger.warn(
 						`Unusual movement. Detected yaw/pitch/movement change: ${
-							ctx.fishing.pitch - this.client.entity.yaw
+							ctx.fishing!.pitch - this.client.entity.yaw
 						}/${
-							ctx.fishing.yaw - this.client.entity.pitch
-						}/${this.client.entity.position.distanceTo(ctx.fishing.position)}`,
+							ctx.fishing!.yaw - this.client.entity.pitch
+						}/${this.client.entity.position.distanceTo(ctx.fishing!.position)}`,
 					);
 
 					this._bot.off('move', listener);

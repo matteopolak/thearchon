@@ -504,9 +504,11 @@ export default class FishBot extends BaseBot {
 
 		const homeContainsShop = this.getFishMonger() !== undefined;
 
-		ctx.fishing.pitch = this.client.entity.pitch;
-		ctx.fishing.yaw = this.client.entity.yaw;
-		ctx.fishing.position = this.client.entity.position;
+		ctx.fishing = {
+			pitch: this.client.entity.pitch,
+			yaw: this.client.entity.yaw,
+			position: this.client.entity.position,
+		};
 
 		if (config.react_to_external_move) this.createMoveHandler(ctx);
 
