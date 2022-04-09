@@ -280,6 +280,11 @@ export default class BaseBot {
 	public async join(ctx: Context = this.context): Promise<void> {
 		if (ctx.id !== this.contextId) return;
 
+		if (this.fisher && config.fishing.fish_on_join) {
+			this.state = State.FISHING;
+			ctx.id = this.contextId;
+		}
+
 		const message = await this.completeActionAndWaitForMessages(
 			ctx,
 			() => this.command(ctx, `/${config.server}`),

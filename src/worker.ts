@@ -51,15 +51,13 @@ console.log(
 bot._bot.on('kicked', async reason => {
 	bot.logger.error(`Kicked: ${chalk.redBright(reason)}`);
 
-	process.exit(0);
+	process.exit(1);
 });
 
 bot._bot.on('end', async reason => {
 	bot.logger.error(`Ended: ${chalk.redBright(reason)}`);
 
-	process.exit(reason === 'socketClosed' ? 1 : 0);
+	process.exit(0);
 });
-
-// bot._bot._client.on('packet', console.log);
 
 bot.init();

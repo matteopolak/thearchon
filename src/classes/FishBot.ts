@@ -488,9 +488,6 @@ export default class FishBot extends BaseBot {
 	}
 
 	public async fish(_: Context) {
-		if (this.state === State.FISHING || this.state === State.SOLVING_CAPTCHA)
-			return false;
-
 		this.state = State.FISHING;
 
 		const ctx = this.context;
