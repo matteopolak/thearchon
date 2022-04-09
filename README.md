@@ -17,8 +17,15 @@ Auto-fishing is against the rules, so using this tool will put you at risk of ge
 ## Features
 * Sells fish, replenishes bait, and upgrades fishing rods
 * Solves anti-macro CAPTCHAs
+* Support for SOCKS4/5 proxies
+* Responds to direct messages with OpenAI (requires API key)
+* Reacts to external movement and rotation
+* Discord integration
+	* Receive notifications for direct messages and movement
+	* Supports per-bot channel whitelisting for sending commands
 * Reconnects on server restarts
-* Automatically send fishing money to your bank account
+* Automatically sends fishing money to your bank account
+* Low memory footprint (~100MB per bot)
 
 ## Installation
 
@@ -35,20 +42,13 @@ Auto-fishing is against the rules, so using this tool will put you at risk of ge
 ## Setup
 Configuration is done in `src/config.ts`.
 If you are setting this up for the first time, rename `src/config.example.ts` to `src/config.ts`.
-| Key | Value |
-| --- | --- |
-| `accounts` | The account information of the bots |
-| `autopay_to` | The username of the player to automatically pay when `MONEY_THRESHOLD` is met |
-| `fishOnJoin` | Whether to start fishing after joining the server with no further prompt |
-| `log` | Whether to log information to the console |
-| `server` | The name of the server to connect to |
-| `sneakWhileFishing` | Whether to sneak while fishing (for example, to hide underwater) |
-| `upgradeFishingRodAutomatically` | Whether to upgrade the fishing rod up to a **Mega Rod** whenever possible |
-| `version` | The version of Minecraft to connect with |
-| `whitelist` | The usernames of players that are allowed to execute commands |
+
+All options are explained in the configuration file.
 
 ## Commands
-These commands must be run in an McMMO party chat to which the bot(s) have access.
+These commands must be run in an McMMO party chat or Discord channel to which the bot(s) have access.
+
+**WARNING: Commands that require a response from the bot will be sent to the party chat.**
 
 | Command | Description |
 | --- | --- |
