@@ -516,13 +516,6 @@ export default class FishBot extends BaseBot {
 
 		this.createMoveHandler(ctx);
 
-		if (
-			(await this.checkFishingThresholds(ctx, homeContainsShop)) !==
-			Location.FISHING
-		) {
-			await this.teleportToHome(ctx, Location.FISHING);
-		}
-
 		for (let i = 0; ctx.id === this.contextId; ++i) {
 			ctx.allow_reaction = false;
 

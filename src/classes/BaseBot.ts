@@ -430,9 +430,13 @@ export default class BaseBot {
 				else this.balance += value;
 
 				this.logger.info(
-					`Sold fish for $${currencyFormatter.format(
-						value,
-					)} : Balance: $${currencyFormatter.format(this.balance)}`,
+					`Sold fish for ${chalk.green(`$${currencyFormatter.format(value)}`)}`,
+				);
+
+				this.logger.info(
+					`Current balance is ${chalk.green(
+						`$${currencyFormatter.format(this.balance)}`,
+					)}`,
 				);
 
 				if (this.balance >= MONEY_THRESHOLD && config.autopay_to) {
@@ -453,7 +457,9 @@ export default class BaseBot {
 				);
 
 				this.logger.info(
-					`Sold fish for ${currencyFormatter.format(value)} MobCoins`,
+					`Sold fish for ${chalk.magenta(
+						`${currencyFormatter.format(value)} MobCoins`,
+					)}`,
 				);
 
 				return;
