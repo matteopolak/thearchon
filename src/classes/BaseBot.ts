@@ -16,10 +16,12 @@ import {
 	DIRECT_MESSAGE_REGEX,
 	FISHMONGER_COINS_SELL_REGEX,
 	FISHMONGER_MOBCOINS_SELL_REGEX,
+	JOIN_ERROR_REGEX,
 	MESSAGE_COOLDOWN,
 	MOBCOINS_REGEX,
 	MONEY_THRESHOLD,
 	RECEIVE_MONEY_REGEX,
+	RENEW_CAPTCHA_INTERVAL,
 	SEND_MONEY_REGEX,
 	SURPLUS_MONEY_THRESHOLD,
 	TELEPORT_REGEX,
@@ -353,10 +355,10 @@ export default class BaseBot {
 				this.client.setInterval(
 					ctx,
 					() => {
-						this.logger.info('active');
-						// this.client.activateItem(ctx);
+						this.logger.info('Renewing captcha...');
+						this.client.activateItem(ctx);
 					},
-					500,
+					RENEW_CAPTCHA_INTERVAL,
 				);
 
 				this.logger.info('Captcha detected. Solving...');
@@ -512,6 +514,14 @@ export default class BaseBot {
 
 					return this.command(ctx, `/msg ${name} ${response}`);
 				}
+
+				return;
+			}
+
+			if (JOIN_ERROR_REGEX.test(m)) {
+				const [, reason] = m.match(JOIN_ERROR_REGEX)!;
+
+				this.logger.warn(`Unable to connect: ${reason}`);
 
 				return;
 			}

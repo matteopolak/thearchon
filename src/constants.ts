@@ -290,6 +290,10 @@ export const CHAT_MESSAGE_REGEX =
 export const RECEIVE_MONEY_REGEX =
 	/^\$([\d,\.]+) has been received from \w{1,16}\./;
 
+// Server join error message. Translation:
+// `Unable to connect to {realm}: {message}`
+export const JOIN_ERROR_REGEX = /^Unable to connect to \w+: (.+)/;
+
 // Amount of money to obtain before automatically paying it to `config.autopay_to`
 export const MONEY_THRESHOLD = 5_000_000;
 
