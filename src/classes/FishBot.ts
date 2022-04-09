@@ -547,15 +547,17 @@ export default class FishBot extends BaseBot {
 				await this.client.equip(ctx, rod, 'hand');
 
 			this.logger.info('Casting...');
-
 			await this.cast(ctx);
+
+			this.logger.info('Waiting for bite...');
 			await this.waitForBite(ctx);
 
+			this.logger.info('Reeling...');
 			await this.completeActionAndWaitForItem(ctx, () =>
 				this.client.activateItem(ctx),
 			);
 
-			this.logger.info('Reeling...');
+			this.logger.info('Reel complete');
 		}
 
 		return true;
