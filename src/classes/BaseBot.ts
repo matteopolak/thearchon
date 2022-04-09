@@ -160,13 +160,20 @@ export default class BaseBot {
 					this.client.entity.yaw !== ctx.fishing!.yaw ||
 					this.client.entity.position.xzDistanceTo(ctx.fishing!.position) > 0.1
 				) {
-					this.logger.warn(
-						`Unusual movement. Detected yaw/pitch/movement change: ${
-							ctx.fishing!.pitch - this.client.entity.yaw
-						}/${
-							ctx.fishing!.yaw - this.client.entity.pitch
-						}/${this.client.entity.position.distanceTo(ctx.fishing!.position)}`,
-					);
+					const message = `Unusual movement. Detected yaw/pitch/movement change: ${
+						ctx.fishing!.pitch - this.client.entity.yaw
+					}/${
+						ctx.fishing!.yaw - this.client.entity.pitch
+					}/${this.client.entity.position.distanceTo(ctx.fishing!.position)}`;
+
+					this.logger.warn(message);
+
+					this.port.postMessage({
+						type: MessageType.WARNING,
+						data: {
+							message,
+						},
+					});
 
 					this._bot.off('move', listener);
 					// @ts-ignore

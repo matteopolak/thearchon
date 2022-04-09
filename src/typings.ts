@@ -15,6 +15,7 @@ export const enum ServerType {
 export const enum MessageType {
 	SELL_TYPE,
 	NOTIFICATION,
+	WARNING,
 }
 
 export type MessagePayload =
@@ -31,6 +32,12 @@ export type MessagePayload =
 				message: string;
 				sender: string;
 				type: 'direct message' | 'message';
+			};
+	  }
+	| {
+			type: MessageType.WARNING;
+			data: {
+				message: string;
 			};
 	  };
 
