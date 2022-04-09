@@ -1,5 +1,7 @@
 import path from 'path';
 
+import chalk from 'chalk';
+
 import config from './config';
 import { ServerType } from './typings';
 import type { FishingRodData } from './typings';
@@ -21,30 +23,35 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			price: 5_000,
 			name: 'Old Rod',
 			name_raw: '§7§lOld Rod',
+			name_coloured_pretty: `an ${chalk.bold(chalk.grey('Old Rod'))}`,
 		},
 		{
 			slot: 11,
 			price: 20_000,
 			name: 'Novice Rod',
 			name_raw: '§e§lNovice Rod',
+			name_coloured_pretty: `a ${chalk.bold(chalk.yellow('Novice Rod'))}`,
 		},
 		{
 			slot: 13,
 			price: 100_000,
 			name: 'Apprentice Rod',
 			name_raw: '§a§lApprentice Rod',
+			name_coloured_pretty: `an ${chalk.bold(chalk.green('Apprentice Rod'))}`,
 		},
 		{
 			slot: 15,
 			price: 400_000,
 			name: 'Sturdy Rod',
 			name_raw: '§b§lSturdy Rod',
+			name_coloured_pretty: `a ${chalk.bold(chalk.blue('Sturdy Rod'))}`,
 		},
 		{
 			slot: 16,
 			price: 1_000_000,
 			name: 'Mega Rod',
 			name_raw: '§c§lMega Rod',
+			name_coloured_pretty: `a ${chalk.bold(chalk.red('Mega Rod'))}`,
 		},
 	],
 	[ServerType.RUBY]: [
@@ -53,30 +60,35 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			price: 5_000,
 			name: 'Old Rod',
 			name_raw: '§7§lOld Rod',
+			name_coloured_pretty: `an ${chalk.bold(chalk.grey('Old Rod'))}`,
 		},
 		{
 			slot: 11,
 			price: 20_000,
 			name: 'Novice Rod',
 			name_raw: '§e§lNovice Rod',
+			name_coloured_pretty: `a ${chalk.bold(chalk.yellow('Novice Rod'))}`,
 		},
 		{
 			slot: 13,
 			price: 100_000,
 			name: 'Apprentice Rod',
 			name_raw: '§a§lApprentice Rod',
+			name_coloured_pretty: `an ${chalk.bold(chalk.green('Apprentice Rod'))}`,
 		},
 		{
 			slot: 15,
 			price: 400_000,
 			name: 'Sturdy Rod',
 			name_raw: '§b§lSturdy Rod',
+			name_coloured_pretty: `a ${chalk.bold(chalk.blue('Sturdy Rod'))}`,
 		},
 		{
 			slot: 16,
 			price: 1_000_000,
 			name: 'Mega Rod',
 			name_raw: '§c§lMega Rod',
+			name_coloured_pretty: `a ${chalk.bold(chalk.red('Mega Rod'))}`,
 		},
 	],
 	[ServerType.AMBER]: [
@@ -85,30 +97,35 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			price: 5_000,
 			name: 'Old Rod',
 			name_raw: '§7§lOld Rod',
+			name_coloured_pretty: `an ${chalk.bold(chalk.grey('Old Rod'))}`,
 		},
 		{
 			slot: 11,
 			price: 20_000,
 			name: 'Novice Rod',
 			name_raw: '§e§lNovice Rod',
+			name_coloured_pretty: `a ${chalk.bold(chalk.yellow('Novice Rod'))}`,
 		},
 		{
 			slot: 13,
 			price: 100_000,
 			name: 'Apprentice Rod',
 			name_raw: '§a§lApprentice Rod',
+			name_coloured_pretty: `an ${chalk.bold(chalk.green('Apprentice Rod'))}`,
 		},
 		{
 			slot: 15,
 			price: 400_000,
 			name: 'Sturdy Rod',
 			name_raw: '§b§lSturdy Rod',
+			name_coloured_pretty: `a ${chalk.bold(chalk.blue('Sturdy Rod'))}`,
 		},
 		{
 			slot: 16,
 			price: 1_000_000,
 			name: 'Mega Rod',
 			name_raw: '§c§lMega Rod',
+			name_coloured_pretty: `a ${chalk.bold(chalk.red('Mega Rod'))}`,
 		},
 	],
 	[ServerType.CHAOS]: [
@@ -117,30 +134,35 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			price: 1_000_000,
 			name: 'Old Rod',
 			name_raw: '§7§lOld Rod',
+			name_coloured_pretty: `an ${chalk.bold(chalk.grey('Old Rod'))}`,
 		},
 		{
 			slot: 11,
 			price: 2_000_000,
 			name: 'Novice Rod',
 			name_raw: '§e§lNovice Rod',
+			name_coloured_pretty: `a ${chalk.bold(chalk.yellow('Novice Rod'))}`,
 		},
 		{
 			slot: 13,
 			price: 5_000_000,
 			name: 'Apprentice Rod',
 			name_raw: '§a§lApprentice Rod',
+			name_coloured_pretty: `an ${chalk.bold(chalk.green('Apprentice Rod'))}`,
 		},
 		{
 			slot: 15,
 			price: 10_000_000,
 			name: 'Sturdy Rod',
 			name_raw: '§b§lSturdy Rod',
+			name_coloured_pretty: `a ${chalk.bold(chalk.blue('Sturdy Rod'))}`,
 		},
 		{
 			slot: 16,
 			price: 25_000_000,
 			name: 'Mega Rod',
 			name_raw: '§c§lMega Rod',
+			name_coloured_pretty: `a ${chalk.bold(chalk.red('Mega Rod'))}`,
 		},
 	],
 	[ServerType.GENESIS]: [
@@ -149,30 +171,35 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			price: 1_000_000,
 			name: 'Old Rod',
 			name_raw: '§7§lOld Rod',
+			name_coloured_pretty: `an ${chalk.bold(chalk.grey('Old Rod'))}`,
 		},
 		{
 			slot: 11,
 			price: 2_000_000,
 			name: 'Novice Rod',
 			name_raw: '§e§lNovice Rod',
+			name_coloured_pretty: `a ${chalk.bold(chalk.yellow('Novice Rod'))}`,
 		},
 		{
 			slot: 13,
 			price: 5_000_000,
 			name: 'Apprentice Rod',
 			name_raw: '§a§lApprentice Rod',
+			name_coloured_pretty: `an ${chalk.bold(chalk.green('Apprentice Rod'))}`,
 		},
 		{
 			slot: 15,
 			price: 10_000_000,
 			name: 'Sturdy Rod',
 			name_raw: '§b§lSturdy Rod',
+			name_coloured_pretty: `a ${chalk.bold(chalk.blue('Sturdy Rod'))}`,
 		},
 		{
 			slot: 16,
 			price: 25_000_000,
 			name: 'Mega Rod',
 			name_raw: '§c§lMega Rod',
+			name_coloured_pretty: `a ${chalk.bold(chalk.red('Mega Rod'))}`,
 		},
 	],
 	[ServerType.ORIGINS]: [
@@ -181,30 +208,35 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			price: 1_000_000,
 			name: 'Old Rod',
 			name_raw: '§7§lOld Rod',
+			name_coloured_pretty: `an ${chalk.bold(chalk.grey('Old Rod'))}`,
 		},
 		{
 			slot: 11,
 			price: 2_000_000,
 			name: 'Novice Rod',
 			name_raw: '§e§lNovice Rod',
+			name_coloured_pretty: `a ${chalk.bold(chalk.yellow('Novice Rod'))}`,
 		},
 		{
 			slot: 13,
 			price: 5_000_000,
 			name: 'Apprentice Rod',
 			name_raw: '§a§lApprentice Rod',
+			name_coloured_pretty: `an ${chalk.bold(chalk.green('Apprentice Rod'))}`,
 		},
 		{
 			slot: 15,
 			price: 10_000_000,
 			name: 'Sturdy Rod',
 			name_raw: '§b§lSturdy Rod',
+			name_coloured_pretty: `a ${chalk.bold(chalk.blue('Sturdy Rod'))}`,
 		},
 		{
 			slot: 16,
 			price: 25_000_000,
 			name: 'Mega Rod',
 			name_raw: '§c§lMega Rod',
+			name_coloured_pretty: `a ${chalk.bold(chalk.red('Mega Rod'))}`,
 		},
 	],
 };
@@ -219,13 +251,22 @@ export const VERSION = config.version;
 // Rod index to purchase slot conversion
 export const ROD_TO_BAIT = [9, 11, 13, 15, 15] as const;
 
-// Slot to rod name
+// Slot to coloured bait name
 export const SLOT_TO_BAIT_NAME = {
 	9: 'Simple Bait',
 	11: 'Basic Bait',
 	13: 'Advanced Bait',
 	15: 'Pro Bait',
 	17: 'All-Purpose Bait',
+};
+
+// Slot to bait name
+export const SLOT_TO_COLOURED_BAIT_NAME = {
+	9: chalk.bold(chalk.grey('Simple Bait')),
+	11: chalk.bold(chalk.green('Basic Bait')),
+	13: chalk.bold(chalk.blue('Advanced Bait')),
+	15: chalk.bold(chalk.red('Pro Bait')),
+	17: chalk.bold(chalk.yellow('All-Purpose Bait')),
 };
 
 // Path to `worker.js`

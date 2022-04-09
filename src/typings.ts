@@ -110,6 +110,7 @@ export interface FishingRodData {
 	price: number;
 	name: string;
 	name_raw: string;
+	name_coloured_pretty: string;
 }
 
 export interface RawItem {
