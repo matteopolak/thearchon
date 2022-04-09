@@ -182,11 +182,13 @@ export default class BaseBot {
 					// @ts-ignore
 					this._bot.off('context_changed', contextListener);
 
-					this.state = State.IDLE;
-					await this.client.lookAround(this.context);
+					if (config.react_to_external_move) {
+						this.state = State.IDLE;
+						await this.client.lookAround(this.context);
 
-					if (this.fisher) {
-						this.fisher.fish(ctx);
+						if (this.fisher) {
+							this.fisher.fish(ctx);
+						}
 					}
 
 					return;

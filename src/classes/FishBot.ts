@@ -514,7 +514,7 @@ export default class FishBot extends BaseBot {
 			position: this.client.entity.position,
 		};
 
-		if (config.react_to_external_move) this.createMoveHandler(ctx);
+		this.createMoveHandler(ctx);
 
 		if (
 			(await this.checkFishingThresholds(ctx, homeContainsShop)) !==
