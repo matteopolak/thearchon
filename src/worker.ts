@@ -51,7 +51,7 @@ console.log(
 bot._bot.on('kicked', async reason => {
 	bot.logger.error(`Kicked: ${chalk.redBright(reason)}`);
 
-	process.exit(1);
+	process.exit(reason.includes('BANNED') ? 1 : 0);
 });
 
 bot._bot.on('end', async reason => {
