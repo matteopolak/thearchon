@@ -302,6 +302,7 @@ export default class BaseBot {
 		if (
 			message !== "You're already connected to that server!" &&
 			message !== 'You have no new mail.' &&
+			message !== 'You are already trying to connect to a server!' &&
 			message !== null
 		) {
 			await this.client.waitForTicks(ctx, 200);
