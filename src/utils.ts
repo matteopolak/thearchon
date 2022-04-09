@@ -134,7 +134,7 @@ function findCharacter(
 }
 
 export function unscramble(json: RawMapData) {
-	const rows = json.rows;
+	const rows = json.rows!;
 	const columns = json.columns;
 
 	const characters = [];

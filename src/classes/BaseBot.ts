@@ -20,7 +20,6 @@ import {
 	MOBCOINS_REGEX,
 	MONEY_THRESHOLD,
 	RECEIVE_MONEY_REGEX,
-	RENEW_CAPTCHA_INTERVAL_TICKS,
 	SEND_MONEY_REGEX,
 	SURPLUS_MONEY_THRESHOLD,
 	TELEPORT_REGEX,
@@ -68,6 +67,7 @@ export default class BaseBot {
 	public _state: State = State.IDLE;
 	public contextId: number = 0;
 	public joinedAt: number = 0;
+	public logFileLocation: string;
 
 	private commandQueue: {
 		message: string;
@@ -98,6 +98,7 @@ export default class BaseBot {
 		this.checkedBalance = false;
 		this.logger = new Logger(options);
 		this.port = port;
+		this.logFileLocation = path.join(this.directory, 'latest.log');
 
 		this.commands.set('tp', this.teleportTo.bind(this));
 		this.commands.set('look', this.lookAt.bind(this));
@@ -314,11 +315,27 @@ export default class BaseBot {
 			.catch(() => {});
 
 		this._bot.on('messagestr', async m => {
+			if (m.startsWith('██')) return;
+
+			const date = new Date();
+			const format = `${date.getHours().toString().padStart(2, '0')}:${date
+				.getMinutes()
+				.toString()
+				.padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
+
+			const messages = m
+				.split('\n')
+				.map(message => `[${format}] [Client thread/INFO] ${message}\n`);
+
+			await fs.appendFile(this.logFileLocation, messages.join(''));
+
 			const ctx = this.context;
 
 			if (
-				m === "Don't panic! This is just a routine check to stop AFK fishing" ||
-				m === 'You are required to complete a captcha to continue playing.'
+				this.state !== State.SOLVING_CAPTCHA &&
+				(m ===
+					"Don't panic! This is just a routine check to stop AFK fishing" ||
+					m === 'You are required to complete a captcha to continue playing.')
 			) {
 				const { promise, resolve } = createPromiseResolvePair();
 
@@ -330,14 +347,16 @@ export default class BaseBot {
 
 				const ctx = this.context;
 
+				this.client.activateItem(ctx);
 				if (Date.now() - this.joinedAt < 5_000) this.client.activateItem(ctx);
 
-				this.client.setTickInterval(
+				this.client.setInterval(
 					ctx,
 					() => {
-						this.client.activateItem(ctx);
+						this.logger.info('active');
+						// this.client.activateItem(ctx);
 					},
-					RENEW_CAPTCHA_INTERVAL_TICKS,
+					500,
 				);
 
 				this.logger.info('Captcha detected. Solving...');

@@ -1,5 +1,3 @@
-import fs from 'fs/promises';
-import path from 'path';
 import { parentPort, workerData } from 'worker_threads';
 
 import chalk from 'chalk';
@@ -50,24 +48,6 @@ console.log(
 	)}${options.proxy ? ` with proxy ${chalk.yellow(options.proxy)}` : ''}`,
 );
 
-const logFileLocation = path.join(bot.directory, 'latest.log');
-
-bot._bot.on('messagestr', message => {
-	if (message.startsWith('██')) return;
-
-	const date = new Date();
-	const format = `${date.getHours().toString().padStart(2, '0')}:${date
-		.getMinutes()
-		.toString()
-		.padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
-
-	const messages = message
-		.split('\n')
-		.map(message => `[${format}] [Client thread/INFO] ${message}\n`);
-
-	fs.appendFile(logFileLocation, messages.join(''));
-});
-
 bot._bot.on('kicked', async reason => {
 	bot.logger.error(`Kicked: ${chalk.redBright(reason)}`);
 
@@ -79,5 +59,7 @@ bot._bot.on('end', async reason => {
 
 	process.exit(reason === 'socketClosed' ? 1 : 0);
 });
+
+// bot._bot._client.on('packet', console.log);
 
 bot.init();

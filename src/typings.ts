@@ -162,7 +162,7 @@ export interface RawMapData {
 	scale: number;
 	icons: number[];
 	columns: number;
-	rows: number;
+	rows: number | undefined;
 	x: number;
 	y: number;
 	data: Buffer;

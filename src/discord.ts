@@ -10,20 +10,6 @@ export function create(
 	discordConfig: DiscordConfig,
 	workers: Map<string, Worker>,
 ) {
-	const channelToWorkers = new Map<string, Worker[]>();
-
-	for (const account of config.accounts) {
-		if (!account.channels?.length) continue;
-
-		for (const channel of account.channels) {
-			if (!channelToWorkers.has(channel)) {
-				channelToWorkers.set(channel, [workers.get(account.alias)!]);
-			} else {
-				channelToWorkers.get(channel)!.push(workers.get(account.alias)!);
-			}
-		}
-	}
-
 	const client = new Client({
 		intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
 	});
@@ -56,17 +42,18 @@ export function create(
 			sender: username,
 		};
 
-		const participants =
-			channelToWorkers.size === 0
-				? workers
-				: channelToWorkers.get(message.channel.id);
+		const filtered = config.accounts.filter(
+			a => !a.channels?.length || a.channels.includes(message.channel.id),
+		);
 
-		if (participants) {
-			for (const worker of participants.values()) {
+		if (filtered.length > 0) {
+			for (const account of filtered.values()) {
+				const worker = workers.get(account.alias)!;
+
 				worker.postMessage(payload);
 			}
 
-			const names = [...participants.keys()].map(n => `\`${n}\``).join(', ');
+			const names = [...filtered.keys()].map(n => `\`${n}\``).join(', ');
 
 			return void message.channel.send(
 				`Executed command \`${command}\` with username \`${username}\` to the following workers:\n${names}`,

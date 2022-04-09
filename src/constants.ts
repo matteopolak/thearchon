@@ -245,4 +245,4 @@ export const RECEIVE_MONEY_REGEX =
 	/^\$([\d,\.]+) has been received from \w{1,16}\./;
 export const MONEY_THRESHOLD = 5_000_000;
 export const SURPLUS_MONEY_THRESHOLD = 150_000;
-export const RENEW_CAPTCHA_INTERVAL_TICKS = 20 * 15;
+export const RENEW_CAPTCHA_INTERVAL = 15_000;

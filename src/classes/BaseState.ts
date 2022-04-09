@@ -20,9 +20,22 @@ export default class BaseState {
 		return this.client._bot.waitForTicks(ticks);
 	}
 
-	async setTickInterval(ctx: Context, fn: () => any, ticks: number) {
+	setInterval(ctx: Context, fn: () => any, interval: number) {
+		const id = setInterval(() => {
+			if (ctx.id !== this.client.contextId) {
+				clearInterval(id);
+				return;
+			}
+
+			fn();
+		}, interval);
+
+		return id;
+	}
+
+	async setTickInterval(ctx: Context, fn: () => any, ticks?: number) {
 		while (ctx.id === this.client.contextId) {
-			await this.waitForTicks(ctx, ticks);
+			await this.waitForTicks(ctx, ticks ? 5 : 0);
 			fn();
 		}
 	}
