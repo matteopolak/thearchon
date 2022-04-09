@@ -17,132 +17,192 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 		{
 			slot: 10,
 			price: 5_000,
+			name: 'Old Rod',
+			name_raw: '§7§lOld Rod',
 		},
 		{
 			slot: 11,
 			price: 20_000,
+			name: 'Novice Rod',
+			name_raw: '§e§lNovice Rod',
 		},
 		{
 			slot: 13,
 			price: 100_000,
+			name: 'Apprentice Rod',
+			name_raw: '§a§lApprentice Rod',
 		},
 		{
 			slot: 15,
 			price: 400_000,
+			name: 'Sturdy Rod',
+			name_raw: '§b§lSturdy Rod',
 		},
 		{
 			slot: 16,
 			price: 1_000_000,
+			name: 'Mega Rod',
+			name_raw: '§c§lMega Rod',
 		},
 	],
 	[ServerType.RUBY]: [
 		{
 			slot: 10,
 			price: 5_000,
+			name: 'Old Rod',
+			name_raw: '§7§lOld Rod',
 		},
 		{
 			slot: 11,
 			price: 20_000,
+			name: 'Novice Rod',
+			name_raw: '§e§lNovice Rod',
 		},
 		{
 			slot: 13,
 			price: 100_000,
+			name: 'Apprentice Rod',
+			name_raw: '§a§lApprentice Rod',
 		},
 		{
 			slot: 15,
 			price: 400_000,
+			name: 'Sturdy Rod',
+			name_raw: '§b§lSturdy Rod',
 		},
 		{
 			slot: 16,
 			price: 1_000_000,
+			name: 'Mega Rod',
+			name_raw: '§c§lMega Rod',
 		},
 	],
 	[ServerType.AMBER]: [
 		{
 			slot: 10,
 			price: 5_000,
+			name: 'Old Rod',
+			name_raw: '§7§lOld Rod',
 		},
 		{
 			slot: 11,
 			price: 20_000,
+			name: 'Novice Rod',
+			name_raw: '§e§lNovice Rod',
 		},
 		{
 			slot: 13,
 			price: 100_000,
+			name: 'Apprentice Rod',
+			name_raw: '§a§lApprentice Rod',
 		},
 		{
 			slot: 15,
 			price: 400_000,
+			name: 'Sturdy Rod',
+			name_raw: '§b§lSturdy Rod',
 		},
 		{
 			slot: 16,
 			price: 1_000_000,
+			name: 'Mega Rod',
+			name_raw: '§c§lMega Rod',
 		},
 	],
 	[ServerType.CHAOS]: [
 		{
 			slot: 10,
 			price: 1_000_000,
+			name: 'Old Rod',
+			name_raw: '§7§lOld Rod',
 		},
 		{
 			slot: 11,
 			price: 2_000_000,
+			name: 'Novice Rod',
+			name_raw: '§e§lNovice Rod',
 		},
 		{
 			slot: 13,
 			price: 5_000_000,
+			name: 'Apprentice Rod',
+			name_raw: '§a§lApprentice Rod',
 		},
 		{
 			slot: 15,
 			price: 10_000_000,
+			name: 'Sturdy Rod',
+			name_raw: '§b§lSturdy Rod',
 		},
 		{
 			slot: 16,
 			price: 25_000_000,
+			name: 'Mega Rod',
+			name_raw: '§c§lMega Rod',
 		},
 	],
 	[ServerType.GENESIS]: [
 		{
 			slot: 10,
 			price: 1_000_000,
+			name: 'Old Rod',
+			name_raw: '§7§lOld Rod',
 		},
 		{
 			slot: 11,
 			price: 2_000_000,
+			name: 'Novice Rod',
+			name_raw: '§e§lNovice Rod',
 		},
 		{
 			slot: 13,
 			price: 5_000_000,
+			name: 'Apprentice Rod',
+			name_raw: '§a§lApprentice Rod',
 		},
 		{
 			slot: 15,
 			price: 10_000_000,
+			name: 'Sturdy Rod',
+			name_raw: '§b§lSturdy Rod',
 		},
 		{
 			slot: 16,
 			price: 25_000_000,
+			name: 'Mega Rod',
+			name_raw: '§c§lMega Rod',
 		},
 	],
 	[ServerType.ORIGINS]: [
 		{
 			slot: 10,
 			price: 1_000_000,
+			name: 'Old Rod',
+			name_raw: '§7§lOld Rod',
 		},
 		{
 			slot: 11,
 			price: 2_000_000,
+			name: 'Novice Rod',
+			name_raw: '§e§lNovice Rod',
 		},
 		{
 			slot: 13,
 			price: 5_000_000,
+			name: 'Apprentice Rod',
+			name_raw: '§a§lApprentice Rod',
 		},
 		{
 			slot: 15,
 			price: 10_000_000,
+			name: 'Sturdy Rod',
+			name_raw: '§b§lSturdy Rod',
 		},
 		{
 			slot: 16,
 			price: 25_000_000,
+			name: 'Mega Rod',
+			name_raw: '§c§lMega Rod',
 		},
 	],
 };
@@ -151,7 +211,14 @@ export const FISHING_ROD_DATA: FishingRodData[] =
 	ALL_FISHING_ROD_DATA[config.server];
 
 export const VERSION = config.version;
-export const ROD_TO_BAIT = [9, 11, 13, 15, 15];
+export const ROD_TO_BAIT = [9, 11, 13, 15, 15] as const;
+export const SLOT_TO_BAIT_NAME = {
+	9: 'Simple Bait',
+	11: 'Basic Bait',
+	13: 'Advanced Bait',
+	15: 'Pro Bait',
+	17: 'All-Purpose Bait',
+};
 
 export const WORKER_PATH = path.join(__dirname, 'worker.js');
 

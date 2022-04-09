@@ -12,6 +12,7 @@ import {
 	FISH_COUNT_THRESHOLD,
 	FISH_THRESHOLD,
 	ROD_TO_BAIT,
+	SLOT_TO_BAIT_NAME,
 	SURPLUS_MONEY_THRESHOLD,
 } from '../constants';
 import {
@@ -254,7 +255,7 @@ export default class FishBot extends BaseBot {
 			best < 4 &&
 			data.price <= this.balance - SURPLUS_MONEY_THRESHOLD
 		) {
-			this.logger.info(`Purchasing ${FISHING_RODS[best + 1]}`);
+			this.logger.info(`Purchasing ${data.name}`);
 
 			await this.completeActionAndWaitForSlotItem(
 				ctx,
@@ -284,7 +285,7 @@ export default class FishBot extends BaseBot {
 		const rodIndex = this.getBestFishingRod(true);
 		const baitSlot = ROD_TO_BAIT[rodIndex === -1 ? 0 : rodIndex];
 
-		this.logger.info('Purchasing bait');
+		this.logger.info(`Purchasing ${SLOT_TO_BAIT_NAME[baitSlot]}`);
 
 		await this.client.clickWindow(ctx, 15, 0, 0);
 		await this.client.waitForTicks(ctx, 5);

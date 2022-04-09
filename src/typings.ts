@@ -101,6 +101,8 @@ export type CommandFunction = (
 export interface FishingRodData {
 	slot: number;
 	price: number;
+	name: string;
+	name_raw: string;
 }
 
 export interface RawItem {
