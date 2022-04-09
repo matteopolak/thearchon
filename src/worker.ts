@@ -63,9 +63,9 @@ bot._bot.on('messagestr', message => {
 
 	const messages = message
 		.split('\n')
-		.map(message => `[${format}] [Client thread/INFO] ${message}`);
+		.map(message => `[${format}] [Client thread/INFO] ${message}\n`);
 
-	fs.appendFile(logFileLocation, messages.join('\n'));
+	fs.appendFile(logFileLocation, messages.join(''));
 });
 
 bot._bot.on('kicked', async reason => {
