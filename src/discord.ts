@@ -53,7 +53,7 @@ export function create(
 				worker.postMessage(payload);
 			}
 
-			const names = [...filtered.keys()].map(n => `\`${n}\``).join(', ');
+			const names = filtered.map(n => `\`${n.alias}\``).join(', ');
 
 			return void message.channel.send(
 				`Executed command \`${command}\` with username \`${username}\` to the following workers:\n${names}`,

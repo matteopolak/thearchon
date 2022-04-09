@@ -291,11 +291,16 @@ export default class BaseBot {
 			/^You have no new mail\./,
 			/^Unable to connect to \w+: Server restarting/,
 			/^Connection to \w+ timed out\./,
+			/^You're already connected to that server!/,
 		);
 
 		this.joinedAt = Date.now();
 
-		if (message !== 'You have no new mail.' && message !== null) {
+		if (
+			message !== "You're already connected to that server!" &&
+			message !== 'You have no new mail.' &&
+			message !== null
+		) {
 			await this.client.waitForTicks(ctx, 200);
 
 			return this.join(ctx);
