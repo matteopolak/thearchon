@@ -14,6 +14,8 @@ A feature-packed auto-fishing bot for the Minecraft server [TheArchon](https://t
 ## Disclaimer
 Auto-fishing is against the rules, so using this tool will put you at risk of getting banned from TheArchon.
 
+## Need support? [Join the Discord!](https://discord.gg/VCC2UvcKuH)
+
 ## Features
 * Sells fish, replenishes bait, and upgrades fishing rods
 * Solves anti-macro CAPTCHAs
