@@ -330,6 +330,8 @@ export default class BaseBot {
 
 				const ctx = this.context;
 
+				if (Date.now() - this.joinedAt < 5_000) this.client.activateItem(ctx);
+
 				this.client.setTickInterval(
 					ctx,
 					() => {
