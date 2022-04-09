@@ -7,6 +7,7 @@ import type { Vec3 } from 'vec3';
 import config from '../config';
 import {
 	BAIT_THRESHOLD,
+	CAPTCHA_TIME_THRESHOLD,
 	FISHING_RODS,
 	FISHING_ROD_DATA,
 	FISH_COUNT_THRESHOLD,
@@ -73,7 +74,10 @@ export default class FishBot extends BaseBot {
 				const ctx = this.context;
 				const promise = this.waitForItem(ctx, 346);
 
-				await sleep(this.captcha.startedAt - Date.now() + 2_000);
+				await sleep(
+					this.captcha.startedAt - Date.now() + CAPTCHA_TIME_THRESHOLD,
+				);
+
 				await this.completeActionAndWaitForMessage(
 					ctx,
 					() => this.command(ctx, `/code ${answer.join('')}`),
