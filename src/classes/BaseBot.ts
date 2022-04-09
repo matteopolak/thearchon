@@ -294,6 +294,7 @@ export default class BaseBot {
 			/^Unable to connect to \w+: Server restarting/,
 			/^Connection to \w+ timed out\./,
 			/^You're already connected to that server!/,
+			/^You are already trying to connect to a server!/,
 		);
 
 		this.joinedAt = Date.now();
