@@ -69,7 +69,6 @@ export interface Config {
 	version: string;
 	accounts: Account[];
 	fishing: {
-		smart_casting: boolean;
 		fish_on_join: boolean;
 		sneak_while_fishing: boolean;
 		upgrade_fishing_rod_automatically: boolean;

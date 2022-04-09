@@ -57,8 +57,6 @@ const config: Config = {
 		sneak_while_fishing: false,
 		// Whether to upgrade the fishing rod automatically
 		upgrade_fishing_rod_automatically: true,
-		// Whether to listen for the rod cast sound when casting
-		smart_casting: true,
 		// Whether to stop fishing when the bot is mentioned in chat or sent a direct message
 		stop_fishing_on_mention: false,
 	},

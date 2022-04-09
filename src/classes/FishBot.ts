@@ -440,7 +440,6 @@ export default class FishBot extends BaseBot {
 
 	private async cast(ctx: Context) {
 		if (ctx.id !== this.contextId) return;
-		if (!config.fishing.smart_casting) return this.client.activateItem(ctx);
 
 		let cast = true;
 
