@@ -346,3 +346,6 @@ export const RENEW_CAPTCHA_INTERVAL = 15_000;
 
 // Minimum time to wait before solving a CAPTCHA
 export const CAPTCHA_TIME_THRESHOLD = 4_000;
+
+// Minimum time to wait between window clicks
+export const TIME_BETWEEN_WINDOW_CLICKS = 750;

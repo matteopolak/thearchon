@@ -76,7 +76,7 @@ export default class FishBot extends BaseBot {
 
 				this.state = State.IDLE;
 
-				const ctx = this.context;
+				const ctx = this.context();
 				const promise = this.waitForItem(ctx, 346);
 
 				await sleep(
@@ -246,7 +246,6 @@ export default class FishBot extends BaseBot {
 
 		if (sellSlot !== -1) {
 			await this.client.clickWindow(ctx, sellSlot, 0, 0);
-			await this.client.waitForTicks(ctx, 5);
 
 			return true;
 		}
@@ -495,7 +494,7 @@ export default class FishBot extends BaseBot {
 	public async fish(_: Context) {
 		this.state = State.FISHING;
 
-		const ctx = this.context;
+		const ctx = this.context();
 		const rod = this.getBestFishingRod();
 
 		if (rod === null) return;
@@ -521,7 +520,7 @@ export default class FishBot extends BaseBot {
 
 		this.createMoveHandler(ctx);
 
-		for (let i = 0; ctx.id === this.contextId; ++i) {
+		while (ctx.id === this.contextId) {
 			ctx.allow_reaction = false;
 
 			if (

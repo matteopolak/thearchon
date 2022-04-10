@@ -4,7 +4,9 @@ import type { Item } from 'prismarine-item';
 import type { Window } from 'prismarine-windows';
 import type { Vec3 } from 'vec3';
 
+import { TIME_BETWEEN_WINDOW_CLICKS } from '../constants';
 import type { Context } from '../typings';
+import { cooldownSleep } from '../utils';
 import type BaseBot from './BaseBot';
 
 export default class BaseState {
@@ -133,8 +135,16 @@ export default class BaseState {
 		return this.client._bot.activateEntity(entity);
 	}
 
-	clickWindow(ctx: Context, slot: number, mouseButton: number, mode: number) {
+	async clickWindow(
+		ctx: Context,
+		slot: number,
+		mouseButton: number,
+		mode: number,
+	) {
 		if (ctx.id !== this.client.contextId) return Promise.resolve();
+
+		await cooldownSleep(ctx.last_window_click, TIME_BETWEEN_WINDOW_CLICKS);
+		ctx.last_window_click = Date.now();
 
 		return this.client._bot.clickWindow(slot, mouseButton, mode);
 	}

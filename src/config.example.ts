@@ -59,6 +59,8 @@ const config: Config = {
 		upgrade_fishing_rod_automatically: true,
 		// Whether to stop fishing when the bot is mentioned in chat or sent a direct message
 		stop_fishing_on_mention: false,
+		// Move randomly while fishing
+		random_movement: true,
 	},
 	// Whether to log information in the console
 	log: true,

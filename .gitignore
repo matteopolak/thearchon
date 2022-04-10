@@ -4,3 +4,4 @@ data
 .env
 src/config.ts
 **/*.js
+recordings

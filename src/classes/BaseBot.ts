@@ -88,6 +88,10 @@ export default class BaseBot {
 	private responseMap: Map<string, number> = new Map();
 
 	public fisher?: FishBot;
+	public movements: {
+		run: (ctx: Context) => Promise<void>;
+		name: string;
+	}[] = [];
 
 	constructor(options: BaseBotOptions, port: MessagePort) {
 		this.options = options;
@@ -121,7 +125,7 @@ export default class BaseBot {
 				this.logger.info(`${sender} ran command '${command}'`);
 
 				try {
-					return run(this.context, sender, ...args);
+					return run(this.context(), sender, ...args);
 				} catch (e: any) {
 					this.logger.error(e);
 				}
@@ -129,12 +133,13 @@ export default class BaseBot {
 		});
 	}
 
-	get context(): Context {
+	context(): Context {
 		return {
 			id: this.contextId,
 			allow_reaction: false,
 			reacting_to_movement: false,
 			location: Location.UNKNOWN,
+			last_window_click: 0,
 		};
 	}
 
@@ -184,7 +189,7 @@ export default class BaseBot {
 
 					if (config.react_to_external_move) {
 						this.state = State.IDLE;
-						await this.client.lookAround(this.context);
+						await this.client.lookAround(this.context());
 
 						if (this.fisher) {
 							this.fisher.fish(ctx);
@@ -284,7 +289,7 @@ export default class BaseBot {
 		});
 	}
 
-	public async join(ctx: Context = this.context): Promise<void> {
+	public async join(ctx: Context = this.context()): Promise<void> {
 		if (ctx.id !== this.contextId) return;
 
 		if (this.fisher && config.fishing.fish_on_join) {
@@ -353,7 +358,7 @@ export default class BaseBot {
 
 			await fs.appendFile(this.logFileLocation, messages.join(''));
 
-			const ctx = this.context;
+			const ctx = this.context();
 
 			if (
 				this.state !== State.SOLVING_CAPTCHA &&
@@ -369,7 +374,7 @@ export default class BaseBot {
 				this.captcha.startedAt = Date.now();
 				this.state = State.SOLVING_CAPTCHA;
 
-				const ctx = this.context;
+				const ctx = this.context();
 
 				if (Date.now() - this.joinedAt < 5_000) this.client.activateItem(ctx);
 
@@ -448,7 +453,7 @@ export default class BaseBot {
 					const amount = Math.floor(this.balance - SURPLUS_MONEY_THRESHOLD);
 
 					return this.command(
-						this.context,
+						ctx,
 						`/pay ${config.autopay_to} ${amount.toFixed(2)}`,
 					);
 				}
@@ -567,7 +572,7 @@ export default class BaseBot {
 				this.logger.info(`${sender} ran command '${command}'`);
 
 				try {
-					return run(this.context, sender, ...args);
+					return run(ctx, sender, ...args);
 				} catch (e: any) {
 					this.logger.error(e);
 				}
@@ -583,7 +588,7 @@ export default class BaseBot {
 			const { message, resolve, ctx } = this.commandQueue.shift() ?? {};
 
 			if (
-				ctx?.id !== this.context.id ||
+				ctx?.id !== this.contextId ||
 				message === undefined ||
 				resolve === undefined ||
 				ctx === undefined
@@ -608,7 +613,7 @@ export default class BaseBot {
 			const { message, resolve, ctx } = this.messageQueue.shift() ?? {};
 
 			if (
-				ctx?.id !== this.context.id ||
+				ctx?.id !== this.contextId ||
 				message === undefined ||
 				resolve === undefined ||
 				ctx === undefined

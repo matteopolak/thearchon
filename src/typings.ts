@@ -80,6 +80,7 @@ export interface Config {
 		sneak_while_fishing: boolean;
 		upgrade_fishing_rod_automatically: boolean;
 		stop_fishing_on_mention: boolean;
+		random_movement: boolean;
 	};
 	log: boolean;
 	notify_on_mention: boolean;
@@ -97,6 +98,7 @@ export type Context = {
 		position: Vec3;
 	};
 	location: Location;
+	last_window_click: number;
 };
 
 export type CommandFunction = (

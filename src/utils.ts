@@ -162,6 +162,16 @@ export function sleep(ms: number): Promise<true> {
 	return new Promise(r => setTimeout(r, ms, true));
 }
 
+export function cooldownSleep(last: number, cooldown: number): Promise<true> {
+	const now = Date.now();
+
+	if (now - last < cooldown) {
+		return sleep(now - last + cooldown);
+	}
+
+	return Promise.resolve(true);
+}
+
 export function createPromiseResolvePair(): {
 	promise: Promise<void>;
 	resolve: () => void;
