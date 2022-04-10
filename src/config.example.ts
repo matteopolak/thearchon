@@ -59,8 +59,20 @@ const config: Config = {
 		upgrade_fishing_rod_automatically: true,
 		// Whether to stop fishing when the bot is mentioned in chat or sent a direct message
 		stop_fishing_on_mention: false,
-		// Move randomly while fishing
-		random_movement: true,
+		// Settings for random movement
+		random_movement: {
+			// Whether to enable random movement
+			enabled: false,
+			// A list of recordings to use for random movement
+			// Creating a recording:
+			// 1. Create a new single-player world and open it to LAN
+			// 2. Run `npm run record -- <port>`
+			// 3. Follow instructions in-game
+			// 4. Use file name as the name of the recording (feel free to rename them to something else!)
+			recordings: [],
+			// Chance of random movement happening (0 to 1)
+			chance: 0.05,
+		},
 	},
 	// Whether to log information in the console
 	log: true,

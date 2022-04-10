@@ -32,6 +32,7 @@ import {
 	LocationType,
 	MessageType,
 	RawItem,
+	RecordingStep,
 	State,
 } from '../typings';
 import { CommandFunction, Location, ParentMessage } from '../typings';
@@ -39,6 +40,7 @@ import {
 	createPromiseResolvePair,
 	currencyFormatter,
 	generateResponse,
+	random,
 	sleep,
 } from '../utils';
 import BaseState from './BaseState';
@@ -89,7 +91,7 @@ export default class BaseBot {
 
 	public fisher?: FishBot;
 	public movements: {
-		run: (ctx: Context) => Promise<void>;
+		steps: RecordingStep[];
 		name: string;
 	}[] = [];
 
@@ -141,6 +143,22 @@ export default class BaseBot {
 			location: Location.UNKNOWN,
 			last_window_click: 0,
 		};
+	}
+
+	async randomMovement(ctx: Context) {
+		if (ctx.id !== this.contextId || this.movements.length === 0) return;
+
+		const movement = this.movements[random(this.movements.length)];
+
+		this.logger.info(`Started random movement ${chalk.red(movement.name)}...`);
+		await this.client.replay(ctx, movement.steps);
+		await this.client.waitForTicks(ctx, 10);
+		this.logger.info(`Finished random movement ${chalk.red(movement.name)}`);
+
+		if (ctx.fishing) {
+			ctx.fishing.pitch = this.client.entity.pitch;
+			ctx.fishing.yaw = this.client.entity.yaw;
+		}
 	}
 
 	get state() {
@@ -255,12 +273,22 @@ export default class BaseBot {
 		});
 	}
 
-	public async waitForSlotItem(ctx: Context, slot: number, item: number) {
+	public async waitForSlotItem(
+		ctx: Context,
+		slot: number,
+		item: number,
+		metadata?: number,
+	) {
 		if (ctx.id !== this.contextId) return;
 
 		return new Promise<undefined>(resolve => {
 			const listener = (packet: RawItem) => {
-				if (packet.slot !== slot || packet.item.blockId !== item) return;
+				if (
+					packet.slot !== slot ||
+					packet.item.blockId !== item ||
+					(metadata !== undefined && metadata !== packet.item.itemDamage)
+				)
+					return;
 
 				this._bot._client.off('set_slot', listener);
 				// @ts-ignore
@@ -342,6 +370,25 @@ export default class BaseBot {
 				path.join(this.directory, `chat_${Date.now()}.log`),
 			)
 			.catch(() => {});
+
+		if (config.fishing.random_movement.enabled) {
+			const recordingDirectory = path.join(__dirname, '..', '..', 'recordings');
+			const recordings = config.fishing.random_movement.recordings;
+
+			for (const name of recordings) {
+				try {
+					const steps = JSON.parse(
+						await fs.readFile(path.join(recordingDirectory, name), 'utf8'),
+					) as RecordingStep[];
+					this.movements.push({
+						name,
+						steps,
+					});
+				} catch {
+					this.logger.warn(`Failed to load recording ${name}`);
+				}
+			}
+		}
 
 		this._bot.on('messagestr', async m => {
 			if (m.startsWith('██')) return;
@@ -833,8 +880,9 @@ export default class BaseBot {
 		action: () => any,
 		slot: number,
 		item: number,
+		metadata?: number,
 	) {
-		const promise = this.waitForSlotItem(ctx, slot, item);
+		const promise = this.waitForSlotItem(ctx, slot, item, metadata);
 
 		await action();
 

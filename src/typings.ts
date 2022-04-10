@@ -80,7 +80,11 @@ export interface Config {
 		sneak_while_fishing: boolean;
 		upgrade_fishing_rod_automatically: boolean;
 		stop_fishing_on_mention: boolean;
-		random_movement: boolean;
+		random_movement: {
+			enabled: boolean;
+			recordings: string[];
+			chance: number;
+		};
 	};
 	log: boolean;
 	notify_on_mention: boolean;
@@ -96,6 +100,8 @@ export type Context = {
 		pitch: number;
 		yaw: number;
 		position: Vec3;
+		original_pitch: number;
+		original_yaw: number;
 	};
 	location: Location;
 	last_window_click: number;
@@ -182,3 +188,18 @@ export interface InventoryData {
 		fish: number;
 	};
 }
+
+export type RecordingStep = {
+	forward?: boolean;
+	back?: boolean;
+	left?: boolean;
+	right?: boolean;
+	jump?: boolean;
+	swing?: boolean;
+	crouch?: boolean;
+	sprint?: boolean;
+	yaw?: number;
+	pitch?: number;
+	time?: number;
+	wait?: number;
+};

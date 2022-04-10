@@ -5,8 +5,8 @@ import type { Window } from 'prismarine-windows';
 import type { Vec3 } from 'vec3';
 
 import { TIME_BETWEEN_WINDOW_CLICKS } from '../constants';
-import type { Context } from '../typings';
-import { cooldownSleep } from '../utils';
+import type { Context, RecordingStep } from '../typings';
+import { cooldownSleep, sleep } from '../utils';
 import type BaseBot from './BaseBot';
 
 export default class BaseState {
@@ -196,5 +196,84 @@ export default class BaseState {
 
 	get entities() {
 		return this.client._bot.entities;
+	}
+
+	swingArm(ctx: Context, hand?: 'right' | 'left', showHand?: boolean) {
+		if (ctx.id !== this.client.contextId) return;
+
+		return this.client._bot.swingArm(hand, showHand);
+	}
+
+	get controlState() {
+		return this.client._bot.controlState;
+	}
+
+	clearControlStates(ctx: Context) {
+		if (ctx.id !== this.client.contextId) return;
+
+		return this.client._bot.clearControlStates();
+	}
+
+	async jumpOnce(ctx: Context) {
+		this.setControlState(ctx, 'jump', true);
+		await this.waitForTicks(ctx, 1);
+		this.setControlState(ctx, 'jump', false);
+	}
+
+	async replay(ctx: Context, steps: RecordingStep[]) {
+		for (const step of steps) {
+			if (step.swing) this.swingArm(ctx);
+			if (step.jump) this.jumpOnce(ctx);
+
+			if (step.sprint === !this.controlState.sprint) {
+				this.setControlState(ctx, 'sprint', step.sprint);
+			}
+
+			if (step.crouch === !this.controlState.sneak) {
+				this.setControlState(ctx, 'sneak', step.crouch);
+			}
+
+			if (step.forward === !this.controlState.forward) {
+				this.setControlState(ctx, 'forward', step.forward);
+				if (step.forward) this.setControlState(ctx, 'back', !step.forward);
+			}
+
+			if (step.back === !this.controlState.back) {
+				if (step.back) this.setControlState(ctx, 'forward', !step.back);
+				this.setControlState(ctx, 'back', step.back);
+			}
+
+			if (step.left === !this.controlState.left) {
+				this.setControlState(ctx, 'left', step.left);
+				if (step.left) this.setControlState(ctx, 'right', !step.left);
+			}
+
+			if (step.right === !this.controlState.right) {
+				if (step.right) this.setControlState(ctx, 'left', !step.right);
+				this.setControlState(ctx, 'right', step.right);
+			}
+
+			if (step.yaw !== undefined || step.pitch !== undefined) {
+				this.entity.pitch = step.pitch ?? this.entity.pitch;
+				this.entity.yaw += step.yaw ?? 0;
+			}
+
+			if (step.wait) {
+				await sleep(step.wait);
+			}
+		}
+
+		this.setControlState(ctx, 'forward', false);
+		this.setControlState(ctx, 'back', false);
+		this.setControlState(ctx, 'left', false);
+		this.setControlState(ctx, 'right', false);
+		this.setControlState(ctx, 'sprint', false);
+		this.setControlState(ctx, 'jump', false);
+
+		await this.look(
+			ctx,
+			ctx.fishing!.original_yaw,
+			ctx.fishing!.original_pitch,
+		);
 	}
 }

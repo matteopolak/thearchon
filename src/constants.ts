@@ -249,7 +249,13 @@ export const FISHING_ROD_DATA: FishingRodData[] =
 export const VERSION = config.version;
 
 // Rod index to purchase slot conversion
-export const ROD_TO_BAIT = [9, 11, 13, 15, 15] as const;
+export const ROD_TO_BAIT = [
+	{ slot: 9, metadata: 8 },
+	{ slot: 11, metadata: 9 },
+	{ slot: 13, metadata: 10 },
+	{ slot: 15, metadata: 11 },
+	{ slot: 17, metadata: 15 },
+] as const;
 
 // Slot to coloured bait name
 export const SLOT_TO_BAIT_NAME = {

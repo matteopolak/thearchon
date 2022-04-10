@@ -28,7 +28,7 @@ import {
 	State,
 } from '../typings';
 import type { Context, InventoryData, RawMapData } from '../typings';
-import { currencyFormatter, sleep, unscramble } from '../utils';
+import { chance, currencyFormatter, sleep, unscramble } from '../utils';
 import BaseBot from './BaseBot';
 
 const items = minecraftData(VERSION);
@@ -292,14 +292,26 @@ export default class FishBot extends BaseBot {
 		if (ctx.id !== this.contextId) return;
 
 		const rodIndex = this.getBestFishingRod(true);
-		const baitSlot = ROD_TO_BAIT[rodIndex === -1 ? 0 : rodIndex];
+		const bait = ROD_TO_BAIT[rodIndex === -1 ? 0 : rodIndex];
 
-		this.logger.info(`Purchasing ${SLOT_TO_COLOURED_BAIT_NAME[baitSlot]}`);
+		this.logger.info(`Purchasing ${SLOT_TO_COLOURED_BAIT_NAME[bait.slot]}`);
 
-		await this.client.clickWindow(ctx, 15, 0, 0);
-		await this.client.waitForTicks(ctx, 5);
-		await this.client.clickWindow(ctx, baitSlot, 0, 0);
-		await this.client.waitForTicks(ctx, 5);
+		await this.completeActionAndWaitForSlotItem(
+			ctx,
+			() => this.client.clickWindow(ctx, 15, 0, 0),
+			13,
+			351,
+			10,
+		);
+
+		await this.completeActionAndWaitForSlotItem(
+			ctx,
+			() => this.client.clickWindow(ctx, bait.slot, 0, 0),
+			bait.slot === 9 ? 11 : 9,
+			351,
+			bait.metadata,
+		);
+
 		await this.client.clickWindow(ctx, 17, 0, 0);
 
 		return true;
@@ -516,6 +528,8 @@ export default class FishBot extends BaseBot {
 			pitch: this.client.entity.pitch,
 			yaw: this.client.entity.yaw,
 			position: this.client.entity.position,
+			original_pitch: this.client.entity.pitch,
+			original_yaw: this.client.entity.yaw,
 		};
 
 		this.createMoveHandler(ctx);
@@ -529,6 +543,12 @@ export default class FishBot extends BaseBot {
 			) {
 				await this.teleportToHome(ctx, Location.FISHING);
 			}
+
+			if (
+				config.fishing.random_movement.enabled &&
+				chance(config.fishing.random_movement.chance)
+			)
+				await this.randomMovement(ctx);
 
 			ctx.allow_reaction = true;
 

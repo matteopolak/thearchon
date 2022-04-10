@@ -9,7 +9,8 @@
 		"check:style": "prettier --check src/**/*.ts && eslint src",
 		"check:tsc": "tsc --noEmit",
 		"test": "jest --verbose ./tests",
-		"benchmark": "ts-node benchmarks/benchmarks.ts --project tsconfig.benchmark.json"
+		"benchmark": "ts-node benchmarks/benchmarks.ts --project tsconfig.benchmark.json",
+		"record": "ts-node src/record.ts"
 	},
 	"author": "Matteo Polak",
 	"license": "MIT",
