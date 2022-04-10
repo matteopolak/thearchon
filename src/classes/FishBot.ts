@@ -1,5 +1,7 @@
 import type { MessagePort } from 'worker_threads';
 
+import chalk from 'chalk';
+import minecraftData from 'minecraft-data';
 import type { Item } from 'prismarine-item';
 import type { Window } from 'prismarine-windows';
 import type { Vec3 } from 'vec3';
@@ -15,6 +17,7 @@ import {
 	ROD_TO_BAIT,
 	SLOT_TO_COLOURED_BAIT_NAME,
 	SURPLUS_MONEY_THRESHOLD,
+	VERSION,
 } from '../constants';
 import {
 	BaseBotOptions,
@@ -27,6 +30,8 @@ import {
 import type { Context, InventoryData, RawMapData } from '../typings';
 import { currencyFormatter, sleep, unscramble } from '../utils';
 import BaseBot from './BaseBot';
+
+const items = minecraftData(VERSION);
 
 export default class FishBot extends BaseBot {
 	public bestFishingRod: number = 0;
@@ -546,11 +551,45 @@ export default class FishBot extends BaseBot {
 			await this.waitForBite(ctx);
 
 			this.logger.info('Reeling...');
-			await this.completeActionAndWaitForItem(ctx, () =>
+			const reward = await this.completeActionAndWaitForItem(ctx, () =>
 				this.client.activateItem(ctx),
 			);
 
-			this.logger.info('Reel complete');
+			if (reward) {
+				const rawName: string =
+					// @ts-ignore
+					reward.item.nbtData?.value?.display?.value?.Name?.value ??
+					items.findItemOrBlockById(reward.item.blockId)?.displayName;
+				const coins: number =
+					// @ts-ignore
+					reward.item.nbtData?.value?.arfshfishworth?.value ?? 0;
+				const mobcoins: number =
+					// @ts-ignore
+					reward.item.nbtData?.value?.arfshfishmobcoins?.value ?? 0;
+				const name = rawName ? rawName.replace(/§\w/g, '') : undefined;
+
+				if (coins && mobcoins && name) {
+					this.logger.info(
+						`Caught ${chalk.bold(chalk.magenta(name))} [${chalk.red(
+							reward.item.itemCount,
+						)}] worth ${chalk.green(
+							`$${currencyFormatter.format(coins)}${chalk.reset(
+								'/',
+							)}${chalk.yellow(
+								`${currencyFormatter.format(mobcoins)} MobCoins`,
+							)}`,
+						)}`,
+					);
+				} else if (name) {
+					this.logger.info(
+						`Caught ${chalk.bold(chalk.magenta(name))} [${chalk.red(
+							reward.item.itemCount,
+						)}]`,
+					);
+				} else {
+					this.logger.info('Reel complete');
+				}
+			}
 		}
 
 		return true;

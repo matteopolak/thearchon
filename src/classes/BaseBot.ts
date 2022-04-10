@@ -214,15 +214,20 @@ export default class BaseBot {
 	public async waitForItem(ctx: Context, item?: number) {
 		if (ctx.id !== this.contextId) return;
 
-		return new Promise<undefined>(resolve => {
+		return new Promise<RawItem | undefined>(resolve => {
 			const listener = (packet: RawItem) => {
-				if (item !== undefined && packet.item.blockId !== item) return;
+				if (
+					packet.item.blockId === 351 ||
+					packet.item.blockId === -1 ||
+					(item !== undefined && packet.item.blockId !== item)
+				)
+					return;
 
 				this._bot._client.off('set_slot', listener);
 				// @ts-ignore
 				this._bot.off('context_changed', contextListener);
 
-				resolve(undefined);
+				resolve(packet);
 			};
 
 			const contextListener = () => {

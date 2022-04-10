@@ -1,0 +1,83 @@
+{
+	"windowId": 0,
+	"slot": 14,
+	"item": {
+		"blockId": 349,
+		"itemCount": 1,
+		"itemDamage": 1,
+		"nbtData": {
+			"type": "compound",
+			"name": "",
+			"value": {
+				"arfshfishcatcher": {
+					"type": "string",
+					"value": "c2c4a1f5-b850-4f2d-9fbc-76db6ed8ca99"
+				},
+				"arfshfishrar": {
+					"type": "string",
+					"value": "uncommon"
+				},
+				"Unbreakable": {
+					"type": "byte",
+					"value": 1
+				},
+				"arfshfish": {
+					"type": "string",
+					"value": "salmon"
+				},
+				"arfshfishmobcoins": {
+					"type": "double",
+					"value": 24.75109889521338
+				},
+				"HideFlags": {
+					"type": "int",
+					"value": 63
+				},
+				"arfshfishkgs": {
+					"type": "double",
+					"value": 13.200586077447136
+				},
+				"display": {
+					"type": "compound",
+					"value": {
+						"Lore": {
+							"type": "list",
+							"value": {
+								"type": "string",
+								"value": [
+									"§7A salmon is a §anormal§7 fish.",
+									"§7It can weigh from §b10§7-§b20§7 kilo.",
+									"§7It is sold for §a$450.00§7/kg or",
+									"§b1.50 Mob Coins§7/kg.",
+									" ",
+									"§7Caught by §bFAITH422",
+									"§7Native to §e§eSafe Lake",
+									"§7Has an §eUncommon§7 quality.",
+									"§7Weighs §e13.20kg",
+									"§7Worth §a$7,425.33",
+									"§7Worth §e24.75 MobCoins"
+								]
+							}
+						},
+						"Name": {
+							"type": "string",
+							"value": "§f§lSalmon"
+						}
+					}
+				},
+				"arfshfishtokens": {
+					"type": "double",
+					"value": 0
+				},
+				"arfshfishlake": {
+					"type": "string",
+					"value": "safe_lake"
+				},
+				"arfshfishworth": {
+					"type": "double",
+					"value": 7425.329668564014
+				}
+			}
+		}
+	}
+}
