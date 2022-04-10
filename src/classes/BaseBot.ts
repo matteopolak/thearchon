@@ -9,17 +9,21 @@ import type { Window } from 'prismarine-windows';
 
 import config from '../config';
 import {
+	BAIT_NAME_TO_PRICE,
 	BALANCE_REGEX,
 	CHAT_MESSAGE_REGEX,
 	COMMAND_COOLDOWN,
 	COMMAND_REGEX,
 	DIRECT_MESSAGE_REGEX,
+	FISHING_ROD_DATA,
 	FISHMONGER_COINS_SELL_REGEX,
 	FISHMONGER_MOBCOINS_SELL_REGEX,
 	JOIN_ERROR_REGEX,
 	MESSAGE_COOLDOWN,
 	MOBCOINS_REGEX,
 	MONEY_THRESHOLD,
+	PURCHASE_BAIT_REGEX,
+	PURCHASE_ROD_REGEX,
 	RECEIVE_MONEY_REGEX,
 	RENEW_CAPTCHA_INTERVAL,
 	SEND_MONEY_REGEX,
@@ -602,6 +606,29 @@ export default class BaseBot {
 
 				if (this.checkedBalance === false) await this.getCurrentBalance(ctx);
 				else this.balance += value;
+
+				return;
+			}
+
+			if (PURCHASE_BAIT_REGEX.test(m)) {
+				const [, _count, name] = m.match(PURCHASE_BAIT_REGEX)!;
+				const count = parseInt(_count);
+
+				const value =
+					count * BAIT_NAME_TO_PRICE[name as keyof typeof BAIT_NAME_TO_PRICE];
+
+				if (this.checkedBalance === false) await this.getCurrentBalance(ctx);
+				else this.balance -= value;
+
+				return;
+			}
+
+			if (PURCHASE_ROD_REGEX.test(m)) {
+				const [, name] = m.match(PURCHASE_ROD_REGEX)!;
+				const value = FISHING_ROD_DATA.find(r => r.name === name)?.price;
+
+				if (this.checkedBalance === false) await this.getCurrentBalance(ctx);
+				else if (value) this.balance -= value;
 
 				return;
 			}

@@ -257,6 +257,14 @@ export const ROD_TO_BAIT = [
 	{ slot: 15, metadata: 11 },
 ] as const;
 
+export const BAIT_NAME_TO_PRICE = {
+	'Simple Bait': 400,
+	'Basic Bait': 600,
+	'Advanced Bait': 1_200,
+	'Pro Bait': 2_000,
+	'All-Purpose Bait': 500,
+};
+
 // Slot to coloured bait name
 export const SLOT_TO_BAIT_NAME = {
 	9: 'Simple Bait',
@@ -355,3 +363,13 @@ export const CAPTCHA_TIME_THRESHOLD = 4_000;
 
 // Minimum time to wait between window clicks
 export const TIME_BETWEEN_WINDOW_CLICKS = 750;
+
+// Bait purchase message. Translation:
+// `You purchased x{number} {name} Bait from the Fishmonger!`
+export const PURCHASE_BAIT_REGEX =
+	/^You purchased x(\d+) (\w+ Bait) from the Fishmonger!/;
+
+// Bait rod message. Translation:
+// `You purchased the {name} Rod from the Fishmonger!`
+export const PURCHASE_ROD_REGEX =
+	/^You purchased the (\w+ Rod) from the Fishmonger!/;
