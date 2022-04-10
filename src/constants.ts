@@ -254,7 +254,7 @@ export const ROD_TO_BAIT = [
 	{ slot: 11, metadata: 9 },
 	{ slot: 13, metadata: 10 },
 	{ slot: 15, metadata: 11 },
-	{ slot: 17, metadata: 15 },
+	{ slot: 15, metadata: 11 },
 ] as const;
 
 // Slot to coloured bait name
