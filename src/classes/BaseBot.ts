@@ -596,7 +596,7 @@ export default class BaseBot {
 			await sleep(COMMAND_COOLDOWN - this.lastCommandAgo);
 			this.lastCommandTimestamp = Date.now();
 
-			this.logger.info(`Sending command: ${message}`);
+			this.logger.info(`Sending command: ${chalk.yellow(message)}`);
 			this.client.chat(ctx, message);
 
 			resolve();
@@ -621,7 +621,7 @@ export default class BaseBot {
 			await sleep(MESSAGE_COOLDOWN - this.lastMessageAgo);
 			this.lastMessageTimestamp = Date.now();
 
-			this.logger.info(`Sending message: ${message}`);
+			this.logger.info(`Sending message: ${chalk.yellow(message)}`);
 			this.client.chat(ctx, message);
 
 			resolve();
