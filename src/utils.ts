@@ -166,7 +166,7 @@ export function cooldownSleep(last: number, cooldown: number): Promise<true> {
 	const now = Date.now();
 
 	if (now - last < cooldown) {
-		return sleep(now - last + cooldown);
+		return sleep(last - now + cooldown);
 	}
 
 	return Promise.resolve(true);
