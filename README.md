@@ -28,6 +28,8 @@ Auto-fishing is against the rules, so using this tool will put you at risk of ge
 * Reconnects on server restarts
 * Automatically sends fishing money to your bank account
 * Low memory footprint (~100MB per bot)
+* Random movement
+	* Easily create recordings
 
 ## Installation
 
@@ -68,3 +70,17 @@ These commands must be run in an McMMO party chat or Discord channel to which th
 | `sell <coins/mobcoins>` | Changes the exchange type for selling fish |
 | `tp` | Sends a teleportation request to the player |
 | `value` | Displays the current value in fish in the bot's inventory |
+
+## Recordings
+
+This section is only relevant if you are using the `random_movement` feature.
+
+### Creating a new recording
+1. Host a new Singleplayer world (open to LAN)
+2. Run the command `npm run record -- <port>`
+3. Type `start` in the chat to start recording
+4. Type `stop` in the chat to stop recording; your recording will be saved to `recordings/{timestamp}.json`
+
+### Using a recording
+
+To use a recording as a random movement, add the name of the file to `config.random_movements.recordings`.

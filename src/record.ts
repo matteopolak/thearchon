@@ -66,7 +66,7 @@ interface Settings {
 }
 
 const bot = mineflayer.createBot({
-	username: 'bot',
+	username: 'Recorder',
 	host: 'localhost',
 	port,
 	version: '1.8.9',
