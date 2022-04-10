@@ -230,7 +230,7 @@ function getPressedKeys(packet: {
 }) {
 	let direction;
 
-	const magnitude = Math.sqrt(packet.dX ** 2 + packet.dY ** 2 + packet.dZ ** 2);
+	const magnitude = Math.sqrt(packet.dX ** 2 + packet.dZ ** 2);
 
 	if (magnitude > 10) {
 		if (packet.dX === 0) {
