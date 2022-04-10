@@ -494,6 +494,16 @@ export default class FishBot extends BaseBot {
 		} while (cast);
 	}
 
+	private async reel(ctx: Context) {
+		const promise = this.waitForItemOrMessage(ctx, [
+			'Whatever fish you were about to catch broke your line!',
+		]);
+
+		this.client.activateItem(ctx);
+
+		return promise;
+	}
+
 	public getFishMonger() {
 		return Object.values(this.client.entities).find(
 			e =>
@@ -570,9 +580,7 @@ export default class FishBot extends BaseBot {
 			await this.waitForBite(ctx);
 
 			this.logger.info('Reeling...');
-			const reward = await this.completeActionAndWaitForItem(ctx, () =>
-				this.client.activateItem(ctx),
-			);
+			const reward = await this.reel(ctx);
 
 			if (reward) {
 				const rawName: string =

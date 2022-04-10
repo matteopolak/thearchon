@@ -234,6 +234,68 @@ export default class BaseBot {
 		}
 	}
 
+	public async waitForItemOrMessage(
+		ctx: Context,
+		messages: string[] | RegExp[],
+		item?: number,
+	) {
+		if (ctx.id !== this.contextId) return;
+
+		return new Promise<RawItem | null>(resolve => {
+			const slotListener = (packet: RawItem) => {
+				if (
+					packet.item.blockId === 351 ||
+					packet.item.blockId === -1 ||
+					(item !== undefined && packet.item.blockId !== item)
+				)
+					return;
+
+				this._bot._client.off('set_slot', slotListener);
+				this._bot.off('messagestr', messageListener);
+				// @ts-ignore
+				this._bot.off('context_changed', contextListener);
+
+				resolve(packet);
+			};
+
+			const contextListener = () => {
+				this._bot._client.off('set_slot', slotListener);
+				this._bot.off('messagestr', messageListener);
+
+				resolve(null);
+			};
+
+			const messageListener = (message: string) => {
+				if (
+					messages.some(x =>
+						x instanceof RegExp ? x.test(message) : message === x,
+					)
+				) {
+					this._bot.off('messagestr', messageListener);
+					this._bot._client.off('set_slot', slotListener);
+					// @ts-ignore
+					this._bot.off('context_changed', contextListener);
+
+					resolve(null);
+				}
+			};
+
+			this._bot._client.on('set_slot', slotListener);
+			this._bot.on('messagestr', messageListener);
+			// @ts-ignore
+			this._bot.once('context_changed', contextListener);
+
+			if (ctx.id !== this.contextId) {
+				this._bot._client.off('set_slot', slotListener);
+				this._bot.off('messagestr', messageListener);
+				// @ts-ignore
+				this._bot.off('context_changed', contextListener);
+
+				resolve(null);
+			}
+		});
+	}
+
 	public async waitForItem(ctx: Context, item?: number) {
 		if (ctx.id !== this.contextId) return;
 
