@@ -373,3 +373,17 @@ export const PURCHASE_BAIT_REGEX =
 // `You purchased the {name} Rod from the Fishmonger!`
 export const PURCHASE_ROD_REGEX =
 	/^You purchased the (\w+ Rod) from the Fishmonger!/;
+
+export const OPPOSITE_DIRECTION = {
+	left: 'left',
+	right: 'right',
+	forward: 'back',
+	back: 'forward',
+} as const;
+
+export const NORMAL_DIRECTION = {
+	left: 'right',
+	right: 'left',
+	forward: 'forward',
+	back: 'back',
+} as const;

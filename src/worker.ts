@@ -2,6 +2,7 @@ import { parentPort, workerData } from 'worker_threads';
 
 import chalk from 'chalk';
 import { createClient } from 'minecraft-protocol';
+import { mineflayer as viewer } from 'prismarine-viewer';
 import { SocksClient } from 'socks';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 
@@ -41,6 +42,10 @@ if (options.proxy !== undefined) {
 }
 
 const bot = new FishBot(options, parentPort!);
+
+if (options.viewer_port !== undefined) {
+	viewer(bot._bot, { port: options.viewer_port });
+}
 
 console.log(
 	`${' '.repeat(17)}${chalk.bold(chalk.cyan('Worker'))} Starting ${chalk.yellow(

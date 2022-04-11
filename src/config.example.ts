@@ -47,6 +47,8 @@ const config: Config = {
 			// The channels where commands will affect this bot (optionak)
 			// Only used when Discord integration is enabled
 			channels: ['CHANNEL_ID', 'CHANNEL_ID'],
+			// The port on which to host an instance of `prismarine-viewer` (optional)
+			viewer_port: 3000,
 		},
 	],
 	// Fishing-related settings

@@ -35,11 +35,17 @@ import {
 	Context,
 	LocationType,
 	MessageType,
+	MovementInstruction,
 	RawItem,
 	RecordingStep,
 	State,
 } from '../typings';
-import { CommandFunction, Location, ParentMessage } from '../typings';
+import {
+	CommandFunction,
+	Direction,
+	Location,
+	ParentMessage,
+} from '../typings';
 import {
 	createPromiseResolvePair,
 	currencyFormatter,
@@ -121,6 +127,8 @@ export default class BaseBot {
 		this.commands.set('entity', this.saveEntityList.bind(this));
 		this.commands.set('pay', this.sendMoney.bind(this));
 		this.commands.set('exec', this.executeCommand.bind(this));
+		this.commands.set('chat', this.sendChatMessage.bind(this));
+		this.commands.set('move', this.executeMove.bind(this));
 
 		this._bot.once('spawn', this.join.bind(this));
 
@@ -147,6 +155,27 @@ export default class BaseBot {
 			location: Location.UNKNOWN,
 			last_window_click: 0,
 		};
+	}
+
+	async executeMove(ctx: Context, _?: string, ...instructions: string[]) {
+		const parsed: MovementInstruction[] = [];
+
+		for (const instruction of instructions) {
+			const match = instruction.match(
+				/(left|right|forward|back|center)(?:\((\d+)\))?/,
+			);
+
+			if (match === null) continue;
+
+			const [, direction, _distance] = match;
+			const distance = _distance ? parseInt(_distance) : 0;
+
+			parsed.push({ direction: direction as Direction, distance });
+		}
+
+		if (parsed.length > 0) {
+			return this.client.processMovementInstructions(ctx, parsed);
+		}
 	}
 
 	async randomMovement(ctx: Context) {
@@ -176,6 +205,12 @@ export default class BaseBot {
 
 		this.previousState = this._state;
 		this._state = value;
+	}
+
+	setState(ctx: Context, value: State) {
+		if (ctx.id !== this.contextId) return;
+
+		this.state = value;
 	}
 
 	createMoveHandler(ctx: Context) {
@@ -210,7 +245,7 @@ export default class BaseBot {
 					this._bot.off('context_changed', contextListener);
 
 					if (config.react_to_external_move) {
-						this.state = State.IDLE;
+						this.setState(ctx, State.IDLE);
 						await this.client.lookAround(this.context());
 
 						if (this.fisher) {
@@ -387,7 +422,7 @@ export default class BaseBot {
 		if (ctx.id !== this.contextId) return;
 
 		if (this.fisher && config.fishing.fish_on_join) {
-			this.state = State.FISHING;
+			this.setState(ctx, State.FISHING);
 			ctx.id = this.contextId;
 		}
 
@@ -485,17 +520,18 @@ export default class BaseBot {
 				this.captcha.promise = promise;
 				this.captcha.resolve = resolve;
 				this.captcha.startedAt = Date.now();
-				this.state = State.SOLVING_CAPTCHA;
+				this.setState(ctx, State.SOLVING_CAPTCHA);
 
-				const ctx = this.context();
+				const newCtx = this.context();
 
-				if (Date.now() - this.joinedAt < 5_000) this.client.activateItem(ctx);
+				if (Date.now() - this.joinedAt < 5_000)
+					this.client.activateItem(newCtx);
 
 				this.client.setInterval(
-					ctx,
+					newCtx,
 					() => {
 						this.logger.info('Renewing captcha...');
-						this.client.activateItem(ctx);
+						this.client.activateItem(newCtx);
 					},
 					RENEW_CAPTCHA_INTERVAL,
 				);
@@ -509,7 +545,7 @@ export default class BaseBot {
 				m ===
 				"It looks like you might be lost, so we've sent you back to spawn!"
 			) {
-				this.state = State.IDLE;
+				this.setState(ctx, State.IDLE);
 
 				if (this.previousState === State.FISHING && this.fisher) {
 					return this.fisher.fish(ctx);
@@ -527,7 +563,7 @@ export default class BaseBot {
 				if (!message.toLowerCase().includes(lower)) return;
 
 				if (config.fishing.stop_fishing_on_mention) {
-					this.state = State.IDLE;
+					this.setState(ctx, State.IDLE);
 				}
 
 				if (config.notify_on_mention) {
@@ -644,7 +680,7 @@ export default class BaseBot {
 				const [, name, message] = m.match(DIRECT_MESSAGE_REGEX)!;
 
 				if (config.fishing.stop_fishing_on_mention) {
-					this.state = State.IDLE;
+					this.setState(ctx, State.IDLE);
 				}
 
 				if (config.notify_on_mention) {
@@ -868,6 +904,10 @@ export default class BaseBot {
 		await this.command(ctx, '/balance');
 
 		return Math.max(await balance, 0);
+	}
+
+	private async sendChatMessage(ctx: Context, _?: string, message?: string) {
+		if (message) return this.chat(ctx, message);
 	}
 
 	private async sendMoney(ctx: Context, username?: string) {

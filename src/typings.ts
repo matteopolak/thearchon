@@ -63,6 +63,7 @@ export type Account = {
 	password: string;
 	auth: AuthType;
 	channels?: string[];
+	viewer_port?: number;
 	proxy?: `${
 		| 'socks4'
 		| 'socks5'}://${number}.${number}.${number}.${number}:${number}`;
@@ -139,6 +140,7 @@ export type BaseBotOptions = BotOptions & {
 	sell_type?: SellType;
 	fish?: boolean;
 	proxy?: string;
+	viewer_port?: number;
 };
 
 export const enum State {
@@ -146,6 +148,7 @@ export const enum State {
 	FISHING,
 	SOLVING_CAPTCHA,
 	CLEARING_INVENTORY,
+	PROCESSING_MOVEMENT,
 }
 
 export const enum LocationType {
@@ -203,3 +206,10 @@ export type RecordingStep = {
 	time?: number;
 	wait?: number;
 };
+
+export type Direction = 'forward' | 'back' | 'left' | 'right';
+
+export interface MovementInstruction {
+	direction: Direction | 'center';
+	distance: number;
+}

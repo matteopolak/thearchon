@@ -4,8 +4,18 @@ import type { Item } from 'prismarine-item';
 import type { Window } from 'prismarine-windows';
 import type { Vec3 } from 'vec3';
 
-import { TIME_BETWEEN_WINDOW_CLICKS } from '../constants';
-import type { Context, RecordingStep } from '../typings';
+import {
+	NORMAL_DIRECTION,
+	OPPOSITE_DIRECTION,
+	TIME_BETWEEN_WINDOW_CLICKS,
+} from '../constants';
+import {
+	Context,
+	Direction,
+	MovementInstruction,
+	RecordingStep,
+	State,
+} from '../typings';
 import { cooldownSleep, sleep } from '../utils';
 import type BaseBot from './BaseBot';
 
@@ -275,5 +285,52 @@ export default class BaseState {
 			ctx.fishing!.original_yaw,
 			ctx.fishing!.original_pitch,
 		);
+	}
+
+	async processMovementInstructions(
+		ctx: Context,
+		instructions: MovementInstruction[],
+	) {
+		if (ctx.id !== this.client.contextId) return;
+
+		this.client.setState(ctx, State.PROCESSING_MOVEMENT);
+
+		ctx = this.client.context();
+		const backwards: (MovementInstruction & { direction: Direction })[] = [];
+
+		for (const { direction, distance } of instructions) {
+			if (direction === 'center') {
+				for (const { direction, distance } of backwards) {
+					await this.move(ctx, OPPOSITE_DIRECTION[direction], distance);
+				}
+
+				backwards.splice(0, backwards.length);
+			} else {
+				await this.move(ctx, NORMAL_DIRECTION[direction], distance);
+
+				backwards.unshift({ direction, distance });
+			}
+		}
+
+		if (this.client.previousState === State.FISHING && this.client.fisher) {
+			return this.client.fisher.fish(ctx);
+		}
+
+		this.client.setState(ctx, State.IDLE);
+	}
+
+	private async move(
+		ctx: Context,
+		direction: 'forward' | 'back' | 'left' | 'right',
+		distance: number,
+	) {
+		const original = this.entity.position.clone();
+
+		while (original.distanceTo(this.entity.position) < distance) {
+			this.setControlState(ctx, direction, true);
+			await this.waitForTicks(ctx, 1);
+		}
+
+		this.setControlState(ctx, direction, false);
 	}
 }

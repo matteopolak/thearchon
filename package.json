@@ -19,6 +19,7 @@
 		"discord.js": "^13.6.0",
 		"mineflayer": "^4.1.0",
 		"openai": "^2.0.5",
+		"prismarine-viewer": "^1.22.0",
 		"socks": "^2.6.2",
 		"socks-proxy-agent": "^6.2.0-beta.0"
 	},
