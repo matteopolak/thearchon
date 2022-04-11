@@ -320,16 +320,17 @@ export default class FishBot extends BaseBot {
 	private async sellFish(ctx: Context, homeContainsShop: boolean) {
 		if (ctx.id !== this.contextId) return;
 
+		await this.teleportToHome(
+			ctx,
+			homeContainsShop ? Location.FISHING : Location.FOREST,
+		);
+
 		const data = {
 			pitch: this.client.entity.pitch,
 			yaw: this.client.entity.yaw,
 		};
 
 		const window = await this.completeActionAndWaitForWindow(ctx, async () => {
-			if (!homeContainsShop) {
-				await this.teleportToHome(ctx, Location.FOREST);
-			}
-
 			const entity = Object.values(this.client.entities).find(
 				e =>
 					e.username !== undefined &&
