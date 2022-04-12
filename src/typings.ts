@@ -214,7 +214,8 @@ export type Direction =
 	| 'left'
 	| 'right'
 	| 'jump'
-	| 'sneak';
+	| 'sneak'
+	| 'punch';
 
 export interface MovementInstruction {
 	direction: Direction | 'center';

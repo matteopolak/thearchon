@@ -371,12 +371,20 @@ export default class BaseState {
 			}
 
 			return;
+		} else if (direction === 'punch') {
+			for (let _ = 0; _ < distance; _++) {
+				this.swingArm(ctx);
+				await this.waitForTicks(ctx, 5);
+			}
+
+			return;
 		}
 
 		const original = this.entity.position.clone();
 
+		this.setControlState(ctx, direction, true);
+
 		while (original.distanceTo(this.entity.position) < distance) {
-			this.setControlState(ctx, direction, true);
 			await this.waitForTicks(ctx, 1);
 		}
 

@@ -309,6 +309,11 @@ export const COMMAND_REGEX = /^\((\w{3,16})\)\s(.+)$/;
 // `{username} has requested to teleport to you.`
 export const TELEPORT_REGEX = /^(\w{3,16}) has requested to teleport to you\.$/;
 
+// Teleportation request. Translation:
+// `{username} has requested that you teleport to them.`
+export const TELEPORT_HERE_REGEX =
+	/^(\w{3,16}) has requested that you teleport to them\.$/;
+
 // Balance message. Translation:
 // `Your balance is ${money}
 export const BALANCE_REGEX = /^Your balance is \$([\d,\.]+)/;
@@ -381,6 +386,7 @@ export const OPPOSITE_DIRECTION = {
 	back: 'forward',
 	jump: 'jump',
 	sneak: 'sneak',
+	punch: 'punch',
 } as const;
 
 export const NORMAL_DIRECTION = {
@@ -390,4 +396,5 @@ export const NORMAL_DIRECTION = {
 	back: 'back',
 	jump: 'jump',
 	sneak: 'sneak',
+	punch: 'punch',
 } as const;

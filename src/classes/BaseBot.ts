@@ -28,6 +28,7 @@ import {
 	RENEW_CAPTCHA_INTERVAL,
 	SEND_MONEY_REGEX,
 	SURPLUS_MONEY_THRESHOLD,
+	TELEPORT_HERE_REGEX,
 	TELEPORT_REGEX,
 } from '../constants';
 import {
@@ -681,6 +682,13 @@ export default class BaseBot {
 				return this.command(ctx, '/tpaccept');
 			}
 
+			if (
+				TELEPORT_HERE_REGEX.test(m) &&
+				this.whitelist.has(m.match(TELEPORT_HERE_REGEX)![1])
+			) {
+				return this.command(ctx, '/tpaccept');
+			}
+
 			if (DIRECT_MESSAGE_REGEX.test(m)) {
 				const [, name, message] = m.match(DIRECT_MESSAGE_REGEX)!;
 
@@ -713,6 +721,8 @@ export default class BaseBot {
 					generateActions(message),
 				]);
 
+				console.log(actions);
+
 				if (response) {
 					const wait = 2_000 + response.length * 250;
 
@@ -723,8 +733,7 @@ export default class BaseBot {
 					);
 
 					await sleep(wait);
-
-					return this.command(ctx, `/msg ${name} ${response}`);
+					await this.command(ctx, `/msg ${name} ${response}`);
 				}
 
 				if (actions.length > 0) {

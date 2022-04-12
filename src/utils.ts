@@ -45,7 +45,7 @@ export async function generateActions(prompt: string) {
 			q: prompt,
 		},
 		headers: {
-			authorization: 'Bearer 37WXZNUZ2RMAAKZD7ZR35KGSEWTFKE74',
+			Authorization: `Bearer ${config.witai_key}`,
 		},
 	});
 
@@ -117,7 +117,7 @@ export async function generateResponse(
 		},
 		{
 			headers: {
-				authorization: `Bearer ${config.openai_key}`,
+				Authorization: `Bearer ${config.openai_key}`,
 			},
 		},
 	);

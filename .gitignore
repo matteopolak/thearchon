@@ -5,3 +5,4 @@ data
 src/config.ts
 **/*.js
 recordings
+src/wit_token

@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { parentPort, workerData } from 'worker_threads';
 
 import chalk from 'chalk';
@@ -7,7 +9,15 @@ import { SocksClient } from 'socks';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 
 import FishBot from './classes/FishBot';
+import config from './config';
 import type { BaseBotOptions } from './typings';
+
+if (config.witai_key) {
+	config.witai_key = fs.readFileSync(
+		path.join(__dirname, '..', 'resources', 'wit_token'),
+		{ encoding: 'utf8' },
+	);
+}
 
 const { options }: { options: BaseBotOptions } = workerData;
 
@@ -44,7 +54,9 @@ if (options.proxy !== undefined) {
 const bot = new FishBot(options, parentPort!);
 
 if (options.viewer_port !== undefined) {
-	viewer(bot._bot, { port: options.viewer_port });
+	bot.addLoginHook(() => {
+		viewer(bot._bot, { port: options.viewer_port! });
+	});
 }
 
 console.log(
