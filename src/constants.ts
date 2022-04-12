@@ -379,6 +379,8 @@ export const OPPOSITE_DIRECTION = {
 	right: 'right',
 	forward: 'back',
 	back: 'forward',
+	jump: 'jump',
+	sneak: 'sneak',
 } as const;
 
 export const NORMAL_DIRECTION = {
@@ -386,4 +388,6 @@ export const NORMAL_DIRECTION = {
 	right: 'left',
 	forward: 'forward',
 	back: 'back',
+	jump: 'jump',
+	sneak: 'sneak',
 } as const;

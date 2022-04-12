@@ -71,6 +71,7 @@ export type Account = {
 
 export interface Config {
 	openai_key?: string;
+	witai_key?: string;
 	server: ServerType;
 	whitelist: string[];
 	autopay_to?: string;
@@ -207,9 +208,72 @@ export type RecordingStep = {
 	wait?: number;
 };
 
-export type Direction = 'forward' | 'back' | 'left' | 'right';
+export type Direction =
+	| 'forward'
+	| 'back'
+	| 'left'
+	| 'right'
+	| 'jump'
+	| 'sneak';
 
 export interface MovementInstruction {
 	direction: Direction | 'center';
 	distance: number;
+}
+
+export interface OpenAIResponse {
+	answers: string[];
+	completion: string;
+	model: string;
+	object: string;
+	search_model: string;
+	selected_documents: { document: number; text: string }[];
+}
+
+export interface WitIntent {
+	id: string;
+	name: string;
+	confidence: number;
+}
+
+export type WitEntity = WitEntityNumber | WitEntityMovementType;
+
+export interface WitEntityNumber extends BaseWitEntity {
+	name: 'wit$number';
+	role: 'number';
+	value: number;
+}
+
+export interface WitEntityMovementType extends BaseWitEntity {
+	name: 'movement_type';
+	role: 'movement_type';
+	value: Direction | 'jump' | 'sneak';
+}
+
+export interface WitEntityMovementWithRepeat extends BaseWitEntity {
+	name: 'movement_with_repeat';
+	role: 'movement_with_repeat';
+	value: string;
+}
+
+export interface BaseWitEntity {
+	id: string;
+	name: string;
+	role: string;
+	start: number;
+	end: number;
+	body: string;
+	confidence: number;
+	value: string | number;
+	type: string;
+	entities: WitEntity[];
+}
+
+export interface WitResponse {
+	text: string;
+	intents: WitIntent[];
+	entities: Partial<{
+		'movement_with_repeat:movement_with_repeat': WitEntityMovementWithRepeat[];
+	}>;
+	traits: {};
 }

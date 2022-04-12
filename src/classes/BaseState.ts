@@ -26,6 +26,37 @@ export default class BaseState {
 		this.client = client;
 	}
 
+	waitUntilGrounded(ctx: Context) {
+		return new Promise(resolve => {
+			const listener = () => {
+				if (this.entity.onGround) {
+					this.client._bot.off('move', listener);
+					// @ts-ignore
+					this.client._bot.off('context_changed', listener);
+
+					resolve(undefined);
+				}
+			};
+
+			const contextListener = () => {
+				this.client._bot.off('move', listener);
+				resolve(undefined);
+			};
+
+			this.client._bot.on('move', listener);
+			// @ts-ignore
+			this.client._bot.once('context_changed', contextListener);
+
+			if (ctx.id !== this.client.contextId || this.entity.onGround) {
+				this.client._bot.off('move', listener);
+				// @ts-ignore
+				this.client._bot.off('context_changed', contextListener);
+
+				resolve(undefined);
+			}
+		});
+	}
+
 	waitForTicks(ctx: Context, ticks: number) {
 		if (ctx.id !== this.client.contextId) return Promise.resolve();
 
@@ -228,6 +259,8 @@ export default class BaseState {
 		this.setControlState(ctx, 'jump', true);
 		await this.waitForTicks(ctx, 1);
 		this.setControlState(ctx, 'jump', false);
+
+		return this.waitUntilGrounded(ctx);
 	}
 
 	async replay(ctx: Context, steps: RecordingStep[]) {
@@ -308,8 +341,11 @@ export default class BaseState {
 			} else {
 				await this.move(ctx, NORMAL_DIRECTION[direction], distance);
 
-				backwards.unshift({ direction, distance });
+				if (direction !== 'jump' && direction !== 'sneak')
+					backwards.unshift({ direction, distance });
 			}
+
+			await this.waitForTicks(ctx, 5);
 		}
 
 		if (this.client.previousState === State.FISHING && this.client.fisher) {
@@ -319,11 +355,24 @@ export default class BaseState {
 		this.client.setState(ctx, State.IDLE);
 	}
 
-	private async move(
-		ctx: Context,
-		direction: 'forward' | 'back' | 'left' | 'right',
-		distance: number,
-	) {
+	private async move(ctx: Context, direction: Direction, distance: number) {
+		if (direction === 'jump') {
+			for (let _ = 0; _ < distance; _++) {
+				await this.jumpOnce(ctx);
+			}
+
+			return;
+		} else if (direction === 'sneak') {
+			for (let _ = 0; _ < distance; _++) {
+				this.setControlState(ctx, 'sneak', true);
+				await this.waitForTicks(ctx, 3);
+				this.setControlState(ctx, 'sneak', false);
+				await this.waitForTicks(ctx, 3);
+			}
+
+			return;
+		}
+
 		const original = this.entity.position.clone();
 
 		while (original.distanceTo(this.entity.position) < distance) {

@@ -1034,7 +1034,7 @@ axios@^0.21.1, axios@^0.21.4:
   dependencies:
     follow-redirects "^1.14.0"
 
-axios@^0.26.0:
+axios@^0.26.1:
   version "0.26.1"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.26.1.tgz#1ede41c51fcf51bbbd6fd43669caaa4f0495aaa9"
   integrity sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==
@@ -3322,14 +3322,6 @@ onetime@^5.1.2:
   integrity sha512-kbpaSSGJTWdAY5KPVeMOKXSrPtr8C8C7wodJbcsd51jRnmD+GZu8Y0VoU6Dm5Z4vWr0Ig/1NKuWRKf7j5aaYSg==
   dependencies:
     mimic-fn "^2.1.0"
-
-openai@^2.0.5:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/openai/-/openai-2.0.5.tgz#dc1e0b0588ce9464e62af87f86a18195de2baa11"
-  integrity sha512-M/drXV2QYdRhmB5EhAINpeA4oGzj0M6mSVfi8o8Rex3Re+yEnSBMUExtGZSlbVRAKpIvTLbq0oC7bgHBaSnjLw==
-  dependencies:
-    axios "^0.26.0"
-    form-data "^4.0.0"
 
 optionator@^0.8.1:
   version "0.8.3"

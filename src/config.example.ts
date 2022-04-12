@@ -21,6 +21,8 @@ export const discordConfig: DiscordConfig = {
 const config: Config = {
 	// Your OpenAI key from https://openai.com/ (optional)
 	openai_key: undefined,
+	// Your Wit.ai key from https://wit.ai (optional)
+	witai_key: undefined,
 	// A list of Minecraft usernames that are allowed to execute commands
 	whitelist: ['username', 'username'],
 	// The user to send money to when `MONEY_THRESHOLD` is reached

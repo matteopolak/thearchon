@@ -1,23 +1,28 @@
 import { Worker } from 'worker_threads';
 
+import axios from 'axios';
 import chalk from 'chalk';
 import type { Client } from 'discord.js';
-import { Configuration, OpenAIApi } from 'openai';
 
 import characters from './characters';
 import config, { discordConfig } from './config';
 import { WORKER_PATH } from './constants';
-import { MessageType, SellType } from './typings';
-import type { BaseBotOptions, MessagePayload, RawMapData } from './typings';
+import {
+	MessageType,
+	MovementInstruction,
+	OpenAIResponse,
+	SellType,
+} from './typings';
+import type {
+	BaseBotOptions,
+	Direction,
+	MessagePayload,
+	RawMapData,
+	WitResponse,
+} from './typings';
 
 const CHARACTER_WIDTH = 12;
 const CHARACTER_HEIGHT = 14;
-
-const configuration = new Configuration({
-	apiKey: config.openai_key,
-});
-
-const openai = new OpenAIApi(configuration);
 
 // prettier-ignore
 const filter: string[][] = [
@@ -34,42 +39,88 @@ export function random(max: number, min: number = 0) {
 	return Math.floor(Math.random() * (max - min)) + min;
 }
 
+export async function generateActions(prompt: string) {
+	const { data } = await axios.get<WitResponse>('https://api.wit.ai/message', {
+		params: {
+			q: prompt,
+		},
+		headers: {
+			authorization: 'Bearer 37WXZNUZ2RMAAKZD7ZR35KGSEWTFKE74',
+		},
+	});
+
+	// const numbers = data.entities['wit$number:number'] ?? [];
+	const movements =
+		data.entities['movement_with_repeat:movement_with_repeat'] ?? [];
+
+	const instructions: MovementInstruction[] = [];
+
+	for (const movement of movements) {
+		const [action, count] = movement.entities.reduce(
+			(a, b) => {
+				if (b.name === 'wit$number') a[1] = b.value;
+				else if (b.name === 'movement_type') a[0] = b.value;
+
+				return a;
+			},
+			[null, 1] as [Direction | null, number],
+		);
+
+		if (action) {
+			instructions.push({
+				direction: action,
+				distance: count,
+			});
+		}
+	}
+
+	return instructions;
+}
+
 export async function generateResponse(
 	prompt: string,
 ): Promise<string | undefined> {
 	if (config.openai_key === undefined) return undefined;
 
-	const { data: response } = await openai.createAnswer({
-		model: 'davinci',
-		search_model: 'babbage',
-		question: prompt,
-		documents: [
-			"I'm fishing at the docks",
-			'I like to fish and watch Netflix',
-			'Ftop is a list of the top factions',
-			'Factions are groups of players',
-			'To become the best faction, you need to have the most value in spawners',
-			"I'm currently here and present",
-		],
-		examples_context:
-			"I am fishing on TheArchon, which is a factions server. Cheating is not allowed. I will not tell you how to make money because it's a secret.",
-		examples: [
-			['Are you cheating?', 'no? why would i cheat'],
-			["Say 'hello world'", 'um ok hello world'],
-			['Say asjkdhaskjdh', 'asjkdhaskjdh'],
-			['How do I make money?', 'idk but fishing is pretty good'],
-			['I love you', 'ok + L'],
-			['Can you give me some money', 'no get it yourself'],
-			["What's 20+40", '60'],
-			['What is 3 times 6', '18'],
-			['What is 5 times 5', '25'],
-			["What's 38*10", '380'],
-			["What's 1x1", '1'],
-		],
-		n: 1,
-		temperature: 0.5,
-		max_tokens: 15,
-	});
+	const { data: response } = await axios.post<OpenAIResponse>(
+		'https://api.openai.com/v1/answers',
+		{
+			model: 'davinci',
+			search_model: 'babbage',
+			question: prompt,
+			documents: [
+				"I'm fishing at the docks",
+				'I like to fish and watch Netflix',
+				'Ftop is a list of the top factions',
+				'Factions are groups of players',
+				'To become the best faction, you need to have the most value in spawners',
+				"I'm currently here and present",
+			],
+			examples_context:
+				"I am fishing on TheArchon, which is a factions server. Cheating is not allowed. I will not tell you how to make money because it's a secret.",
+			examples: [
+				['Are you cheating?', 'no? why would i cheat'],
+				["Say 'hello world'", 'um ok hello world'],
+				['Say asjkdhaskjdh', 'asjkdhaskjdh'],
+				['How do I make money?', 'idk but fishing is pretty good'],
+				['I love you', 'ok + L'],
+				['Can you give me some money', 'no get it yourself'],
+				["What's 20+40", '60'],
+				['What is 3 times 6', '18'],
+				['What is 5 times 5', '25'],
+				["What's 38*10", '380'],
+				["What's 1x1", '1'],
+			],
+			n: 1,
+			temperature: 0.5,
+			max_tokens: 15,
+		},
+		{
+			headers: {
+				authorization: `Bearer ${config.openai_key}`,
+			},
+		},
+	);
 
 	if (response.answers === undefined || response.answers.length === 0)
 		return undefined;

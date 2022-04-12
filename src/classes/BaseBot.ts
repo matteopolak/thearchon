@@ -49,6 +49,7 @@ import {
 import {
 	createPromiseResolvePair,
 	currencyFormatter,
+	generateActions,
 	generateResponse,
 	random,
 	sleep,
@@ -207,10 +208,14 @@ export default class BaseBot {
 		this._state = value;
 	}
 
-	setState(ctx: Context, value: State) {
+	setState(ctx: Context, value: State, update = false) {
 		if (ctx.id !== this.contextId) return;
 
 		this.state = value;
+
+		if (update) {
+			ctx.id = this.contextId;
+		}
 	}
 
 	createMoveHandler(ctx: Context) {
@@ -703,7 +708,10 @@ export default class BaseBot {
 
 				this.responseMap.set(name, Date.now());
 
-				const response = await generateResponse(message);
+				const [response, actions] = await Promise.all([
+					generateResponse(message),
+					generateActions(message),
+				]);
 
 				if (response) {
 					const wait = 2_000 + response.length * 250;
@@ -717,6 +725,10 @@ export default class BaseBot {
 					await sleep(wait);
 
 					return this.command(ctx, `/msg ${name} ${response}`);
+				}
+
+				if (actions.length > 0) {
+					await this.client.processMovementInstructions(ctx, actions);
 				}
 
 				return;
