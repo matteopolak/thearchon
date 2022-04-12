@@ -58,6 +58,7 @@ export async function generateActions(prompt: string) {
 	for (const movement of movements) {
 		const [action, count] = movement.entities.reduce(
 			(a, b) => {
+				if (b.confidence < 0.9 || b.value === 'spin') return a;
 				if (b.name === 'wit$number') a[1] = b.value;
 				else if (b.name === 'movement_type') a[0] = b.value;
 

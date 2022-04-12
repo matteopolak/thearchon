@@ -248,7 +248,7 @@ export interface WitEntityNumber extends BaseWitEntity {
 export interface WitEntityMovementType extends BaseWitEntity {
 	name: 'movement_type';
 	role: 'movement_type';
-	value: Direction | 'jump' | 'sneak';
+	value: Direction | 'spin';
 }
 
 export interface WitEntityMovementWithRepeat extends BaseWitEntity {

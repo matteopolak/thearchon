@@ -721,8 +721,6 @@ export default class BaseBot {
 					generateActions(message),
 				]);
 
-				console.log(actions);
-
 				if (response) {
 					const wait = 2_000 + response.length * 250;
 
@@ -737,6 +735,11 @@ export default class BaseBot {
 				}
 
 				if (actions.length > 0) {
+					this.logger.info(
+						`Processing movement from ${name}: ${actions.map(
+							a => `${a.direction}(${a.distance})`,
+						)}`,
+					);
 					await this.client.processMovementInstructions(ctx, actions);
 				}
 
