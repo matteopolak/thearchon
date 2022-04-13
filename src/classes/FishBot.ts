@@ -514,6 +514,8 @@ export default class FishBot extends BaseBot {
 		const ctx = this.context();
 		const rod = this.getBestFishingRod();
 
+		ctx.location = _.location;
+
 		if (rod === null) return;
 
 		if (!this.checkedBalance) await this.getCurrentBalance(ctx, true);
@@ -535,6 +537,7 @@ export default class FishBot extends BaseBot {
 			position: this.client.entity.position,
 			original_pitch: this.client.entity.pitch,
 			original_yaw: this.client.entity.yaw,
+			fix_after_current: false,
 		};
 
 		this.createMoveHandler(ctx);
@@ -611,6 +614,17 @@ export default class FishBot extends BaseBot {
 				} else {
 					this.logger.info('Reel complete');
 				}
+			}
+
+			if (ctx.fishing.fix_after_current) {
+				ctx.fishing.fix_after_current = false;
+				ctx.id = this.contextId;
+
+				await this.client.look(
+					ctx,
+					ctx.fishing.original_yaw,
+					ctx.fishing.original_pitch,
+				);
 			}
 		}
 

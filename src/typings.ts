@@ -118,6 +118,7 @@ export type Context = {
 		position: Vec3;
 		original_pitch: number;
 		original_yaw: number;
+		fix_after_current: boolean;
 	};
 	location: Location;
 	last_window_click: number;

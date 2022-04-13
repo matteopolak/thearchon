@@ -144,32 +144,21 @@ export default class BaseState {
 		return this.client._bot.chat(message);
 	}
 
-	lookAt(ctx: Context, point: Vec3, force?: boolean) {
+	async lookAt(ctx: Context, point: Vec3, force?: boolean) {
 		if (ctx.id !== this.client.contextId) return Promise.resolve();
 
-		return this.client._bot.lookAt(point, force);
+		ctx.reacting_to_movement = true;
+		await this.client._bot.lookAt(point);
+		if (force) this.client._bot.lookAt(point, force);
+		ctx.reacting_to_movement = false;
 	}
 
 	async look(ctx: Context, yaw: number, pitch: number, force?: boolean) {
 		if (ctx.id !== this.client.contextId) return Promise.resolve();
 
-		await this.client._bot.look(yaw, pitch);
-
-		if (force) await this.client._bot.look(yaw, pitch, force);
-	}
-
-	async lookAround(ctx: Context) {
 		ctx.reacting_to_movement = true;
-
-		const pitch = ctx.fishing?.pitch ?? this.entity.pitch;
-		const yaw = ctx.fishing?.yaw ?? this.entity.yaw;
-
-		await this.look(ctx, yaw - Math.PI * 0.3, pitch + Math.PI * 0.2);
-		await this.waitForTicks(ctx, 2);
-		await this.look(ctx, yaw - Math.PI * 1.2, Math.PI * 0.5);
-		await this.waitForTicks(ctx, 2);
-		await this.look(ctx, yaw, pitch);
-
+		await this.client._bot.look(yaw, pitch);
+		if (force) await this.client._bot.look(yaw, pitch, force);
 		ctx.reacting_to_movement = false;
 	}
 
