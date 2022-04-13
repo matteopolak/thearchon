@@ -958,8 +958,8 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		return Math.max(await balance, 0);
 	}
 
-	private async sendChatMessage(ctx: Context, _?: string, message?: string) {
-		if (message) return this.chat(ctx, message);
+	private async sendChatMessage(ctx: Context, _?: string, ...args: string[]) {
+		if (args.length > 0) return this.chat(ctx, args.join(' '));
 	}
 
 	private async sendMoney(ctx: Context, username?: string) {
@@ -1007,7 +1007,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 	}
 
 	private async executeCommand(ctx: Context, _: string, ...args: string[]) {
-		return this.command(ctx, `/${args.join(' ')}`);
+		if (args.length > 0) return this.command(ctx, `/${args.join(' ')}`);
 	}
 
 	private async showMobCoinsBalance(ctx: Context) {

@@ -1,6 +1,7 @@
 import type { MessagePort } from 'worker_threads';
 
 import chalk from 'chalk';
+import type { Window } from 'prismarine-windows';
 
 import config from '../config';
 import { BaseBotOptions, Context, State, StorageAccount } from '../typings';
@@ -168,7 +169,13 @@ export default class FishBot extends BaseBot {
 						)} into the Ender Chest`,
 					);
 
-					await enderchest.deposit(item.type, item.metadata, count);
+					await this.client.deposit(
+						ctx,
+						enderchest as unknown as Window,
+						item.type,
+						item.metadata,
+						depositCount,
+					);
 					enderchest.close();
 
 					this.logger.info(

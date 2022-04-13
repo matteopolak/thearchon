@@ -24,6 +24,18 @@ import {
 import { cooldownSleep, sleep } from '../utils';
 import type BaseBot from './BaseBot';
 
+interface TransferOptions {
+	window: Window | undefined;
+	itemType: number;
+	metadata: number | null;
+	count: number;
+	nbt: Item['nbt'] | undefined;
+	sourceStart: number;
+	sourceEnd: number;
+	destStart: number;
+	destEnd: number;
+}
+
 export default class BaseState {
 	private client: BaseBot;
 
@@ -242,6 +254,11 @@ export default class BaseState {
 		return this.client._bot.currentWindow;
 	}
 
+	get registry() {
+		// @ts-ignore
+		return this.client._bot.registry;
+	}
+
 	swingArm(ctx: Context, hand?: 'right' | 'left', showHand?: boolean) {
 		if (ctx.id !== this.client.contextId) return;
 
@@ -268,6 +285,182 @@ export default class BaseState {
 		if (ctx.id !== this.client.contextId) return null;
 
 		return this.client._bot.findBlock(options);
+	}
+
+	// Taken from `mineflayer/lib/plugins/inventory.js`
+	async deposit(
+		ctx: Context,
+		window: Window,
+		itemType: number,
+		metadata: number | null,
+		count: number,
+		nbt?: Item['nbt'],
+	) {
+		const options = {
+			window: window,
+			itemType,
+			metadata,
+			count,
+			nbt,
+			sourceStart: window.inventoryStart,
+			sourceEnd: window.inventoryEnd,
+			destStart: 0,
+			destEnd: window.inventoryStart,
+		};
+
+		return this.transfer(ctx, options);
+	}
+
+	// Taken from `mineflayer/lib/plugins/inventory.js`
+	async putSelectedItemRange(
+		ctx: Context,
+		start: number,
+		end: number,
+		window: Window,
+		slot: number | null,
+	) {
+		while (window.selectedItem) {
+			const item = window.findItemRange(
+				start,
+				end,
+				window.selectedItem.type,
+				window.selectedItem.metadata,
+				true,
+				window.selectedItem.nbt,
+			);
+
+			const tossLeftover = async () => {
+				if (window.selectedItem) {
+					await this.clickWindow(ctx, -999, 0, 0);
+				}
+			};
+
+			if (item && item.stackSize !== item.count) {
+				// something to join with
+				await this.clickWindow(ctx, item.slot, 0, 0);
+			} else {
+				// nothing to join with
+				const emptySlot = window.firstEmptySlotRange(start, end);
+				if (emptySlot === null) {
+					// no room left
+					if (slot === null) {
+						// no room => drop it
+						await tossLeftover();
+					} else {
+						// if there is still some leftover and slot is not null, click slot
+						await this.clickWindow(ctx, slot, 0, 0);
+						await tossLeftover();
+					}
+				} else {
+					await this.clickWindow(ctx, emptySlot, 0, 0);
+				}
+			}
+		}
+	}
+
+	// Taken from `mineflayer/lib/plugins/inventory.js`
+	async transfer(ctx: Context, options: TransferOptions) {
+		const window = options.window || this.currentWindow || this.inventory;
+		const itemType = options.itemType;
+		const metadata = options.metadata;
+		const nbt = options.nbt;
+		let count = options.count === null ? 1 : options.count;
+		let firstSourceSlot: number | null = null;
+
+		const sourceStart = options.sourceStart;
+		const destStart = options.destStart;
+		const sourceEnd =
+			options.sourceEnd === null ? sourceStart + 1 : options.sourceEnd;
+		const destEnd = options.destEnd === null ? destStart + 1 : options.destEnd;
+
+		const transferOne = async () => {
+			if (count === 0) {
+				await this.putSelectedItemRange(
+					ctx,
+					sourceStart,
+					sourceEnd,
+					window,
+					firstSourceSlot,
+				);
+				return;
+			}
+			if (
+				!window.selectedItem ||
+				window.selectedItem.type !== itemType ||
+				(metadata != null && window.selectedItem.metadata !== metadata) ||
+				(nbt != null && window.selectedItem.nbt !== nbt)
+			) {
+				// we are not holding the item we need. click it.
+				const sourceItem = window.findItemRange(
+					sourceStart,
+					sourceEnd,
+					itemType,
+					metadata,
+					false,
+					nbt,
+				);
+				const mcDataEntry = this.registry.itemsArray.find(
+					(x: any) => x.id === itemType,
+				);
+				if (!sourceItem)
+					throw new Error(
+						`Can't find ${mcDataEntry.name} in slots [${sourceStart} - ${sourceEnd}], (item id: ${itemType})`,
+					);
+				if (firstSourceSlot === null) firstSourceSlot = sourceItem.slot;
+				// number of item that can be moved from that slot
+				await this.clickWindow(ctx, sourceItem.slot, 0, 0);
+			}
+
+			const clickDest = async () => {
+				let destItem;
+				let destSlot;
+				// special case for tossing
+				if (destStart === -999) {
+					destSlot = -999;
+				} else {
+					// find a non full item that we can drop into
+					destItem = window.findItemRange(
+						destStart,
+						destEnd,
+						window.selectedItem!.type,
+						window.selectedItem?.metadata ?? null,
+						true,
+						nbt,
+					);
+					// if that didn't work find an empty slot to drop into
+					destSlot = destItem
+						? destItem.slot
+						: window.firstEmptySlotRange(destStart, destEnd);
+					// if that didn't work, give up
+					if (destSlot === null) {
+						throw new Error('destination full');
+					}
+				}
+				// move the maximum number of item that can be moved
+				const destSlotCount = destItem && destItem.count ? destItem.count : 0;
+				const movedItems = Math.min(
+					window.selectedItem!.stackSize - destSlotCount,
+					window.selectedItem!.count,
+				);
+				// if the number of item the left click moves is less than the number of item we want to move
+				// several at the same time (left click)
+				if (movedItems <= count) {
+					await this.clickWindow(ctx, destSlot, 0, 0);
+					// update the number of item we want to move (count)
+					count -= movedItems;
+					await transferOne();
+				} else {
+					// one by one (right click)
+					await this.clickWindow(ctx, destSlot, 1, 0);
+					count -= 1;
+					await transferOne();
+				}
+			};
+
+			await clickDest();
+		};
+
+		await transferOne();
 	}
 
 	async jumpOnce(ctx: Context) {
