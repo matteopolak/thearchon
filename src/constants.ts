@@ -348,11 +348,24 @@ export const CHAT_MESSAGE_REGEX =
 // Money received message. Translation:
 // `${money} has been received from {username}.`
 export const RECEIVE_MONEY_REGEX =
-	/^\$([\d,\.]+) has been received from \w{1,16}\./;
+	/^\$([\d,\.]+) has been received from (\w{1,16})\./;
 
 // Server join error message. Translation:
 // `Unable to connect to {realm}: {message}`
 export const JOIN_ERROR_REGEX = /^Unable to connect to \w+: (.+)/;
+
+// Bait purchase message. Translation:
+// `You purchased x{number} {name} Bait from the Fishmonger!`
+export const PURCHASE_BAIT_REGEX =
+	/^You purchased x(\d+) (\w+ Bait) from the Fishmonger!/;
+
+// Bait rod message. Translation:
+// `You purchased the {name} Rod from the Fishmonger!`
+export const PURCHASE_ROD_REGEX =
+	/^You purchased the (\w+ Rod) from the Fishmonger!/;
+
+export const PURCHASE_ITEM_REGEX =
+	/^TheArchon >> You bought \d+ x .+ for ([\d,\.]+)\$\.$/;
 
 // Amount of money to obtain before automatically paying it to `config.autopay_to`
 export const MONEY_THRESHOLD = 5_000_000;
@@ -369,15 +382,8 @@ export const CAPTCHA_TIME_THRESHOLD = 4_000;
 // Minimum time to wait between window clicks
 export const TIME_BETWEEN_WINDOW_CLICKS = 750;
 
-// Bait purchase message. Translation:
-// `You purchased x{number} {name} Bait from the Fishmonger!`
-export const PURCHASE_BAIT_REGEX =
-	/^You purchased x(\d+) (\w+ Bait) from the Fishmonger!/;
-
-// Bait rod message. Translation:
-// `You purchased the {name} Rod from the Fishmonger!`
-export const PURCHASE_ROD_REGEX =
-	/^You purchased the (\w+ Rod) from the Fishmonger!/;
+// Time to wait before resuming fishing after detecting unusual movement
+export const TIME_BEFORE_FISH_AFTER_MOVEMENT_DETECT = 60_000;
 
 export const OPPOSITE_DIRECTION = {
 	left: 'left',

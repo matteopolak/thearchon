@@ -57,13 +57,26 @@ export interface DiscordConfig {
 	}>;
 }
 
-export type Account = {
+type BotType = 'storage' | 'fisher';
+
+export interface StorageAccount {
+	type: 'storage';
+	price: number;
+	instructions: number[];
+}
+
+export interface FishingAccount {
+	type: 'fisher';
+}
+
+export type Account = (StorageAccount | FishingAccount) & {
 	alias: string;
 	username: string;
 	password: string;
 	auth: AuthType;
 	channels?: string[];
 	viewer_port?: number;
+	type: BotType;
 	proxy?: `${
 		| 'socks4'
 		| 'socks5'}://${number}.${number}.${number}.${number}:${number}`;
@@ -134,15 +147,13 @@ export interface RawItem {
 	};
 }
 
-export type BaseBotOptions = BotOptions & {
-	alias: string;
-	whitelist?: Set<string>;
-	logger?: boolean;
-	sell_type?: SellType;
-	fish?: boolean;
-	proxy?: string;
-	viewer_port?: number;
-};
+export type BaseBotOptions = BotOptions &
+	Account & {
+		whitelist?: Set<string>;
+		logger?: boolean;
+		sell_type?: SellType;
+		fish?: boolean;
+	};
 
 export const enum State {
 	IDLE,
@@ -150,6 +161,7 @@ export const enum State {
 	SOLVING_CAPTCHA,
 	CLEARING_INVENTORY,
 	PROCESSING_MOVEMENT,
+	PURCHASING,
 }
 
 export const enum LocationType {
@@ -167,6 +179,7 @@ export const enum Location {
 	FISHING = 'fishing',
 	FOREST = 'forest',
 	SPAWN = 'spawn',
+	ENCHANTING = 'enchant',
 	UNKNOWN = 'unknown',
 }
 

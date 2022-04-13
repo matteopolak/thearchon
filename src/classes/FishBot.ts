@@ -166,8 +166,7 @@ export default class FishBot extends BaseBot {
 					'{"extra":[{"color":"dark_aqua","text":"You Got a Bite!"}],"text":""}'
 				) {
 					this._bot.off('title', listener);
-					// @ts-ignore
-					this._bot.off('context_changed', contextListener);
+					this.off('context_changed', contextListener);
 					clearTimeout(timeout);
 
 					return resolve(true);
@@ -182,23 +181,20 @@ export default class FishBot extends BaseBot {
 			};
 
 			this._bot.on('title', listener);
-			// @ts-ignore
-			this._bot.once('context_changed', contextListener);
+			this.once('context_changed', contextListener);
 
 			const timeout = setTimeout(() => {
 				this._bot.off('title', listener);
-				// @ts-ignore
-				this._bot.off('context_changed', contextListener);
+				this.off('context_changed', contextListener);
 
 				return resolve(true);
 			}, 60 * 1_000);
 
 			if (ctx.id !== this.contextId) {
 				this._bot.off('title', listener);
-				// @ts-ignore
-				this._bot.off('context_changed', contextListener);
-				clearTimeout(timeout);
+				this.off('context_changed', contextListener);
 
+				clearTimeout(timeout);
 				resolve(false);
 			}
 		});
@@ -475,8 +471,7 @@ export default class FishBot extends BaseBot {
 			) {
 				cast = false;
 				this._bot.off('soundEffectHeard', listener);
-				// @ts-ignore
-				this._bot.off('context_changed', contextListener);
+				this.off('context_changed', contextListener);
 			}
 		};
 
@@ -486,8 +481,7 @@ export default class FishBot extends BaseBot {
 		};
 
 		this._bot.on('soundEffectHeard', listener);
-		// @ts-ignore
-		this._bot.once('context_changed', contextListener);
+		this.once('context_changed', contextListener);
 
 		do {
 			this.client.activateItem(ctx);

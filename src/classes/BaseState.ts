@@ -1,4 +1,9 @@
-import type { ControlState, EquipmentDestination } from 'mineflayer';
+import type {
+	ControlState,
+	EquipmentDestination,
+	FindBlockOptions,
+} from 'mineflayer';
+import type { Block } from 'prismarine-block';
 import type { Entity } from 'prismarine-entity';
 import type { Item } from 'prismarine-item';
 import type { Window } from 'prismarine-windows';
@@ -31,8 +36,7 @@ export default class BaseState {
 			const listener = () => {
 				if (this.entity.onGround) {
 					this.client._bot.off('move', listener);
-					// @ts-ignore
-					this.client._bot.off('context_changed', listener);
+					this.client.off('context_changed', listener);
 
 					resolve(undefined);
 				}
@@ -44,13 +48,11 @@ export default class BaseState {
 			};
 
 			this.client._bot.on('move', listener);
-			// @ts-ignore
-			this.client._bot.once('context_changed', contextListener);
+			this.client.once('context_changed', contextListener);
 
 			if (ctx.id !== this.client.contextId || this.entity.onGround) {
 				this.client._bot.off('move', listener);
-				// @ts-ignore
-				this.client._bot.off('context_changed', contextListener);
+				this.client.off('context_changed', contextListener);
 
 				resolve(undefined);
 			}
@@ -100,8 +102,7 @@ export default class BaseState {
 					)
 				) {
 					this.client._bot.off('messagestr', listener);
-					// @ts-ignore
-					this.client._bot.off('context_changed', contextListener);
+					this.client.off('context_changed', contextListener);
 
 					resolve(message);
 				}
@@ -114,13 +115,11 @@ export default class BaseState {
 			};
 
 			this.client._bot.on('messagestr', listener);
-			// @ts-ignore
-			this.client._bot.once('context_changed', contextListener);
+			this.client.once('context_changed', contextListener);
 
 			if (ctx.id !== this.client.contextId) {
 				this.client._bot.off('messagestr', listener);
-				// @ts-ignore
-				this.client._bot.off('context_changed', contextListener);
+				this.client.off('context_changed', contextListener);
 
 				resolve(null);
 			}
@@ -239,6 +238,10 @@ export default class BaseState {
 		return this.client._bot.entities;
 	}
 
+	get currentWindow(): Window | null {
+		return this.client._bot.currentWindow;
+	}
+
 	swingArm(ctx: Context, hand?: 'right' | 'left', showHand?: boolean) {
 		if (ctx.id !== this.client.contextId) return;
 
@@ -253,6 +256,18 @@ export default class BaseState {
 		if (ctx.id !== this.client.contextId) return;
 
 		return this.client._bot.clearControlStates();
+	}
+
+	openChest(ctx: Context, chest: Block | Entity) {
+		if (ctx.id !== this.client.contextId) return;
+
+		return this.client._bot.openChest(chest);
+	}
+
+	findBlock(ctx: Context, options: FindBlockOptions) {
+		if (ctx.id !== this.client.contextId) return null;
+
+		return this.client._bot.findBlock(options);
 	}
 
 	async jumpOnce(ctx: Context) {

@@ -1,3 +1,4 @@
+import EventEmitter from 'events';
 import fs from 'fs/promises';
 import path from 'path';
 import type { MessagePort } from 'worker_threads';
@@ -6,6 +7,7 @@ import chalk from 'chalk';
 import mineflayer from 'mineflayer';
 import type { Bot } from 'mineflayer';
 import type { Window } from 'prismarine-windows';
+import type TypedEventEmitter from 'typed-emitter';
 
 import config from '../config';
 import {
@@ -23,6 +25,7 @@ import {
 	MOBCOINS_REGEX,
 	MONEY_THRESHOLD,
 	PURCHASE_BAIT_REGEX,
+	PURCHASE_ITEM_REGEX,
 	PURCHASE_ROD_REGEX,
 	RECEIVE_MONEY_REGEX,
 	RENEW_CAPTCHA_INTERVAL,
@@ -30,6 +33,7 @@ import {
 	SURPLUS_MONEY_THRESHOLD,
 	TELEPORT_HERE_REGEX,
 	TELEPORT_REGEX,
+	TIME_BEFORE_FISH_AFTER_MOVEMENT_DETECT,
 } from '../constants';
 import {
 	BaseBotOptions,
@@ -59,8 +63,14 @@ import BaseState from './BaseState';
 import type FishBot from './FishBot';
 import Logger from './Logger';
 
-export default class BaseBot {
-	public balance: number;
+type BaseBotEvents = {
+	context_changed: () => void;
+	balance_changed: (balance: number, change: number, from?: string) => void;
+	mobcoins_changed: (mobcoins: number) => void;
+};
+
+export default class BaseBot extends (EventEmitter as new () => TypedEventEmitter<BaseBotEvents>) {
+	private _balance: number = 0;
 	public checkedBalance: boolean;
 	public directory: string;
 	public alias: string;
@@ -108,13 +118,14 @@ export default class BaseBot {
 	}[] = [];
 
 	constructor(options: BaseBotOptions, port: MessagePort) {
+		super();
+
 		this.options = options;
 		this._bot = mineflayer.createBot(options);
 		this.client = new BaseState(this);
 		this.alias = options.alias;
 		this.whitelist = options.whitelist ?? new Set();
 		this.directory = path.join(__dirname, '..', '..', 'data', this.alias);
-		this.balance = 0;
 		this.checkedBalance = false;
 		this.logger = new Logger(options);
 		this.port = port;
@@ -132,8 +143,6 @@ export default class BaseBot {
 		this.commands.set('chat', this.sendChatMessage.bind(this));
 		this.commands.set('move', this.executeMove.bind(this));
 
-		this._bot.once('spawn', this.join.bind(this));
-
 		this.port.on('message', ({ command, args, sender }: ParentMessage) => {
 			const run = this.commands.get(command);
 
@@ -147,6 +156,29 @@ export default class BaseBot {
 				}
 			}
 		});
+	}
+
+	get balance() {
+		return this._balance;
+	}
+
+	setBalance(value: number, from?: string) {
+		const change = value - this._balance;
+
+		this._balance = value;
+		this.emit('balance_changed', value, change, from);
+	}
+
+	get state() {
+		return this._state;
+	}
+
+	set state(value: State) {
+		++this.contextId;
+		this.emit('context_changed');
+
+		this.previousState = this._state;
+		this._state = value;
 	}
 
 	context(): Context {
@@ -196,19 +228,6 @@ export default class BaseBot {
 		}
 	}
 
-	get state() {
-		return this._state;
-	}
-
-	set state(value: State) {
-		++this.contextId;
-		// @ts-ignore
-		this._bot.emit('context_changed');
-
-		this.previousState = this._state;
-		this._state = value;
-	}
-
 	setState(ctx: Context, value: State, update = false) {
 		if (ctx.id !== this.contextId) return;
 
@@ -247,14 +266,15 @@ export default class BaseBot {
 					});
 
 					this._bot.off('move', listener);
-					// @ts-ignore
-					this._bot.off('context_changed', contextListener);
+					this.off('context_changed', contextListener);
 
 					if (config.react_to_external_move) {
 						this.setState(ctx, State.IDLE);
 						await this.client.lookAround(this.context());
 
-						if (this.fisher) {
+						await sleep(TIME_BEFORE_FISH_AFTER_MOVEMENT_DETECT);
+
+						if (this.fisher && this.previousState === State.FISHING) {
 							this.fisher.fish(ctx);
 						}
 					}
@@ -269,13 +289,11 @@ export default class BaseBot {
 		};
 
 		this._bot.on('move', listener);
-		// @ts-ignore
-		this._bot.once('context_changed', contextListener);
+		this.once('context_changed', contextListener);
 
 		if (ctx.id !== this.contextId) {
 			this._bot.off('move', listener);
-			// @ts-ignore
-			this._bot.off('context_changed', contextListener);
+			this.off('context_changed', contextListener);
 		}
 	}
 
@@ -297,8 +315,7 @@ export default class BaseBot {
 
 				this._bot._client.off('set_slot', slotListener);
 				this._bot.off('messagestr', messageListener);
-				// @ts-ignore
-				this._bot.off('context_changed', contextListener);
+				this.off('context_changed', contextListener);
 
 				resolve(packet);
 			};
@@ -318,8 +335,7 @@ export default class BaseBot {
 				) {
 					this._bot.off('messagestr', messageListener);
 					this._bot._client.off('set_slot', slotListener);
-					// @ts-ignore
-					this._bot.off('context_changed', contextListener);
+					this.off('context_changed', contextListener);
 
 					resolve(null);
 				}
@@ -327,14 +343,12 @@ export default class BaseBot {
 
 			this._bot._client.on('set_slot', slotListener);
 			this._bot.on('messagestr', messageListener);
-			// @ts-ignore
-			this._bot.once('context_changed', contextListener);
+			this.once('context_changed', contextListener);
 
 			if (ctx.id !== this.contextId) {
 				this._bot._client.off('set_slot', slotListener);
 				this._bot.off('messagestr', messageListener);
-				// @ts-ignore
-				this._bot.off('context_changed', contextListener);
+				this.off('context_changed', contextListener);
 
 				resolve(null);
 			}
@@ -354,8 +368,7 @@ export default class BaseBot {
 					return;
 
 				this._bot._client.off('set_slot', listener);
-				// @ts-ignore
-				this._bot.off('context_changed', contextListener);
+				this.off('context_changed', contextListener);
 
 				resolve(packet);
 			};
@@ -367,13 +380,11 @@ export default class BaseBot {
 			};
 
 			this._bot._client.on('set_slot', listener);
-			// @ts-ignore
-			this._bot.once('context_changed', contextListener);
+			this.once('context_changed', contextListener);
 
 			if (ctx.id !== this.contextId) {
 				this._bot._client.off('set_slot', listener);
-				// @ts-ignore
-				this._bot.off('context_changed', contextListener);
+				this.off('context_changed', contextListener);
 
 				resolve(undefined);
 			}
@@ -383,23 +394,34 @@ export default class BaseBot {
 	public async waitForSlotItem(
 		ctx: Context,
 		slot: number,
-		item: number,
-		metadata?: number,
+		item: number | number[],
+		metadata?: number | (number | undefined)[],
 	) {
 		if (ctx.id !== this.contextId) return;
+
+		const itemArray =
+			item === undefined || !Array.isArray(item) ? [item] : item;
+		const metadataArray =
+			metadata === undefined || !Array.isArray(metadata)
+				? [metadata]
+				: metadata;
 
 		return new Promise<undefined>(resolve => {
 			const listener = (packet: RawItem) => {
 				if (
 					packet.slot !== slot ||
-					packet.item.blockId !== item ||
-					(metadata !== undefined && metadata !== packet.item.itemDamage)
+					!itemArray.some(
+						(x, i) =>
+							x === undefined ||
+							(x === packet.item.blockId &&
+								(metadataArray[i] === undefined ||
+									metadataArray[i] === packet.item.itemDamage)),
+					)
 				)
 					return;
 
 				this._bot._client.off('set_slot', listener);
-				// @ts-ignore
-				this._bot.off('context_changed', contextListener);
+				this.off('context_changed', contextListener);
 
 				resolve(undefined);
 			};
@@ -411,13 +433,11 @@ export default class BaseBot {
 			};
 
 			this._bot._client.on('set_slot', listener);
-			// @ts-ignore
-			this._bot.once('context_changed', contextListener);
+			this.once('context_changed', contextListener);
 
 			if (ctx.id !== this.contextId) {
 				this._bot._client.off('set_slot', listener);
-				// @ts-ignore
-				this._bot.off('context_changed', contextListener);
+				this.off('context_changed', contextListener);
 
 				resolve(undefined);
 			}
@@ -592,7 +612,7 @@ export default class BaseBot {
 				);
 
 				if (this.checkedBalance === false) await this.getCurrentBalance(ctx);
-				else this.balance += value;
+				else this.setBalance(this.balance + value);
 
 				this.logger.info(
 					`Sold fish for ${chalk.green(`$${currencyFormatter.format(value)}`)}`,
@@ -636,18 +656,28 @@ export default class BaseBot {
 				);
 
 				if (this.checkedBalance === false) await this.getCurrentBalance(ctx);
-				else this.balance -= value;
+				else this.setBalance(this.balance - value);
+
+				return;
+			}
+
+			if (PURCHASE_ITEM_REGEX.test(m)) {
+				const value = parseFloat(
+					m.match(PURCHASE_ITEM_REGEX)![1].replaceAll(',', ''),
+				);
+
+				if (this.checkedBalance === false) await this.getCurrentBalance(ctx);
+				else this.setBalance(this.balance - value);
 
 				return;
 			}
 
 			if (RECEIVE_MONEY_REGEX.test(m)) {
-				const value = parseFloat(
-					m.match(RECEIVE_MONEY_REGEX)![1].replaceAll(',', ''),
-				);
+				const [, _value, name] = m.match(RECEIVE_MONEY_REGEX)!;
+				const value = parseFloat(_value.replaceAll(',', ''));
 
 				if (this.checkedBalance === false) await this.getCurrentBalance(ctx);
-				else this.balance += value;
+				else this.setBalance(this.balance + value, name);
 
 				return;
 			}
@@ -660,7 +690,7 @@ export default class BaseBot {
 					count * BAIT_NAME_TO_PRICE[name as keyof typeof BAIT_NAME_TO_PRICE];
 
 				if (this.checkedBalance === false) await this.getCurrentBalance(ctx);
-				else this.balance -= value;
+				else this.setBalance(this.balance - value);
 
 				return;
 			}
@@ -670,7 +700,7 @@ export default class BaseBot {
 				const value = FISHING_ROD_DATA.find(r => r.name === name)?.price;
 
 				if (this.checkedBalance === false) await this.getCurrentBalance(ctx);
-				else if (value) this.balance -= value;
+				else if (value) this.setBalance(this.balance - value);
 
 				return;
 			}
@@ -872,12 +902,10 @@ export default class BaseBot {
 			};
 
 			this._bot.on('messagestr', listener);
-			// @ts-ignore
-			this._bot.once('context_changed', () => context);
+			this.once('context_changed', () => context);
 
 			if (ctx.id !== this.contextId) {
-				// @ts-ignore
-				this._bot.off('context_changed', context);
+				this.off('context_changed', context);
 				this._bot.off('messagestr', listener);
 
 				return resolve(0);
@@ -890,6 +918,9 @@ export default class BaseBot {
 	}
 
 	public async getCurrentBalance(ctx: Context, real = false) {
+		if (this.checkedBalance)
+			return this.balance - (real ? 0 : SURPLUS_MONEY_THRESHOLD);
+
 		const balance: Promise<number> = new Promise(resolve => {
 			const listener = (m: string) => {
 				if (BALANCE_REGEX.test(m)) {
@@ -898,7 +929,7 @@ export default class BaseBot {
 					const balanceString = m.match(BALANCE_REGEX)![1];
 					const balance = parseFloat(balanceString.replaceAll(',', ''));
 
-					this.balance = balance;
+					this.setBalance(balance);
 					this.checkedBalance = true;
 
 					return resolve(balance - (real ? 0 : SURPLUS_MONEY_THRESHOLD));
@@ -912,13 +943,10 @@ export default class BaseBot {
 			};
 
 			this._bot.on('messagestr', listener);
-
-			// @ts-ignore
-			this._bot.on('context_changed', context);
+			this.on('context_changed', context);
 
 			if (ctx.id !== this.contextId) {
-				// @ts-ignore
-				this._bot.off('context_changed', context);
+				this.off('context_changed', context);
 				this._bot.off('messagestr', listener);
 
 				return resolve(0);
@@ -935,7 +963,7 @@ export default class BaseBot {
 	}
 
 	private async sendMoney(ctx: Context, username?: string) {
-		if (!this.checkedBalance) await this.getCurrentBalance(ctx);
+		await this.getCurrentBalance(ctx);
 
 		const balance = this.balance - SURPLUS_MONEY_THRESHOLD;
 
@@ -1032,8 +1060,8 @@ export default class BaseBot {
 		ctx: Context,
 		action: () => any,
 		slot: number,
-		item: number,
-		metadata?: number,
+		item: number | number[],
+		metadata?: number | (number | undefined)[],
 	) {
 		const promise = this.waitForSlotItem(ctx, slot, item, metadata);
 
@@ -1092,19 +1120,16 @@ export default class BaseBot {
 		const waitForWindow: Promise<Window | undefined> = new Promise(resolve => {
 			const listener = (window?: Window) => {
 				this._bot.off('windowOpen', listener);
-				// @ts-ignore
-				this._bot.off('context_changed', listener);
+				this.off('context_changed', listener);
 
 				return resolve(window);
 			};
 
 			this._bot.once('windowOpen', listener);
-			// @ts-ignore
-			this._bot.once('context_changed', listener);
+			this.once('context_changed', listener);
 
 			if (ctx.id !== this.contextId) {
-				// @ts-ignore
-				this._bot.off('context_changed', listener);
+				this.off('context_changed', listener);
 				this._bot.off('windowOpen', listener);
 
 				return resolve(undefined);

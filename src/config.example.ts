@@ -43,6 +43,10 @@ const config: Config = {
 			password: 'password',
 			// The authentication service to use. Either `mojang` or `microsoft`
 			auth: 'mojang',
+			// The type of bot to use. Either `storage` or `fisher`
+			// `storage`: Automatically purchases items from the shop and stores them
+			// `fisher`: Auto-fishing capabilities
+			type: 'fisher',
 			// The proxy to use (optional)
 			// Protocols: `socks4` or `socks5`
 			proxy: 'socks5://192.168.1.1:5050',
@@ -51,6 +55,22 @@ const config: Config = {
 			channels: ['CHANNEL_ID', 'CHANNEL_ID'],
 			// The port on which to host an instance of `prismarine-viewer` (optional)
 			viewer_port: 3000,
+		},
+		{
+			alias: 'username',
+			username: 'handle@gmail.com',
+			password: 'password',
+			auth: 'mojang',
+			// The type of bot to use. Either `storage` or `fisher`
+			// `storage`: Automatically purchases items from the shop and stores them
+			// `fisher`: Auto-fishing capabilities
+			type: 'storage',
+			// The slots to click while in `/shop`, in order
+			// For example, [14, 32] would purchase `Iron Golem Spawner` as the `Spawners`
+			// category is in slot 14, and `Iron Golem Spawner` is slot 32 in that category
+			instructions: [14, 32],
+			// The price of the item to buy
+			price: 4_000_000,
 		},
 	],
 	// Fishing-related settings

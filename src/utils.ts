@@ -3,6 +3,7 @@ import { Worker } from 'worker_threads';
 import axios from 'axios';
 import chalk from 'chalk';
 import type { Client } from 'discord.js';
+import type { Item } from 'prismarine-item';
 
 import characters from './characters';
 import config, { discordConfig } from './config';
@@ -37,6 +38,15 @@ export function chance(percent: number): boolean {
 
 export function random(max: number, min: number = 0) {
 	return Math.floor(Math.random() * (max - min)) + min;
+}
+
+export function getItemDisplayName(item: Item, stripColour = true) {
+	// @ts-ignore
+	const name: string | undefined = item.nbt?.value?.display?.value?.Name?.value;
+
+	if (!name) return item.displayName;
+
+	return stripColour ? name.replace(/§\w/g, '') : name;
 }
 
 export async function generateActions(prompt: string) {

@@ -9,6 +9,7 @@ import { SocksClient } from 'socks';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 
 import FishBot from './classes/FishBot';
+import StorageBot from './classes/StorageBot';
 import config from './config';
 import type { BaseBotOptions } from './typings';
 
@@ -51,7 +52,10 @@ if (options.proxy !== undefined) {
 	});
 }
 
-const bot = new FishBot(options, parentPort!);
+const bot =
+	options.type === 'fisher'
+		? new FishBot(options, parentPort!)
+		: new StorageBot(options, parentPort!);
 
 if (options.viewer_port !== undefined) {
 	bot.addLoginHook(() => {
@@ -76,5 +80,7 @@ bot._bot.on('end', async reason => {
 
 	process.exit(0);
 });
+
+bot._bot.once('spawn', bot.join.bind(bot));
 
 bot.init();
