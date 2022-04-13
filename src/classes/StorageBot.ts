@@ -168,6 +168,7 @@ export default class FishBot extends BaseBot {
 						)} to ${chalk.yellow(player.username)}`,
 					);
 
+					await this.client.lookAt(ctx, player.entity.position);
 					const start = Date.now();
 
 					for (const item of this.client.inventory.items()) {
