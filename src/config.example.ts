@@ -65,6 +65,10 @@ const config: Config = {
 			// `storage`: Automatically purchases items from the shop and stores them
 			// `fisher`: Auto-fishing capabilities
 			type: 'storage',
+			// The method of storing items. Either `enderchest` or `drop`
+			// `enderchest`: Stores items in the bot's enderchest
+			// `drop`: Drops items to a player in the whitelist at `/home storage`
+			storage: 'enderchest',
 			// The slots to click while in `/shop`, in order
 			// For example, [14, 32] would purchase `Iron Golem Spawner` as the `Spawners`
 			// category is in slot 14, and `Iron Golem Spawner` is slot 32 in that category

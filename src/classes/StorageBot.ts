@@ -145,51 +145,88 @@ export default class FishBot extends BaseBot {
 		if (this.client.currentWindow)
 			this.client.closeWindow(ctx, this.client.currentWindow);
 
-		await this.teleport(ctx, Location.ENCHANTING, LocationType.WARP);
+		await this.teleport(ctx, Location.ENDER_CHEST, LocationType.WARP);
 
 		const depositCount = this.client.inventory.count(item.type, item.metadata);
 
 		if (depositCount > 0) {
-			const block = this.client.findBlock(ctx, {
-				matching: 130,
-				maxDistance: 5,
-			});
+			if (this.options.storage === 'drop') {
+				await this.teleport(ctx, Location.DROP, LocationType.WARP);
 
-			if (block) {
-				block.name = 'chest';
-				const enderchest = await this.client.openChest(ctx, block);
-				block.name = 'ender_chest';
+				for (let _ = 0; _ < 300; ++_) {
+					await this.client.waitForTicks(ctx, 20);
 
-				if (enderchest) {
+					const username = config.whitelist.find(u => this.client.players[u]);
+					if (!username) continue;
+
+					const player = this.client.players[username];
+					if (!player) continue;
+
+					this.logger.info(
+						`Dropping ${depositCount}x ${chalk.green(
+							getItemDisplayName(item),
+						)} to ${chalk.yellow(player.username)}`,
+					);
+
 					const start = Date.now();
 
-					this.logger.info(
-						`Depositing ${depositCount}x ${chalk.green(
-							getItemDisplayName(item),
-						)} into the Ender Chest`,
-					);
+					for (const item of this.client.inventory.items()) {
+						if (item.type !== item.type || item.metadata !== item.metadata)
+							continue;
 
-					await this.client.deposit(
-						ctx,
-						enderchest as unknown as Window,
-						item.type,
-						item.metadata,
-						depositCount,
-					);
-					enderchest.close();
+						await this.client.tossStack(ctx, item);
+					}
 
 					this.logger.info(
-						`Deposited ${depositCount}x ${chalk.green(
+						`Dropped ${depositCount}x ${chalk.green(
 							getItemDisplayName(item),
-						)} into the Ender Chest (${chalk.cyan(
+						)} to ${chalk.yellow(player.username)} (${chalk.cyan(
 							`took ${Date.now() - start}ms`,
 						)})`,
 					);
-				} else {
-					this.logger.warn('Could not open the Ender Chest');
 				}
 			} else {
-				this.logger.warn('Could not find an Ender Chest');
+				const block = this.client.findBlock(ctx, {
+					matching: 130,
+					maxDistance: 5,
+				});
+
+				if (block) {
+					block.name = 'chest';
+					const enderchest = await this.client.openChest(ctx, block);
+					block.name = 'ender_chest';
+
+					if (enderchest) {
+						const start = Date.now();
+
+						this.logger.info(
+							`Depositing ${depositCount}x ${chalk.green(
+								getItemDisplayName(item),
+							)} into the Ender Chest`,
+						);
+
+						await this.client.deposit(
+							ctx,
+							enderchest as unknown as Window,
+							item.type,
+							item.metadata,
+							depositCount,
+						);
+						enderchest.close();
+
+						this.logger.info(
+							`Deposited ${depositCount}x ${chalk.green(
+								getItemDisplayName(item),
+							)} into the Ender Chest (${chalk.cyan(
+								`took ${Date.now() - start}ms`,
+							)})`,
+						);
+					} else {
+						this.logger.warn('Could not open the Ender Chest');
+					}
+				} else {
+					this.logger.warn('Could not find an Ender Chest');
+				}
 			}
 		}
 

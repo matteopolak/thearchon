@@ -250,6 +250,10 @@ export default class BaseState {
 		return this.client._bot.entities;
 	}
 
+	get players() {
+		return this.client._bot.players;
+	}
+
 	get currentWindow(): Window | null {
 		return this.client._bot.currentWindow;
 	}
@@ -285,6 +289,15 @@ export default class BaseState {
 		if (ctx.id !== this.client.contextId) return null;
 
 		return this.client._bot.findBlock(options);
+	}
+
+	async tossStack(ctx: Context, item: Item) {
+		if (ctx.id !== this.client.contextId) return;
+
+		await this.clickWindow(ctx, item.slot, 0, 0);
+		await this.clickWindow(ctx, -999, 0, 0);
+
+		this.closeWindow(ctx, this.currentWindow ?? this.inventory);
 	}
 
 	// Taken from `mineflayer/lib/plugins/inventory.js`

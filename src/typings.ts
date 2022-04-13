@@ -61,6 +61,7 @@ type BotType = 'storage' | 'fisher';
 
 export interface StorageAccount {
 	type: 'storage';
+	storage: 'enderchest' | 'drop';
 	price: number;
 	instructions: number[];
 }
@@ -179,7 +180,8 @@ export const enum Location {
 	FISHING = 'fishing',
 	FOREST = 'forest',
 	SPAWN = 'spawn',
-	ENCHANTING = 'enchant',
+	ENDER_CHEST = 'enchant',
+	DROP = 'storage',
 	UNKNOWN = 'unknown',
 }
 
