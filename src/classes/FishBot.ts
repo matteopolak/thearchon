@@ -544,13 +544,14 @@ export default class FishBot extends BaseBot {
 
 		while (ctx.id === this.contextId) {
 			if (ctx.fishing.fix_after_current) {
-				ctx.fishing.fix_after_current = false;
-
 				await this.client.look(
 					ctx,
 					ctx.fishing.original_yaw,
 					ctx.fishing.original_pitch,
 				);
+
+				if (config.fishing.random_movement.enabled)
+					await this.randomMovement(ctx);
 			}
 
 			ctx.allow_reaction = false;
@@ -564,10 +565,12 @@ export default class FishBot extends BaseBot {
 
 			if (
 				config.fishing.random_movement.enabled &&
+				!ctx.fishing.fix_after_current &&
 				chance(config.fishing.random_movement.chance)
 			)
 				await this.randomMovement(ctx);
 
+			if (ctx.fishing.fix_after_current) ctx.fishing.fix_after_current = false;
 			ctx.allow_reaction = true;
 
 			const rod = this.getBestFishingRod();
