@@ -557,6 +557,10 @@ export default class FishBot extends BaseBot {
 
 				if (config.fishing.random_movement.enabled)
 					await this.randomMovement(ctx);
+				else {
+					ctx.fishing.pitch = this.client.entity.pitch;
+					ctx.fishing.yaw = this.client.entity.yaw;
+				}
 			}
 
 			if (
