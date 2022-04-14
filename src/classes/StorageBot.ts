@@ -56,6 +56,11 @@ export default class FishBot extends BaseBot {
 			`Purchasing up to ${Math.floor(balance / this.options.price)} items`,
 		);
 
+		// Close any windows that are open
+		while (this.client.currentWindow) {
+			this.client.closeWindow(ctx, this.client.currentWindow);
+		}
+
 		await this.completeActionAndWaitForWindow(ctx, () =>
 			this.command(ctx, '/shop'),
 		);

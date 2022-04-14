@@ -543,6 +543,8 @@ export default class FishBot extends BaseBot {
 		this.createMoveHandler(ctx);
 
 		while (ctx.id === this.contextId) {
+			ctx.allow_reaction = false;
+
 			if (ctx.fishing.fix_after_current) {
 				await this.client.look(
 					ctx,
@@ -554,13 +556,14 @@ export default class FishBot extends BaseBot {
 					await this.randomMovement(ctx);
 			}
 
-			ctx.allow_reaction = false;
-
 			if (
 				(await this.checkFishingThresholds(ctx, homeContainsShop)) !==
 				Location.FISHING
 			) {
 				await this.teleportToHome(ctx, Location.FISHING);
+
+				ctx.fishing.pitch = this.client.entity.pitch;
+				ctx.fishing.yaw = this.client.entity.yaw;
 			}
 
 			if (
