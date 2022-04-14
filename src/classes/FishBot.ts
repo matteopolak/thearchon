@@ -577,7 +577,6 @@ export default class FishBot extends BaseBot {
 				await this.randomMovement(ctx);
 
 			if (ctx.fishing.fix_after_current) ctx.fishing.fix_after_current = false;
-			ctx.allow_reaction = true;
 
 			const rod = this.getBestFishingRod();
 
@@ -589,6 +588,8 @@ export default class FishBot extends BaseBot {
 				this.client.heldItem?.nbt?.value?.display?.value?.Name?.value
 			)
 				await this.client.equip(ctx, rod, 'hand');
+
+			ctx.allow_reaction = true;
 
 			this.logger.info('Casting...');
 			await this.cast(ctx);
