@@ -77,7 +77,7 @@ export default class FishBot extends BaseBot {
 
 		if (this.client.currentWindow === null) return;
 
-		const item = this.client.currentWindow.slots[22];
+		const item = (this.client.currentWindow as Window).slots[22];
 		const availableItems = this.client.inventory.slots.reduce((a, b) => {
 			if (b === null) return a + item.stackSize;
 			if (item.type === b.type && item.metadata === b.metadata)
