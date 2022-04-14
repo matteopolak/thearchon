@@ -268,21 +268,21 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 					this._bot.off('move', listener);
 					this.off('context_changed', contextListener);
 
-					if (
-						this.client.entity.position.xzDistanceTo(ctx.fishing!.position) >
-						0.1
-					) {
-						this.setState(ctx, State.IDLE);
-						await sleep(TIME_BEFORE_FISH_AFTER_MOVEMENT_DETECT);
+					if (config.react_to_external_move) {
+						if (
+							this.client.entity.position.xzDistanceTo(ctx.fishing!.position) >
+							0.1
+						) {
+							this.setState(ctx, State.IDLE);
+							await sleep(TIME_BEFORE_FISH_AFTER_MOVEMENT_DETECT);
 
-						if (this.fisher && this.previousState === State.FISHING) {
-							this.fisher.fish(ctx);
+							if (this.fisher && this.previousState === State.FISHING) {
+								this.fisher.fish(ctx);
+							}
+
+							return;
 						}
 
-						return;
-					}
-
-					if (config.react_to_external_move) {
 						if (ctx.fishing) ctx.fishing.fix_after_current = true;
 
 						this.setState(ctx, State.IDLE);

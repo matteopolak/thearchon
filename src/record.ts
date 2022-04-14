@@ -179,22 +179,12 @@ bot.on('chat', async (username, message) => {
 		settings.record = false;
 		settings.data.sort((a, b) => a.time! - b.time!);
 
-		const data = [];
+		const data: RecordingStep[] = [];
 
 		for (const [i, step] of settings.data.entries()) {
-			const prev = settings.data[i - 1];
+			const prev = data.at(-1);
 
-			if (i === 0) {
-				step.wait = 0;
-
-				if (step.pitch === undefined) step.pitch = settings.pitch;
-			} else {
-				step.wait =
-					i === settings.data.length - 1
-						? 0
-						: settings.data[i + 1].time! - step.time!;
-			}
-
+			if (i === 0 && step.pitch === undefined) step.pitch = settings.pitch;
 			if (
 				!prev ||
 				step.forward !== prev.forward ||
@@ -206,15 +196,23 @@ bot.on('chat', async (username, message) => {
 				step.sprint !== prev.sprint ||
 				step.crouch !== prev.crouch
 			) {
+				if (prev) {
+					prev.wait = step.time! - prev.time!;
+				}
+
 				data.push(step);
 			}
 		}
+
+		if (data.length > 0) data.at(-1)!.wait = 0;
 
 		await fs.mkdir(outputDirectory, { recursive: true });
 		await fs.writeFile(
 			path.join(outputDirectory, Date.now().toString()),
 			JSON.stringify(data),
 		);
+
+		settings.data.splice(0, settings.data.length);
 
 		return bot.chat(`Saved recording to 'recordings/${Date.now()}'`);
 	}
@@ -232,7 +230,7 @@ function getPressedKeys(packet: {
 
 	const magnitude = Math.sqrt(packet.dX ** 2 + packet.dZ ** 2);
 
-	if (magnitude > 10) {
+	if (magnitude > 5) {
 		if (packet.dX === 0) {
 			direction = packet.dZ < 0 ? 0 : Math.PI;
 		} else if (packet.dZ === 0) {
@@ -266,11 +264,18 @@ function getPressedKeys(packet: {
 		return KEY_COMBINATIONS[eighth];
 	}
 
+	const movement =
+		magnitude === 0
+			? {}
+			: {
+					forward: false,
+					back: false,
+					left: false,
+					right: false,
+			  };
+
 	return {
-		forward: false,
-		back: false,
-		left: false,
-		right: false,
+		...movement,
 		onGround: packet.onGround,
 		yaw:
 			packet.yaw !== undefined
@@ -317,7 +322,8 @@ function parsePacket(packet: any, metadata: PacketMeta) {
 				(p: { key: string; modifiers: any[] }) =>
 					p.key === 'generic.movementSpeed',
 			);
-			if (property) return { sprint: property.modifiders?.length > 0 };
+
+			if (property) return { sprint: property.modifiers?.length > 0 };
 			break;
 	}
 
