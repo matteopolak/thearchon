@@ -55,6 +55,14 @@ const config: Config = {
 			channels: ['CHANNEL_ID', 'CHANNEL_ID'],
 			// The port on which to host an instance of `prismarine-viewer` (optional)
 			viewer_port: 3000,
+			// The homes to use (optional)
+			homes: {
+				// The home that is set at the fishing location
+				fishing: 'fishing',
+				// The home that is set at the selling location
+				// (optional if the NPC is in range of the bot)
+				forest: 'forest',
+			},
 		},
 		{
 			alias: 'username',
@@ -75,6 +83,11 @@ const config: Config = {
 			instructions: [14, 32],
 			// The price of the item to buy
 			price: 4_000_000,
+			// The homes to use (optional)
+			homes: {
+				// The home that is set at the drop location
+				drop: 'storage',
+			},
 		},
 	],
 	// Fishing-related settings

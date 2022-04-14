@@ -81,6 +81,12 @@ export type Account = (StorageAccount | FishingAccount) & {
 	proxy?: `${
 		| 'socks4'
 		| 'socks5'}://${number}.${number}.${number}.${number}:${number}`;
+	homes?: Partial<{
+		fishing: string;
+		drop: string;
+		ender_chest: string;
+		forest: string;
+	}>;
 };
 
 export interface Config {
@@ -120,7 +126,7 @@ export type Context = {
 		original_yaw: number;
 		fix_after_current: boolean;
 	};
-	location: Location;
+	location: Location | string;
 	last_window_click: number;
 };
 

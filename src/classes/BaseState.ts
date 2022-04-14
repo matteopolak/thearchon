@@ -594,8 +594,19 @@ export default class BaseState {
 
 		this.setControlState(ctx, direction, true);
 
-		while (original.distanceTo(this.entity.position) < distance) {
+		const last = this.entity.position.clone();
+
+		while (
+			original.distanceTo(this.entity.position) < distance &&
+			last.distanceTo(this.entity.position) > 0.1
+		) {
 			await this.waitForTicks(ctx, 1);
+
+			last.set(
+				this.entity.position.x,
+				this.entity.position.y,
+				this.entity.position.z,
+			);
 		}
 
 		this.setControlState(ctx, direction, false);

@@ -150,13 +150,13 @@ export default class FishBot extends BaseBot {
 		if (this.client.currentWindow)
 			this.client.closeWindow(ctx, this.client.currentWindow);
 
-		await this.teleport(ctx, Location.ENDER_CHEST, LocationType.WARP);
+		await this.teleport(ctx, this.homes.ender_chest, LocationType.WARP);
 
 		const depositCount = this.client.inventory.count(item.type, item.metadata);
 
 		if (depositCount > 0) {
 			if (this.options.storage === 'drop') {
-				await this.teleport(ctx, Location.DROP, LocationType.HOME);
+				await this.teleport(ctx, this.homes.drop, LocationType.HOME);
 
 				for (let _ = 0; _ < 300; ++_) {
 					await this.client.waitForTicks(ctx, 20);

@@ -32,6 +32,8 @@ const filter: string[][] = [
 	[],
 ];
 
+axios.defaults.validateStatus = () => true;
+
 export function chance(percent: number): boolean {
 	return Math.random() < percent;
 }
@@ -50,14 +52,19 @@ export function getItemDisplayName(item: Item, stripColour = true) {
 }
 
 export async function generateActions(prompt: string) {
-	const { data } = await axios.get<WitResponse>('https://api.wit.ai/message', {
-		params: {
-			q: prompt,
+	const { data, status } = await axios.get<WitResponse>(
+		'https://api.wit.ai/message',
+		{
+			params: {
+				q: prompt,
+			},
+			headers: {
+				Authorization: `Bearer ${config.witai_key}`,
+			},
 		},
-		headers: {
-			Authorization: `Bearer ${config.witai_key}`,
-		},
-	});
+	);
+
+	if (status !== 200) return [];
 
 	// const numbers = data.entities['wit$number:number'] ?? [];
 	const movements =
@@ -93,7 +100,7 @@ export async function generateResponse(
 ): Promise<string | undefined> {
 	if (config.openai_key === undefined) return undefined;
 
-	const { data: response } = await axios.post<OpenAIResponse>(
+	const { data: response, status } = await axios.post<OpenAIResponse>(
 		'https://api.openai.com/v1/answers',
 		{
 			model: 'davinci',
@@ -133,7 +140,11 @@ export async function generateResponse(
 		},
 	);
 
-	if (response.answers === undefined || response.answers.length === 0)
+	if (
+		status !== 200 ||
+		response.answers === undefined ||
+		response.answers.length === 0
+	)
 		return undefined;
 
 	const answer = response.answers[0];

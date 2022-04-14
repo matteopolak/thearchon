@@ -94,6 +94,12 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 	public contextId: number = 0;
 	public joinedAt: number = 0;
 	public logFileLocation: string;
+	public homes = {
+		fishing: Location.FISHING,
+		forest: Location.FOREST,
+		drop: Location.DROP,
+		ender_chest: Location.ENDER_CHEST,
+	};
 
 	private commandQueue: {
 		message: string;
@@ -315,10 +321,21 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		ctx: Context,
 		messages: string[] | RegExp[],
 		item?: number,
+		timeout?: number,
 	) {
 		if (ctx.id !== this.contextId) return;
 
 		return new Promise<RawItem | null>(resolve => {
+			const max = timeout
+				? setTimeout(() => {
+						this._bot._client.off('set_slot', slotListener);
+						this._bot.off('messagestr', messageListener);
+						this.off('context_changed', contextListener);
+
+						resolve(null);
+				  }, timeout)
+				: null;
+
 			const slotListener = (packet: RawItem) => {
 				if (
 					packet.item.blockId === 351 ||
@@ -330,6 +347,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				this._bot._client.off('set_slot', slotListener);
 				this._bot.off('messagestr', messageListener);
 				this.off('context_changed', contextListener);
+				if (max) clearTimeout(max);
 
 				resolve(packet);
 			};
@@ -337,6 +355,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 			const contextListener = () => {
 				this._bot._client.off('set_slot', slotListener);
 				this._bot.off('messagestr', messageListener);
+				if (max) clearTimeout(max);
 
 				resolve(null);
 			};
@@ -350,6 +369,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 					this._bot.off('messagestr', messageListener);
 					this._bot._client.off('set_slot', slotListener);
 					this.off('context_changed', contextListener);
+					if (max) clearTimeout(max);
 
 					resolve(null);
 				}
@@ -363,6 +383,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				this._bot._client.off('set_slot', slotListener);
 				this._bot.off('messagestr', messageListener);
 				this.off('context_changed', contextListener);
+				if (max) clearTimeout(max);
 
 				resolve(null);
 			}
@@ -1098,7 +1119,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 
 	public async teleport(
 		ctx: Context,
-		name: Location,
+		name: Location | string,
 		type: LocationType = LocationType.HOME,
 	) {
 		if (ctx.id !== this.contextId) return;

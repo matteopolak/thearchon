@@ -104,16 +104,16 @@ export default class FishBot extends BaseBot {
 		});
 	}
 
-	public async teleportToHome(ctx: Context, name: Location) {
+	public async teleportToHome(ctx: Context, name: Location | string) {
 		if (ctx.location === name || ctx.id !== this.contextId) return;
 
-		if (name === Location.FOREST && config.fishing.sneak_while_fishing) {
+		if (name === this.homes.forest && config.fishing.sneak_while_fishing) {
 			this.client.setControlState(ctx, 'sneak', false);
 		}
 
 		await super.teleport(ctx, name, LocationType.HOME);
 
-		if (name === Location.FISHING && config.fishing.sneak_while_fishing) {
+		if (name === this.homes.fishing && config.fishing.sneak_while_fishing) {
 			this.client.setControlState(ctx, 'sneak', true);
 		}
 	}
@@ -318,7 +318,7 @@ export default class FishBot extends BaseBot {
 
 		await this.teleportToHome(
 			ctx,
-			homeContainsShop ? Location.FISHING : Location.FOREST,
+			homeContainsShop ? this.homes.fishing : this.homes.forest,
 		);
 
 		const data = {
@@ -350,7 +350,7 @@ export default class FishBot extends BaseBot {
 
 		this.client.closeWindow(ctx, window);
 
-		if (ctx.location === Location.FISHING)
+		if (ctx.location === this.homes.fishing)
 			return this.client.look(ctx, data.yaw, data.pitch, true);
 	}
 
@@ -359,7 +359,7 @@ export default class FishBot extends BaseBot {
 
 		await this.teleportToHome(
 			ctx,
-			homeContainsShop ? Location.FISHING : Location.FOREST,
+			homeContainsShop ? this.homes.fishing : this.homes.forest,
 		);
 
 		const data = {
@@ -393,7 +393,7 @@ export default class FishBot extends BaseBot {
 
 		this.client.closeWindow(ctx, window);
 
-		if (ctx.location === Location.FISHING)
+		if (ctx.location === this.homes.fishing)
 			return this.client.look(ctx, data.yaw, data.pitch, true);
 	}
 
@@ -490,9 +490,12 @@ export default class FishBot extends BaseBot {
 	}
 
 	private async reel(ctx: Context) {
-		const promise = this.waitForItemOrMessage(ctx, [
-			'Whatever fish you were about to catch broke your line!',
-		]);
+		const promise = this.waitForItemOrMessage(
+			ctx,
+			['Whatever fish you were about to catch broke your line!'],
+			undefined,
+			5_000,
+		);
 
 		this.client.activateItem(ctx);
 
@@ -527,7 +530,7 @@ export default class FishBot extends BaseBot {
 		)
 			await this.client.equip(ctx, rod, 'hand');
 
-		await this.teleportToHome(ctx, Location.FISHING);
+		await this.teleportToHome(ctx, this.homes.fishing);
 
 		const homeContainsShop = this.getFishMonger() !== undefined;
 
@@ -558,9 +561,9 @@ export default class FishBot extends BaseBot {
 
 			if (
 				(await this.checkFishingThresholds(ctx, homeContainsShop)) !==
-				Location.FISHING
+				this.homes.fishing
 			) {
-				await this.teleportToHome(ctx, Location.FISHING);
+				await this.teleportToHome(ctx, this.homes.fishing);
 
 				ctx.fishing.pitch = this.client.entity.pitch;
 				ctx.fishing.yaw = this.client.entity.yaw;
