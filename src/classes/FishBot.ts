@@ -534,7 +534,7 @@ export default class FishBot extends BaseBot {
 		ctx.fishing = {
 			pitch: this.client.entity.pitch,
 			yaw: this.client.entity.yaw,
-			position: this.client.entity.position,
+			position: this.client.entity.position.clone(),
 			original_pitch: this.client.entity.pitch,
 			original_yaw: this.client.entity.yaw,
 			fix_after_current: false,
@@ -543,6 +543,16 @@ export default class FishBot extends BaseBot {
 		this.createMoveHandler(ctx);
 
 		while (ctx.id === this.contextId) {
+			if (ctx.fishing.fix_after_current) {
+				ctx.fishing.fix_after_current = false;
+
+				await this.client.look(
+					ctx,
+					ctx.fishing.original_yaw,
+					ctx.fishing.original_pitch,
+				);
+			}
+
 			ctx.allow_reaction = false;
 
 			if (
@@ -617,14 +627,7 @@ export default class FishBot extends BaseBot {
 			}
 
 			if (ctx.fishing.fix_after_current) {
-				ctx.fishing.fix_after_current = false;
 				ctx.id = this.contextId;
-
-				await this.client.look(
-					ctx,
-					ctx.fishing.original_yaw,
-					ctx.fishing.original_pitch,
-				);
 			}
 		}
 

@@ -151,7 +151,7 @@ export default class FishBot extends BaseBot {
 
 		if (depositCount > 0) {
 			if (this.options.storage === 'drop') {
-				await this.teleport(ctx, Location.DROP, LocationType.WARP);
+				await this.teleport(ctx, Location.DROP, LocationType.HOME);
 
 				for (let _ = 0; _ < 300; ++_) {
 					await this.client.waitForTicks(ctx, 20);
@@ -162,14 +162,15 @@ export default class FishBot extends BaseBot {
 					const player = this.client.players[username];
 					if (!player) continue;
 
+					await this.client.lookAt(ctx, player.entity.position);
+
+					const start = Date.now();
+
 					this.logger.info(
 						`Dropping ${depositCount}x ${chalk.green(
 							getItemDisplayName(item),
 						)} to ${chalk.yellow(player.username)}`,
 					);
-
-					await this.client.lookAt(ctx, player.entity.position);
-					const start = Date.now();
 
 					for (const item of this.client.inventory.items()) {
 						if (item.type !== item.type || item.metadata !== item.metadata)
@@ -185,6 +186,8 @@ export default class FishBot extends BaseBot {
 							`took ${Date.now() - start}ms`,
 						)})`,
 					);
+
+					break;
 				}
 			} else {
 				const block = this.client.findBlock(ctx, {
