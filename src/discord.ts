@@ -6,6 +6,21 @@ import { Client, Intents } from 'discord.js';
 import config from './config';
 import type { DiscordConfig, ParentMessage } from './typings';
 
+const NO_USERNAME_COMMANDS = new Set([
+	'exec',
+	'chat',
+	'move',
+	'inventory',
+	'bal',
+	'mobcoins',
+	'accept',
+	'fish',
+	'value',
+	'clear',
+	'stop',
+	'sell',
+]);
+
 export function create(
 	discordConfig: DiscordConfig,
 	workers: Map<string, Worker>,
@@ -26,9 +41,14 @@ export function create(
 		if (!message.content.startsWith(discordConfig.prefix)) return;
 		if (!discordConfig.whitelist.includes(message.author.id)) return;
 
-		const [command, username, ...args] = message.content
+		const [_command, ...args] = message.content
 			.slice(discordConfig.prefix.length)
 			.split(/ +/);
+
+		const command = _command.toLowerCase();
+		const username = NO_USERNAME_COMMANDS.has(command)
+			? 'Discord'
+			: args.shift();
 
 		if (!command || !username) {
 			return void message.channel.send(

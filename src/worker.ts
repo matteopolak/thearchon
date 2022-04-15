@@ -55,9 +55,9 @@ if (options.proxy !== undefined) {
 }
 
 const bot =
-	options.type === 'fisher'
-		? new FishBot(options, parentPort!)
-		: new StorageBot(options, parentPort!);
+	options.type === 'storage'
+		? new StorageBot(options, parentPort!)
+		: new FishBot(options, parentPort!);
 
 if (options.viewer_port !== undefined) {
 	bot.addLoginHook(() => {
