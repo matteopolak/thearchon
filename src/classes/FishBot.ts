@@ -639,6 +639,11 @@ export default class FishBot extends BaseBot {
 		this.state = State.FISHING;
 
 		const ctx = this.context();
+
+		if (this.options.temporary && !this.flags.acceptedIP) {
+			await this.command(ctx, '/yes');
+		}
+
 		const rod =
 			this.getBestFishingRod() ?? (await this.prepareFromNothing(ctx));
 
