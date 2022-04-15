@@ -540,6 +540,8 @@ export default class FishBot extends BaseBot {
 		const rodIndex = this.getBestFishingRod(true);
 		const bait = ROD_TO_BAIT[rodIndex === -1 ? 0 : rodIndex];
 
+		console.log(this.balance, bait.price);
+
 		if (inventory.count.bait <= BAIT_THRESHOLD && bait.price <= this.balance) {
 			await this.purchaseBait(ctx, homeContainsShop);
 		} else if (
@@ -670,6 +672,7 @@ export default class FishBot extends BaseBot {
 			position: this.client.entity.position.clone(),
 			original_pitch: this.client.entity.pitch,
 			original_yaw: this.client.entity.yaw,
+			original_position: this.client.entity.position.clone(),
 			fix_after_current: false,
 		};
 

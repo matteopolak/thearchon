@@ -138,6 +138,7 @@ export type Context = {
 		position: Vec3;
 		original_pitch: number;
 		original_yaw: number;
+		original_position: Vec3;
 		fix_after_current: boolean;
 	};
 	location: Location | string;

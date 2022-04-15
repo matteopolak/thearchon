@@ -234,6 +234,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		if (ctx.fishing) {
 			ctx.fishing.pitch = this.client.entity.pitch;
 			ctx.fishing.yaw = this.client.entity.yaw;
+			ctx.fishing.position = this.client.entity.position.clone();
 		}
 	}
 
@@ -255,9 +256,15 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				this.state === State.FISHING
 			) {
 				if (
-					this.client.entity.pitch !== ctx.fishing!.pitch ||
-					this.client.entity.yaw !== ctx.fishing!.yaw ||
-					this.client.entity.position.xzDistanceTo(ctx.fishing!.position) > 0.1
+					(this.client.entity.pitch !== ctx.fishing!.pitch &&
+						this.client.entity.pitch !== ctx.fishing!.original_pitch) ||
+					(this.client.entity.yaw !== ctx.fishing!.yaw &&
+						this.client.entity.yaw !== ctx.fishing!.original_yaw) ||
+					(this.client.entity.position.xzDistanceTo(ctx.fishing!.position) >
+						0.1 &&
+						this.client.entity.position.xzDistanceTo(
+							ctx.fishing!.original_position,
+						) > 0.1)
 				) {
 					const message = `Unusual movement. Detected yaw/pitch/movement change: ${
 						ctx.fishing!.pitch - this.client.entity.yaw
