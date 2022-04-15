@@ -568,9 +568,10 @@ export default class FishBot extends BaseBot {
 	}
 
 	private async cast(ctx: Context) {
-		if (ctx.id !== this.contextId) return;
+		if (ctx.id !== this.contextId) return true;
 
 		let cast = true;
+		let error = false;
 
 		const listener = (name: string, position: Vec3) => {
 			if (
@@ -579,6 +580,17 @@ export default class FishBot extends BaseBot {
 			) {
 				cast = false;
 				this._bot.off('soundEffectHeard', listener);
+				this._bot.off('messagestr', messageListener);
+				this.off('context_changed', contextListener);
+			}
+		};
+
+		const messageListener = (message: string) => {
+			if (message === "You don't have any bait!") {
+				cast = false;
+				error = true;
+				this._bot.off('soundEffectHeard', listener);
+				this._bot.off('messagestr', messageListener);
 				this.off('context_changed', contextListener);
 			}
 		};
@@ -586,15 +598,19 @@ export default class FishBot extends BaseBot {
 		const contextListener = () => {
 			cast = false;
 			this._bot.off('soundEffectHeard', listener);
+			this._bot.off('messagestr', messageListener);
 		};
 
 		this._bot.on('soundEffectHeard', listener);
+		this._bot.on('messagestr', messageListener);
 		this.once('context_changed', contextListener);
 
 		do {
 			this.client.activateItem(ctx);
 			await this.client.waitForTicks(ctx, 10);
 		} while (cast);
+
+		return error;
 	}
 
 	private async reel(ctx: Context) {
@@ -705,47 +721,49 @@ export default class FishBot extends BaseBot {
 			ctx.allow_reaction = true;
 
 			this.logger.info('Casting...');
-			await this.cast(ctx);
+			const error = await this.cast(ctx);
 
-			this.logger.info('Waiting for bite...');
-			await this.waitForBite(ctx);
+			if (!error) {
+				this.logger.info('Waiting for bite...');
+				await this.waitForBite(ctx);
 
-			this.logger.info('Reeling...');
-			const reward = await this.reel(ctx);
+				this.logger.info('Reeling...');
+				const reward = await this.reel(ctx);
 
-			if (reward) {
-				const rawName: string =
-					// @ts-ignore
-					reward.item.nbtData?.value?.display?.value?.Name?.value ??
-					items.findItemOrBlockById(reward.item.blockId)?.displayName;
-				const coins: number =
-					// @ts-ignore
-					reward.item.nbtData?.value?.arfshfishworth?.value ?? 0;
-				const mobcoins: number =
-					// @ts-ignore
-					reward.item.nbtData?.value?.arfshfishmobcoins?.value ?? 0;
-				const name = rawName ? rawName.replace(/§\w/g, '') : undefined;
+				if (reward) {
+					const rawName: string =
+						// @ts-ignore
+						reward.item.nbtData?.value?.display?.value?.Name?.value ??
+						items.findItemOrBlockById(reward.item.blockId)?.displayName;
+					const coins: number =
+						// @ts-ignore
+						reward.item.nbtData?.value?.arfshfishworth?.value ?? 0;
+					const mobcoins: number =
+						// @ts-ignore
+						reward.item.nbtData?.value?.arfshfishmobcoins?.value ?? 0;
+					const name = rawName ? rawName.replace(/§\w/g, '') : undefined;
 
-				if (coins && mobcoins && name) {
-					this.logger.info(
-						`Caught ${chalk.bold(chalk.magenta(name))} [${chalk.red(
-							reward.item.itemCount,
-						)}] worth ${chalk.green(
-							`$${currencyFormatter.format(coins)}${chalk.reset(
-								'/',
-							)}${chalk.yellow(
-								`${currencyFormatter.format(mobcoins)} MobCoins`,
+					if (coins && mobcoins && name) {
+						this.logger.info(
+							`Caught ${chalk.bold(chalk.magenta(name))} [${chalk.red(
+								reward.item.itemCount,
+							)}] worth ${chalk.green(
+								`$${currencyFormatter.format(coins)}${chalk.reset(
+									'/',
+								)}${chalk.yellow(
+									`${currencyFormatter.format(mobcoins)} MobCoins`,
+								)}`,
 							)}`,
-						)}`,
-					);
-				} else if (name) {
-					this.logger.info(
-						`Caught ${chalk.bold(chalk.magenta(name))} [${chalk.red(
-							reward.item.itemCount,
-						)}]`,
-					);
-				} else {
-					this.logger.info('Reel complete');
+						);
+					} else if (name) {
+						this.logger.info(
+							`Caught ${chalk.bold(chalk.magenta(name))} [${chalk.red(
+								reward.item.itemCount,
+							)}]`,
+						);
+					} else {
+						this.logger.info('Reel complete');
+					}
 				}
 			}
 
