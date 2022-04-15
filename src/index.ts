@@ -3,11 +3,16 @@ import path from 'path';
 import type { Worker } from 'worker_threads';
 
 import axios from 'axios';
+import chalk from 'chalk';
 
 import config, { discordConfig } from './config';
+import {
+	THEALTENING_AUTHENTICATION_URL,
+	THEALTENING_SESSIONSERVER_URL,
+} from './constants';
 import { create } from './discord';
 import { BaseBotOptions, SellType } from './typings';
-import { startNewProcess } from './utils';
+import { generateAlteningToken, startNewProcess } from './utils';
 
 const workers = new Map<string, Worker>();
 const client = discordConfig.enabled ? create(discordConfig, workers) : null;
@@ -54,13 +59,40 @@ async function run() {
 	}
 
 	for (const options of config.accounts) {
+		if (options.auth === 'thealtening') {
+			if (!options.username) {
+				const data = await generateAlteningToken();
+
+				if (data === null) {
+					console.log(
+						`${' '.repeat(17)}${chalk.bold(
+							chalk.cyan('Parent'),
+						)} Could not generate token for ${chalk.yellow(options.alias)}`,
+					);
+
+					continue;
+				}
+
+				options.alias = data.token.slice(11);
+				options.username = data.token;
+				options.expires = data.expires;
+			}
+
+			options.auth = undefined;
+			options.temporary = true;
+
+			options.sessionServer = THEALTENING_SESSIONSERVER_URL;
+			options.authServer = THEALTENING_AUTHENTICATION_URL;
+		}
+
 		startNewProcess(
 			{
+				// @ts-ignore
 				options: {
 					...defaults,
 					...options,
 					sell_type: SellType.COINS,
-					fish: true,
+					fish: config.fishing.fish_on_join,
 				},
 			},
 			workers,

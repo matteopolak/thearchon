@@ -2,7 +2,7 @@ import type { BotOptions } from 'mineflayer';
 import type { Item } from 'prismarine-item';
 import type { Vec3 } from 'vec3';
 
-export type AuthType = 'mojang' | 'microsoft';
+export type AuthType = 'mojang' | 'microsoft' | 'thealtening';
 export const enum ServerType {
 	ONYX = 'onyx',
 	RUBY = 'ruby',
@@ -70,24 +70,38 @@ export interface FishingAccount {
 	type: 'fisher';
 }
 
-export type Account = (StorageAccount | FishingAccount) & {
-	alias: string;
+export interface TheAlteningAccount {
+	username?: string;
+	expires?: number;
+	auth: 'thealtening';
+}
+
+export interface NormalAccount {
 	username: string;
-	password: string;
-	auth: AuthType;
-	channels?: string[];
-	viewer_port?: number;
-	type: BotType;
-	proxy?: `${
-		| 'socks4'
-		| 'socks5'}://${number}.${number}.${number}.${number}:${number}`;
-	homes?: Partial<{
-		fishing: string;
-		drop: string;
-		ender_chest: string;
-		forest: string;
-	}>;
-};
+	expires?: number;
+	auth?: AuthType;
+}
+
+export type Account = (StorageAccount | FishingAccount) &
+	(NormalAccount | TheAlteningAccount) & {
+		alias: string;
+		password: string;
+		channels?: string[];
+		viewer_port?: number;
+		temporary?: boolean;
+		type: BotType;
+		proxy?: `${
+			| 'socks4'
+			| 'socks5'}://${number}.${number}.${number}.${number}:${number}`;
+		homes?: Partial<{
+			fishing: string;
+			drop: string;
+			ender_chest: string;
+			forest: string;
+		}>;
+		authServer?: string;
+		sessionServer?: string;
+	};
 
 export interface Config {
 	openai_key?: string;

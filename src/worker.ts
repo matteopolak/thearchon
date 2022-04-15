@@ -31,6 +31,8 @@ if (options.proxy !== undefined) {
 		password: options.password,
 		host: options.host,
 		port: options.port,
+		authServer: options.authServer,
+		sessionServer: options.sessionServer,
 		connect: async client => {
 			const info = await SocksClient.createConnection({
 				proxy: {

@@ -344,6 +344,24 @@ export function startNewProcess(
 		if (code === 0) {
 			await sleep(10_000);
 
+			if (payload.options.expires && payload.options.expires - Date.now()) {
+				const data = await generateAlteningToken();
+
+				if (data === null) {
+					return console.log(
+						`${' '.repeat(17)}${chalk.bold(
+							chalk.cyan('Parent'),
+						)} Permanently stopping worker ${chalk.yellow(
+							payload.options.alias,
+						)}`,
+					);
+				}
+
+				payload.options.alias = data.token.slice(11);
+				payload.options.username = data.token;
+				payload.options.expires = data.expires;
+			}
+
 			startNewProcess(payload, workers, client);
 		} else {
 			console.log(
@@ -353,4 +371,22 @@ export function startNewProcess(
 			);
 		}
 	});
+}
+
+export async function generateAlteningToken(): Promise<{
+	token: string;
+	expires: number;
+} | null> {
+	const { data, status } = await axios.get(
+		'https://api.thealtening.com/free/generate',
+		{
+			headers: {
+				cookie: 'tower=aaaaaaaaaaaaaaa; watch=aaaaaaaaaaaaaaaa',
+			},
+		},
+	);
+
+	if (status !== 200) return null;
+
+	return { token: data.token, expires: new Date(data.expires).getTime() };
 }

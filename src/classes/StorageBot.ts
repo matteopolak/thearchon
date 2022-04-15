@@ -167,7 +167,7 @@ export default class FishBot extends BaseBot {
 					const player = this.client.players[username];
 					if (!player) continue;
 
-					await this.client.lookAt(ctx, player.entity.position);
+					await this.client.look(ctx, this.client.entity.yaw, 0);
 
 					const start = Date.now();
 

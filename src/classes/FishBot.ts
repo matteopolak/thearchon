@@ -308,9 +308,105 @@ export default class FishBot extends BaseBot {
 			bait.metadata,
 		);
 
-		await this.client.clickWindow(ctx, 17, 0, 0);
+		const maxCount = Math.floor(this.balance / bait.price);
+		const slotCount =
+			maxCount >= 64
+				? 17
+				: maxCount >= 32
+				? 15
+				: maxCount >= 10
+				? 13
+				: maxCount >= 5
+				? 11
+				: 9;
+
+		await this.client.clickWindow(ctx, slotCount, 0, 0);
 
 		return true;
+	}
+
+	private async sellDefaultResourcesAction(ctx: Context) {
+		if (ctx.id !== this.contextId) return;
+
+		const window = await this.completeActionAndWaitForWindow(ctx, () =>
+			this.command(ctx, '/shop ores'),
+		);
+
+		if (!window) return false;
+
+		this._bot._client.write('window_click', {
+			windowId: window.id,
+			slot: 16,
+			mouseButton: 2,
+			action: 32600,
+			mode: 3,
+			item: window.slots[16],
+		});
+
+		await this.client.waitForTicks(ctx, 10);
+
+		this._bot._client.write('window_click', {
+			windowId: window.id,
+			slot: 12,
+			mouseButton: 2,
+			action: 32650,
+			mode: 3,
+			item: window.slots[12],
+		});
+
+		return true;
+	}
+
+	private async prepareFromNothing(ctx: Context) {
+		if (ctx.id !== this.contextId) return null;
+
+		const balance = await this.getCurrentBalance(ctx, true);
+
+		if (balance < FISHING_ROD_DATA[0].price) {
+			if (!(await this.sellDefaultResourcesAction(ctx))) {
+				return null;
+			}
+		}
+
+		await this.teleport(ctx, 'fishing', LocationType.WARP);
+		await this.command(ctx, `/sethome ${this.homes.fishing}`);
+
+		const window = await this.completeActionAndWaitForWindow(ctx, async () => {
+			const entity = Object.values(this.client.entities).find(
+				e =>
+					e.username !== undefined &&
+					e.username.includes('Fish') &&
+					e.position.distanceTo(this.client.entity.position) < 4,
+			);
+
+			if (!entity) {
+				if (ctx.id === this.contextId) process.exit(0);
+			} else await this.client.activateEntity(ctx, entity);
+		});
+
+		if (!window) return null;
+
+		const data = FISHING_ROD_DATA[0];
+
+		this.logger.info(`Purchasing ${data.name_coloured_pretty}`);
+
+		await this.completeActionAndWaitForSlotItem(
+			ctx,
+			() => this.client.clickWindow(ctx, 14, 0, 0),
+			data.slot,
+			346,
+		);
+
+		await this.client.clickWindow(ctx, data.slot, 0, 0);
+
+		await this.completeActionAndWaitForSlotItem(
+			ctx,
+			() => this.client.closeWindow(ctx, window),
+			11,
+			266,
+		);
+
+		return this.getBestFishingRod();
 	}
 
 	private async sellFish(ctx: Context, homeContainsShop: boolean) {
@@ -441,7 +537,10 @@ export default class FishBot extends BaseBot {
 			await this.clearInventory(ctx);
 		}
 
-		if (inventory.count.bait <= BAIT_THRESHOLD) {
+		const rodIndex = this.getBestFishingRod(true);
+		const bait = ROD_TO_BAIT[rodIndex === -1 ? 0 : rodIndex];
+
+		if (inventory.count.bait <= BAIT_THRESHOLD && bait.price <= this.balance) {
 			await this.purchaseBait(ctx, homeContainsShop);
 		} else if (
 			inventory.slots.fish >= FISH_THRESHOLD ||
@@ -449,7 +548,16 @@ export default class FishBot extends BaseBot {
 		) {
 			if (inventory.count.bait >= FISH_THRESHOLD)
 				await this.sellFish(ctx, homeContainsShop);
-			else await this.sellFishAndPurchaseBait(ctx, homeContainsShop);
+			else {
+				const value = this.client.inventory.items().reduce(
+					// @ts-ignore
+					(a, b) => a + (b.nbt?.value?.arfshfishworth?.value ?? 0),
+					0,
+				);
+
+				if (bait.price <= this.balance + value)
+					await this.sellFishAndPurchaseBait(ctx, homeContainsShop);
+			}
 		}
 
 		return ctx.location;
@@ -515,7 +623,8 @@ export default class FishBot extends BaseBot {
 		this.state = State.FISHING;
 
 		const ctx = this.context();
-		const rod = this.getBestFishingRod();
+		const rod =
+			this.getBestFishingRod() ?? (await this.prepareFromNothing(ctx));
 
 		ctx.location = _.location;
 

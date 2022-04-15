@@ -100,6 +100,9 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		drop: Location.DROP,
 		ender_chest: Location.ENDER_CHEST,
 	};
+	public flags = {
+		acceptedIP: false,
+	};
 
 	private commandQueue: {
 		message: string;
@@ -611,6 +614,12 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				if (this.previousState === State.FISHING && this.fisher) {
 					return this.fisher.fish(ctx);
 				}
+			}
+
+			if (m === 'Answer with /yes or /no' && !this.flags.acceptedIP) {
+				this.flags.acceptedIP = true;
+
+				return this.command(ctx, '/yes');
 			}
 
 			if (m.startsWith('TheArchon » This server is rebooting')) {

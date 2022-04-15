@@ -250,11 +250,11 @@ export const VERSION = config.version;
 
 // Rod index to purchase slot conversion
 export const ROD_TO_BAIT = [
-	{ slot: 9, metadata: 8 },
-	{ slot: 11, metadata: 9 },
-	{ slot: 13, metadata: 10 },
-	{ slot: 15, metadata: 11 },
-	{ slot: 15, metadata: 11 },
+	{ slot: 9, metadata: 8, price: 400 },
+	{ slot: 11, metadata: 9, price: 600 },
+	{ slot: 13, metadata: 10, price: 1_200 },
+	{ slot: 15, metadata: 11, price: 2_000 },
+	{ slot: 15, metadata: 11, price: 2_000 },
 ] as const;
 
 export const BAIT_NAME_TO_PRICE = {
@@ -404,3 +404,8 @@ export const NORMAL_DIRECTION = {
 	sneak: 'sneak',
 	punch: 'punch',
 } as const;
+
+export const THEALTENING_AUTHENTICATION_URL =
+	'http://authserver.thealtening.com';
+export const THEALTENING_SESSIONSERVER_URL =
+	'http://sessionserver.thealtening.com';
