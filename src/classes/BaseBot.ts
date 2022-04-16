@@ -265,7 +265,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 						0.1 &&
 						this.client.entity.position.xzDistanceTo(
 							ctx.fishing!.original_position,
-						) > 0.1)
+						) > 0.5)
 				) {
 					const message = `Unusual movement. Detected yaw/pitch/movement change: ${
 						ctx.fishing!.pitch - this.client.entity.yaw
