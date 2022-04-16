@@ -36,8 +36,6 @@ import BaseBot from './BaseBot';
 const items = minecraftData(VERSION);
 
 export default class FishBot extends BaseBot {
-	public bestFishingRod: number = 0;
-
 	private sellType: SellType;
 
 	constructor(options: BaseBotOptions, port: MessagePort) {
@@ -143,19 +141,13 @@ export default class FishBot extends BaseBot {
 				: b,
 		);
 
-		if (index) {
-			return FISHING_RODS.indexOf(
-				// @ts-ignore
-				item?.nbt?.value?.display?.value?.Name?.value,
-			);
-		}
-
-		return FISHING_RODS.indexOf(
+		const i = FISHING_RODS.indexOf(
 			// @ts-ignore
 			item?.nbt?.value?.display?.value?.Name?.value,
-		) === -1
-			? null
-			: item;
+		);
+
+		if (index) return i;
+		return i === -1 ? null : item;
 	}
 
 	private waitForBite(ctx: Context) {
@@ -507,6 +499,30 @@ export default class FishBot extends BaseBot {
 		return this.clearInventory(ctx);
 	}
 
+	public isOwnedFish(item: Item) {
+		if (item.nbt?.type !== 'compound') return false;
+
+		return item.nbt?.value?.arfshfishcatcher?.value === this.client.entity.uuid;
+	}
+
+	public isBait(item: Item) {
+		if (item.nbt?.type !== 'compound') return false;
+
+		return item.nbt?.value?.arfshbait?.type === 'string';
+	}
+
+	public isFishingRod(item: Item, onlyBest = true) {
+		if (item.nbt?.type !== 'compound') return false;
+
+		return (
+			item.nbt?.value?.arfshrod?.type === 'string' &&
+			(!onlyBest ||
+				item.nbt?.value?.arfshrod?.value ===
+					// @ts-ignore
+					this.getBestFishingRod()?.nbt?.value?.arfshrod?.value)
+		);
+	}
+
 	private async clearInventory(ctx: Context) {
 		await this.teleport(ctx, Location.SPAWN, LocationType.RAW);
 
@@ -522,12 +538,9 @@ export default class FishBot extends BaseBot {
 			if (
 				item.type !== 52 &&
 				item.type !== 7 &&
-				// @ts-ignore
-				item.nbt?.value?.arfshbait?.type !== 'string' &&
-				// @ts-ignore
-				item.nbt?.value?.arfshfishworth?.type !== 'double' &&
-				// @ts-ignore
-				!FISHING_RODS.includes(item.nbt?.value?.display?.value?.Name?.value)
+				!this.isOwnedFish(item) &&
+				!this.isBait(item) &&
+				!this.isFishingRod(item, true)
 			) {
 				await this.client.waitForTicks(ctx, 10);
 				await this.client.toss(ctx, item);

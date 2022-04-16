@@ -96,10 +96,10 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 	public joinedAt: number = 0;
 	public logFileLocation: string;
 	public homes = {
-		fishing: Location.FISHING,
-		forest: Location.FOREST,
-		drop: Location.DROP,
-		ender_chest: Location.ENDER_CHEST,
+		fishing: Location.FISHING as string,
+		forest: Location.FOREST as string,
+		drop: Location.DROP as string,
+		ender_chest: Location.ENDER_CHEST as string,
 	};
 	public flags = {
 		acceptedIP: false,
@@ -140,6 +140,14 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		this.logger = new Logger(options);
 		this.port = port;
 		this.logFileLocation = path.join(this.directory, 'latest.log');
+
+		if (options.homes) {
+			if (options.homes.fishing) this.homes.fishing = options.homes.fishing;
+			if (options.homes.forest) this.homes.forest = options.homes.forest;
+			if (options.homes.drop) this.homes.drop = options.homes.drop;
+			if (options.homes.ender_chest)
+				this.homes.ender_chest = options.homes.ender_chest;
+		}
 
 		this.commands.set('tp', this.teleportTo.bind(this));
 		this.commands.set('look', this.lookAt.bind(this));
@@ -522,7 +530,6 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		}
 
 		if (this.fisher && config.fishing.fish_on_join) {
-			this.fisher.bestFishingRod = this.fisher.getBestFishingRod(true);
 			this.fisher.fish(ctx);
 		}
 	}
