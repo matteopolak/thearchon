@@ -502,7 +502,7 @@ export default class FishBot extends BaseBot {
 	public isOwnedFish(item: Item) {
 		if (item.nbt?.type !== 'compound') return false;
 
-		return item.nbt?.value?.arfshfishcatcher?.value === this.client.entity.uuid;
+		return item.nbt?.value?.arfshfishcatcher?.value === this.client.player.uuid;
 	}
 
 	public isBait(item: Item) {

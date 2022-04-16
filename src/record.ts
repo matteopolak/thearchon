@@ -63,6 +63,7 @@ interface Settings {
 	pitch: number;
 	yaw: number;
 	data: RecordingStep[];
+	lastMoveMagnitude: number;
 }
 
 const bot = mineflayer.createBot({
@@ -79,6 +80,7 @@ const settings: Settings = {
 	yaw: 0,
 	entityId: 0,
 	data: [],
+	lastMoveMagnitude: 0,
 };
 
 async function jump() {
@@ -88,6 +90,8 @@ async function jump() {
 }
 
 async function replay(steps: RecordingStep[]) {
+	let lastYaw: number = bot.entity.yaw;
+
 	for (const step of steps) {
 		if (step.swing) bot.swingArm(undefined, undefined);
 		if (step.jump) jump();
@@ -122,7 +126,12 @@ async function replay(steps: RecordingStep[]) {
 
 		if (step.yaw !== undefined || step.pitch !== undefined) {
 			bot.entity.pitch = step.pitch ?? bot.entity.pitch;
-			bot.entity.yaw += step.yaw ?? 0;
+
+			if (step.yaw !== undefined) {
+				bot.entity.yaw += step.yaw - lastYaw;
+
+				lastYaw = step.yaw;
+			}
 		}
 
 		if (step.wait) {
@@ -170,6 +179,7 @@ bot.on('chat', async (username, message) => {
 		settings.pitch = player.entity.pitch;
 		settings.yaw = player.entity.yaw;
 		settings.entityId = player.entity.id;
+		settings.lastMoveMagnitude = 0;
 		settings.record = true;
 
 		return bot.chat('Starting recording...');
@@ -185,16 +195,18 @@ bot.on('chat', async (username, message) => {
 			const prev = data.at(-1);
 
 			if (i === 0 && step.pitch === undefined) step.pitch = settings.pitch;
+
 			if (
 				!prev ||
-				step.forward !== prev.forward ||
 				step.back !== prev.back ||
 				step.left !== prev.left ||
 				step.right !== prev.right ||
-				step.jump !== prev.jump ||
 				step.swing !== prev.swing ||
 				step.sprint !== prev.sprint ||
-				step.crouch !== prev.crouch
+				step.crouch !== prev.crouch ||
+				step.pitch !== prev.pitch ||
+				step.yaw !== prev.yaw ||
+				step.jump !== undefined
 			) {
 				if (prev) {
 					prev.wait = step.time! - prev.time!;
@@ -230,7 +242,7 @@ function getPressedKeys(packet: {
 
 	const magnitude = Math.sqrt(packet.dX ** 2 + packet.dZ ** 2);
 
-	if (magnitude > 5) {
+	if (magnitude > settings.lastMoveMagnitude) {
 		if (packet.dX === 0) {
 			direction = packet.dZ < 0 ? 0 : Math.PI;
 		} else if (packet.dZ === 0) {
@@ -264,6 +276,8 @@ function getPressedKeys(packet: {
 		return KEY_COMBINATIONS[eighth];
 	}
 
+	settings.lastMoveMagnitude = magnitude;
+
 	const movement =
 		magnitude === 0
 			? {}
@@ -277,6 +291,7 @@ function getPressedKeys(packet: {
 	return {
 		...movement,
 		onGround: packet.onGround,
+		jump: packet.dY === 11 || packet.dY === 19,
 		yaw:
 			packet.yaw !== undefined
 				? fromNotchianYawByte(packet.yaw) - settings.yaw
@@ -337,7 +352,9 @@ bot._client.on('packet', async (packet, metadata) => {
 	const data: RecordingStep | null = parsePacket(packet, metadata);
 
 	if (data) {
-		data.time = now;
-		settings.data.push(data);
+		const copy: RecordingStep = JSON.parse(JSON.stringify(data));
+
+		copy.time = now;
+		settings.data.push(copy);
 	}
 });

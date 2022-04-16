@@ -232,6 +232,10 @@ export default class BaseState {
 		return this.client._bot.entity;
 	}
 
+	get player() {
+		return this.client._bot.player;
+	}
+
 	get heldItem() {
 		return this.client._bot.heldItem;
 	}
@@ -479,6 +483,8 @@ export default class BaseState {
 	}
 
 	async replay(ctx: Context, steps: RecordingStep[]) {
+		let lastYaw = this.entity.yaw;
+
 		for (const step of steps) {
 			if (step.swing) this.swingArm(ctx);
 			if (step.jump) this.jumpOnce(ctx);
@@ -513,7 +519,12 @@ export default class BaseState {
 
 			if (step.yaw !== undefined || step.pitch !== undefined) {
 				this.entity.pitch = step.pitch ?? this.entity.pitch;
-				this.entity.yaw += step.yaw ?? 0;
+
+				if (step.yaw !== undefined) {
+					this.entity.yaw += step.yaw - lastYaw;
+
+					lastYaw = step.yaw;
+				}
 			}
 
 			if (step.wait) {
@@ -555,6 +566,8 @@ export default class BaseState {
 		if (ctx.id !== this.client.contextId) return;
 
 		this.client.setState(ctx, State.PROCESSING_MOVEMENT);
+
+		console.log(instructions);
 
 		ctx = this.client.context();
 		const backwards: (MovementInstruction & { direction: Direction })[] = [];
