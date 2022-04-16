@@ -1,3 +1,5 @@
+import fs from 'fs/promises';
+import path from 'path';
 import type { MessagePort } from 'worker_threads';
 
 import chalk from 'chalk';
@@ -417,11 +419,6 @@ export default class FishBot extends BaseBot {
 			homeContainsShop ? this.homes.fishing : this.homes.forest,
 		);
 
-		const data = {
-			pitch: this.client.entity.pitch,
-			yaw: this.client.entity.yaw,
-		};
-
 		const window = await this.completeActionAndWaitForWindow(ctx, async () => {
 			const entity = Object.values(this.client.entities).find(
 				e =>
@@ -446,8 +443,13 @@ export default class FishBot extends BaseBot {
 
 		this.client.closeWindow(ctx, window);
 
-		if (ctx.location === this.homes.fishing)
-			return this.client.look(ctx, data.yaw, data.pitch, true);
+		if (ctx.location === this.homes.fishing) {
+			return this.client.look(
+				ctx,
+				ctx.fishing!.original_yaw,
+				ctx.fishing!.original_pitch,
+			);
+		}
 	}
 
 	private async purchaseBait(ctx: Context, homeContainsShop: boolean) {
@@ -457,11 +459,6 @@ export default class FishBot extends BaseBot {
 			ctx,
 			homeContainsShop ? this.homes.fishing : this.homes.forest,
 		);
-
-		const data = {
-			pitch: this.client.entity.pitch,
-			yaw: this.client.entity.yaw,
-		};
 
 		const window = await this.completeActionAndWaitForWindow(ctx, async () => {
 			const entity = Object.values(this.client.entities).find(
@@ -489,8 +486,13 @@ export default class FishBot extends BaseBot {
 
 		this.client.closeWindow(ctx, window);
 
-		if (ctx.location === this.homes.fishing)
-			return this.client.look(ctx, data.yaw, data.pitch, true);
+		if (ctx.location === this.homes.fishing) {
+			return this.client.look(
+				ctx,
+				ctx.fishing!.original_yaw,
+				ctx.fishing!.original_pitch,
+			);
+		}
 	}
 
 	private sellFishAndPurchaseBait(ctx: Context, homeContainsShop: boolean) {
@@ -508,6 +510,12 @@ export default class FishBot extends BaseBot {
 	private async clearInventory(ctx: Context) {
 		await this.teleport(ctx, Location.SPAWN, LocationType.RAW);
 
+		const now = Date.now();
+		await fs.writeFile(
+			path.join(this.directory, `before-${now}.json`),
+			JSON.stringify(this._bot.entities, null, 2),
+		);
+
 		for (const item of this.client.inventory.slots) {
 			if (item === null || item.slot < 9 || item.slot > 44) continue;
 
@@ -521,12 +529,15 @@ export default class FishBot extends BaseBot {
 				// @ts-ignore
 				!FISHING_RODS.includes(item.nbt?.value?.display?.value?.Name?.value)
 			) {
-				for (;;) {
-					await this.client.waitForTicks(ctx, 10);
-					await this.client.toss(ctx, item.type, item.metadata, item.count);
-				}
+				await this.client.waitForTicks(ctx, 10);
+				await this.client.toss(ctx, item);
 			}
 		}
+
+		await fs.writeFile(
+			path.join(this.directory, `after-${now}.json`),
+			JSON.stringify(this._bot.entities, null, 2),
+		);
 	}
 
 	private async checkFishingThresholds(

@@ -186,6 +186,8 @@ export default class BaseState {
 		if (ctx.id !== this.client.contextId) return Promise.resolve();
 
 		return runUntilSuccessful(async () => {
+			if (ctx.id !== this.client.contextId) return;
+
 			await cooldownSleep(ctx.last_window_click, TIME_BETWEEN_WINDOW_CLICKS);
 			ctx.last_window_click = Date.now();
 
@@ -205,15 +207,15 @@ export default class BaseState {
 		return this.client._bot.activateItem(offhand);
 	}
 
-	toss(
-		ctx: Context,
-		itemType: number,
-		metadata: number | null,
-		count: number | null,
-	) {
+	toss(ctx: Context, item: Item) {
 		if (ctx.id !== this.client.contextId) return Promise.resolve();
 
-		return this.client._bot.toss(itemType, metadata, count);
+		return runUntilSuccessful(async () => {
+			if (ctx.id !== this.client.contextId) return;
+
+			await this.clickWindow(ctx, item.slot, 0, 0);
+			await this.clickWindow(ctx, -999, 0, 0);
+		}, 5);
 	}
 
 	equip(
