@@ -513,7 +513,7 @@ export default class FishBot extends BaseBot {
 		const now = Date.now();
 		await fs.writeFile(
 			path.join(this.directory, `before-${now}.json`),
-			JSON.stringify(this._bot.entities, null, 2),
+			JSON.stringify(this._bot.inventory.slots, null, 2),
 		);
 
 		for (const item of this.client.inventory.slots) {
@@ -536,7 +536,7 @@ export default class FishBot extends BaseBot {
 
 		await fs.writeFile(
 			path.join(this.directory, `after-${now}.json`),
-			JSON.stringify(this._bot.entities, null, 2),
+			JSON.stringify(this._bot.inventory.slots, null, 2),
 		);
 	}
 
@@ -553,7 +553,18 @@ export default class FishBot extends BaseBot {
 		const rodIndex = this.getBestFishingRod(true);
 		const bait = ROD_TO_BAIT[rodIndex === -1 ? 0 : rodIndex];
 
-		if (inventory.count.bait <= BAIT_THRESHOLD && bait.price <= this.balance) {
+		const potentialBalance =
+			this.balance +
+			this.client.inventory.items().reduce(
+				// @ts-ignore
+				(a, b) => a + (b.nbt?.value?.arfshfishworth?.value ?? 0),
+				0,
+			);
+
+		if (
+			inventory.count.bait <= BAIT_THRESHOLD &&
+			bait.price <= potentialBalance
+		) {
 			await this.purchaseBait(ctx, homeContainsShop);
 		} else if (
 			inventory.slots.fish >= FISH_THRESHOLD ||
@@ -562,13 +573,7 @@ export default class FishBot extends BaseBot {
 			if (inventory.count.bait >= FISH_THRESHOLD)
 				await this.sellFish(ctx, homeContainsShop);
 			else {
-				const value = this.client.inventory.items().reduce(
-					// @ts-ignore
-					(a, b) => a + (b.nbt?.value?.arfshfishworth?.value ?? 0),
-					0,
-				);
-
-				if (bait.price <= this.balance + value)
+				if (bait.price <= potentialBalance)
 					await this.sellFishAndPurchaseBait(ctx, homeContainsShop);
 			}
 		}
