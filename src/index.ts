@@ -12,7 +12,11 @@ import {
 } from './constants';
 import { create } from './discord';
 import { BaseBotOptions, SellType } from './typings';
-import { generateAlteningToken, startNewProcess } from './utils';
+import {
+	fetchStaffList,
+	generateAlteningToken,
+	startNewProcess,
+} from './utils';
 
 const workers = new Map<string, Worker>();
 const client = discordConfig.enabled ? create(discordConfig, workers) : null;
@@ -28,6 +32,14 @@ const defaults: Partial<BaseBotOptions> = {
 };
 
 async function run() {
+	const staff = await fetchStaffList();
+
+	console.log(
+		`${' '.repeat(17)}${chalk.bold(
+			chalk.cyan('Parent'),
+		)} Fetched staff list of ${chalk.magenta(staff.size)} members`,
+	);
+
 	if (config.witai_key !== undefined) {
 		try {
 			await fs.promises.access(
@@ -93,6 +105,7 @@ async function run() {
 					...options,
 					sell_type: SellType.COINS,
 					fish: config.fishing.fish_on_join,
+					staff,
 				},
 			},
 			workers,

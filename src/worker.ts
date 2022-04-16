@@ -83,13 +83,6 @@ bot._bot.on('end', async reason => {
 	process.exit(0);
 });
 
-bot._bot.on('playerJoined', player =>
-	fs.promises.appendFile('./players.log', `join: ${JSON.stringify(player)}\n`),
-);
-bot._bot.on('playerLeft', player =>
-	fs.promises.appendFile('./players.log', `left: ${JSON.stringify(player)}\n`),
-);
-
 bot._bot.once('spawn', bot.join.bind(bot));
 
 bot.init();

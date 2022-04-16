@@ -100,6 +100,10 @@ const config: Config = {
 		upgrade_fishing_rod_automatically: true,
 		// Whether to stop fishing when the bot is mentioned in chat or sent a direct message
 		stop_fishing_on_mention: false,
+		// Whether to stop fishing while staff are vanished
+		pause_fishing_while_staff_hidden: true,
+		// whether to stop fishing while staff are online
+		pause_fishing_while_staff_online: false,
 		// Settings for random movement
 		random_movement: {
 			// Whether to enable random movement

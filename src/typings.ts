@@ -116,6 +116,8 @@ export interface Config {
 		sneak_while_fishing: boolean;
 		upgrade_fishing_rod_automatically: boolean;
 		stop_fishing_on_mention: boolean;
+		pause_fishing_while_staff_hidden: boolean;
+		pause_fishing_while_staff_online: boolean;
 		random_movement: {
 			enabled: boolean;
 			recordings: string[];
@@ -176,6 +178,7 @@ export type BaseBotOptions = BotOptions &
 		logger?: boolean;
 		sell_type?: SellType;
 		fish?: boolean;
+		staff: Map<string, StaffMember>;
 	};
 
 export const enum State {
@@ -314,4 +317,15 @@ export interface WitResponse {
 		'movement_with_repeat:movement_with_repeat': WitEntityMovementWithRepeat[];
 	}>;
 	traits: {};
+}
+
+export interface StaffMember {
+	name: string;
+	title: string;
+	img: string;
+}
+
+export interface StaffCategory {
+	name: string;
+	members: StaffMember[];
 }

@@ -7,7 +7,7 @@ import type { Item } from 'prismarine-item';
 
 import characters from './characters';
 import config, { discordConfig } from './config';
-import { WORKER_PATH } from './constants';
+import { FIX_OBJECT_REGEX, STAFF_LIST_REGEX, WORKER_PATH } from './constants';
 import {
 	MessageType,
 	MovementInstruction,
@@ -19,6 +19,8 @@ import type {
 	Direction,
 	MessagePayload,
 	RawMapData,
+	StaffCategory,
+	StaffMember,
 	WitResponse,
 } from './typings';
 
@@ -405,4 +407,27 @@ export async function runUntilSuccessful<T>(
 	}
 
 	return result;
+}
+
+export async function fetchStaffList(): Promise<Map<string, StaffMember>> {
+	const { data: html } = await axios.get<string>(
+		'https://thearchon.net/staff/',
+	);
+	const match = html.match(STAFF_LIST_REGEX);
+
+	if (match === null) return new Map();
+
+	const list: StaffCategory[] = JSON.parse(
+		match[1].replace(FIX_OBJECT_REGEX, (_, a, b) => (a ? '"' : `"${b}":`)),
+	);
+
+	const map = new Map<string, StaffMember>();
+
+	for (const category of list) {
+		for (const member of category.members) {
+			map.set(member.name, member);
+		}
+	}
+
+	return map;
 }

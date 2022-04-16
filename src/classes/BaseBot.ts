@@ -36,21 +36,17 @@ import {
 	TELEPORT_REGEX,
 	TIME_BEFORE_FISH_AFTER_MOVEMENT_DETECT,
 } from '../constants';
-import {
+import { Location, LocationType, MessageType, State } from '../typings';
+import type {
 	BaseBotOptions,
+	CommandFunction,
 	Context,
-	LocationType,
-	MessageType,
+	Direction,
 	MovementInstruction,
+	ParentMessage,
 	RawItem,
 	RecordingStep,
-	State,
-} from '../typings';
-import {
-	CommandFunction,
-	Direction,
-	Location,
-	ParentMessage,
+	StaffMember,
 } from '../typings';
 import {
 	createPromiseResolvePair,
@@ -126,6 +122,11 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		steps: RecordingStep[];
 		name: string;
 	}[] = [];
+	public staff: {
+		online: Set<string>;
+		hidden: Set<string>;
+		members: Map<string, StaffMember>;
+	};
 
 	constructor(options: BaseBotOptions, port: MessagePort) {
 		super();
@@ -140,6 +141,11 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		this.logger = new Logger(options);
 		this.port = port;
 		this.logFileLocation = path.join(this.directory, 'latest.log');
+		this.staff = {
+			online: new Set(),
+			hidden: new Set(),
+			members: this.options.staff,
+		};
 
 		if (options.homes) {
 			if (options.homes.fishing) this.homes.fishing = options.homes.fishing;
@@ -298,24 +304,13 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 							this.client.entity.position.xzDistanceTo(ctx.fishing!.position) >
 							0.1
 						) {
-							this.setState(ctx, State.IDLE);
 							await sleep(TIME_BEFORE_FISH_AFTER_MOVEMENT_DETECT);
+							ctx.location = Location.UNKNOWN;
 
-							if (this.fisher && this.previousState === State.FISHING) {
-								this.fisher.fish(ctx);
-							}
-
-							return;
+							if (ctx.fishing) ctx.fishing.fix_after_current = true;
 						}
 
 						if (ctx.fishing) ctx.fishing.fix_after_current = true;
-
-						this.setState(ctx, State.IDLE);
-						await sleep(TIME_BEFORE_FISH_AFTER_MOVEMENT_DETECT);
-
-						if (this.fisher && this.previousState === State.FISHING) {
-							this.fisher.fish(ctx);
-						}
 					}
 
 					return;
@@ -570,6 +565,35 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 			}
 		}
 
+		this._bot.on('playerJoined', player => {
+			if (!this.staff.members.has(player.username)) return;
+
+			const member = this.staff.members.get(player.username)!;
+
+			this.staff.hidden.delete(member.name);
+			this.staff.online.add(member.name);
+
+			return this.logger.joined(`[${member.title}] ${member.name}`);
+		});
+
+		this._bot.on('playerLeft', player => {
+			if (!this.staff.members.has(player.username)) return;
+
+			const member = this.staff.members.get(player.username)!;
+
+			if (player.gamemode === 3) {
+				this.staff.hidden.add(member.name);
+				this.staff.online.delete(member.name);
+
+				return this.logger.vanished(`[${member.title}] ${member.name}`);
+			}
+
+			this.staff.hidden.delete(member.name);
+			this.staff.online.delete(member.name);
+
+			return this.logger.left(`[${member.title}] ${member.name}`);
+		});
+
 		this._bot.on('messagestr', async m => {
 			if (m.startsWith('██')) return;
 
@@ -638,7 +662,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 			}
 
 			if (m.startsWith('TheArchon » This server is rebooting')) {
-				return process.exit(0);
+				return this.exit(ctx, 'Server rebooting');
 			}
 
 			if (CHAT_MESSAGE_REGEX.test(m)) {
@@ -1216,5 +1240,12 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		return !this._bot.inventory.slots.some(
 			(s, i) => i > 8 && i < 45 && (s === null || s.type === 0),
 		);
+	}
+
+	public exit(ctx: Context, reason: string) {
+		if (ctx.id !== this.contextId) return;
+
+		this.logger.error(`Exiting: ${reason}`);
+		process.exit(0);
 	}
 }

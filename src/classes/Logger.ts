@@ -8,6 +8,9 @@ export default class Logger {
 	private infoPrefix: string;
 	private errorPrefix: string;
 	private warnPrefix: string;
+	private joinedPrefix: string;
+	private leftPrefix: string;
+	private vanishedPrefix: string;
 
 	constructor(options: BaseBotOptions) {
 		this.options = options;
@@ -21,6 +24,33 @@ export default class Logger {
 		this.warnPrefix = `${chalk.gray(this.name)}   ${chalk.bold(
 			chalk.yellow('Warn'),
 		)}`;
+		this.joinedPrefix = `${chalk.gray(this.name)} ${chalk.bold(
+			chalk.green('Joined'),
+		)}`;
+		this.leftPrefix = `${chalk.gray(this.name)}   ${chalk.bold(
+			chalk.green('Left'),
+		)}`;
+		this.vanishedPrefix = `${chalk.gray(this.name)} ${chalk.bold(
+			chalk.magenta('Vanish'),
+		)}`;
+	}
+
+	joined(username: string) {
+		if (!this.options.logger) return;
+
+		console.log(`${this.joinedPrefix} ${chalk.cyan(username)} has joined`);
+	}
+
+	left(username: string) {
+		if (!this.options.logger) return;
+
+		console.log(`${this.leftPrefix} ${chalk.cyan(username)} has left`);
+	}
+
+	vanished(username: string) {
+		if (!this.options.logger) return;
+
+		console.log(`${this.vanishedPrefix} ${chalk.cyan(username)} has vanished`);
 	}
 
 	info(message: string) {

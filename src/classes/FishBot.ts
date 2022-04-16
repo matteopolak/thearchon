@@ -19,6 +19,7 @@ import {
 	ROD_TO_BAIT,
 	SLOT_TO_COLOURED_BAIT_NAME,
 	SURPLUS_MONEY_THRESHOLD,
+	TIME_BEFORE_FISH_AFTER_MOVEMENT_DETECT,
 	VERSION,
 } from '../constants';
 import {
@@ -374,7 +375,8 @@ export default class FishBot extends BaseBot {
 			);
 
 			if (!entity) {
-				if (ctx.id === this.contextId) process.exit(0);
+				if (ctx.id === this.contextId)
+					this.exit(ctx, 'Could not find fishing NPC');
 			} else await this.client.activateEntity(ctx, entity);
 		});
 
@@ -420,7 +422,8 @@ export default class FishBot extends BaseBot {
 			);
 
 			if (!entity) {
-				if (ctx.id === this.contextId) process.exit(0);
+				if (ctx.id === this.contextId)
+					this.exit(ctx, 'Could not find fishing NPC');
 			} else await this.client.activateEntity(ctx, entity);
 		});
 
@@ -461,7 +464,8 @@ export default class FishBot extends BaseBot {
 			);
 
 			if (!entity) {
-				if (ctx.id === this.contextId) process.exit(0);
+				if (ctx.id === this.contextId)
+					this.exit(ctx, 'Could not find fishing NPC');
 			} else await this.client.activateEntity(ctx, entity);
 		});
 
@@ -643,7 +647,7 @@ export default class FishBot extends BaseBot {
 				// @ts-ignore
 				this.client.heldItem?.nbt?.value?.display?.value?.Name?.value
 			)
-				process.exit(0);
+				this.exit(ctx, 'Could not find fishing rod');
 
 			this.client.activateItem(ctx);
 			await this.client.waitForTicks(ctx, 10);
@@ -691,6 +695,8 @@ export default class FishBot extends BaseBot {
 
 		if (rod === null) return;
 
+		console.log(this.client.players);
+
 		if (!this.checkedBalance) await this.getCurrentBalance(ctx, true);
 		if (
 			// @ts-ignore
@@ -717,9 +723,22 @@ export default class FishBot extends BaseBot {
 		this.createMoveHandler(ctx);
 
 		while (ctx.id === this.contextId) {
+			if (
+				(config.fishing.pause_fishing_while_staff_hidden &&
+					this.staff.hidden.size > 0) ||
+				(config.fishing.pause_fishing_while_staff_online &&
+					this.staff.online.size > 0)
+			) {
+				await this.client.waitForTicks(ctx, 20);
+
+				continue;
+			}
+
 			ctx.allow_reaction = false;
 
 			if (ctx.fishing.fix_after_current) {
+				await sleep(TIME_BEFORE_FISH_AFTER_MOVEMENT_DETECT);
+
 				await this.client.look(
 					ctx,
 					ctx.fishing.original_yaw,
@@ -811,10 +830,6 @@ export default class FishBot extends BaseBot {
 						this.logger.info('Reel complete');
 					}
 				}
-			}
-
-			if (ctx.fishing.fix_after_current) {
-				ctx.id = this.contextId;
 			}
 		}
 
