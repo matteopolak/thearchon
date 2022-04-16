@@ -28,7 +28,7 @@ export default class Logger {
 			chalk.green('Joined'),
 		)}`;
 		this.leftPrefix = `${chalk.gray(this.name)}   ${chalk.bold(
-			chalk.green('Left'),
+			chalk.red('Left'),
 		)}`;
 		this.vanishedPrefix = `${chalk.gray(this.name)} ${chalk.bold(
 			chalk.magenta('Vanish'),
