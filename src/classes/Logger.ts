@@ -35,47 +35,70 @@ export default class Logger {
 		)}`;
 	}
 
+	get timestamp() {
+		const date = new Date();
+
+		return chalk.gray(
+			`${date.getHours().toString().padStart(2, '0')}:${date
+				.getMinutes()
+				.toString()
+				.padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`,
+		);
+	}
+
 	joined(username: string) {
 		if (!this.options.logger) return;
 
-		console.log(`${this.joinedPrefix} ${chalk.cyan(username)} has joined`);
+		console.log(
+			`${this.timestamp} ${this.joinedPrefix} ${chalk.cyan(
+				username,
+			)} has joined`,
+		);
 	}
 
 	left(username: string) {
 		if (!this.options.logger) return;
 
-		console.log(`${this.leftPrefix} ${chalk.cyan(username)} has left`);
+		console.log(
+			`${this.timestamp} ${this.leftPrefix} ${chalk.cyan(username)} has left`,
+		);
 	}
 
 	unvanished(username: string) {
 		if (!this.options.logger) return;
 
 		console.log(
-			`${this.vanishedPrefix} ${chalk.cyan(username)} has unvanished`,
+			`${this.timestamp} ${this.vanishedPrefix} ${chalk.cyan(
+				username,
+			)} has unvanished`,
 		);
 	}
 
 	vanished(username: string) {
 		if (!this.options.logger) return;
 
-		console.log(`${this.vanishedPrefix} ${chalk.cyan(username)} has vanished`);
+		console.log(
+			`${this.timestamp} ${this.vanishedPrefix} ${chalk.cyan(
+				username,
+			)} has vanished`,
+		);
 	}
 
 	info(message: string) {
 		if (!this.options.logger) return;
 
-		console.log(`${this.infoPrefix} ${message}`);
+		console.log(`${this.timestamp} ${this.infoPrefix} ${message}`);
 	}
 
 	error(message: string) {
 		if (!this.options.logger) return;
 
-		console.log(`${this.errorPrefix} ${message}`);
+		console.log(`${this.timestamp} ${this.errorPrefix} ${message}`);
 	}
 
 	warn(message: string) {
 		if (!this.options.logger) return;
 
-		console.log(`${this.warnPrefix} ${message}`);
+		console.log(`${this.timestamp} ${this.warnPrefix} ${message}`);
 	}
 }

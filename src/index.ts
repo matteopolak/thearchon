@@ -35,7 +35,7 @@ async function run() {
 	const staff = await fetchStaffList();
 
 	console.log(
-		`${' '.repeat(17)}${chalk.bold(
+		`         ${' '.repeat(17)}${chalk.bold(
 			chalk.cyan('Parent'),
 		)} Fetched staff list of ${chalk.magenta(staff.size)} members`,
 	);
@@ -77,7 +77,7 @@ async function run() {
 
 				if (data === null) {
 					console.log(
-						`${' '.repeat(17)}${chalk.bold(
+						`        ${' '.repeat(17)}${chalk.bold(
 							chalk.cyan('Parent'),
 						)} Could not generate token for ${chalk.yellow(options.alias)}`,
 					);

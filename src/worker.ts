@@ -66,9 +66,11 @@ if (options.viewer_port !== undefined) {
 }
 
 console.log(
-	`${' '.repeat(17)}${chalk.bold(chalk.cyan('Worker'))} Starting ${chalk.yellow(
-		options.alias,
-	)}${options.proxy ? ` with proxy ${chalk.yellow(options.proxy)}` : ''}`,
+	`         ${' '.repeat(17)}${chalk.bold(
+		chalk.cyan('Worker'),
+	)} Starting ${chalk.yellow(options.alias)}${
+		options.proxy ? ` with proxy ${chalk.yellow(options.proxy)}` : ''
+	}`,
 );
 
 bot._bot.on('kicked', async reason => {

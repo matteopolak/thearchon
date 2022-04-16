@@ -480,7 +480,7 @@ export default class FishBot extends BaseBot {
 
 		await this.purchaseBaitAction(ctx);
 
-		this.client.closeWindow(ctx, window);
+		this.client.closeWindow(ctx, this.client.currentWindow!);
 
 		if (ctx.location === this.homes.fishing) {
 			return this.client.look(

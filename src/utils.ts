@@ -267,7 +267,7 @@ export function startNewProcess(
 	client: Client | null,
 ) {
 	console.log(
-		`${' '.repeat(17)}${chalk.bold(
+		`         ${' '.repeat(17)}${chalk.bold(
 			chalk.cyan('Parent'),
 		)} Starting worker for ${chalk.yellow(payload.options.alias)}`,
 	);
@@ -281,9 +281,9 @@ export function startNewProcess(
 	const messageHandler = async (packet: MessagePayload) => {
 		if (packet.type === MessageType.SELL_TYPE) {
 			console.log(
-				`${' '.repeat(17)}${chalk.bold(chalk.cyan('Parent'))} ${chalk.yellow(
-					payload.options.alias,
-				)} is ${
+				`         ${' '.repeat(17)}${chalk.bold(
+					chalk.cyan('Parent'),
+				)} ${chalk.yellow(payload.options.alias)} is ${
 					packet.data.is_fishing ? 'fishing' : 'not fishing'
 				} and trading for ${
 					packet.data.sell_type === SellType.COINS ? 'coins' : 'mob coins'
@@ -351,7 +351,7 @@ export function startNewProcess(
 
 				if (data === null) {
 					return console.log(
-						`${' '.repeat(17)}${chalk.bold(
+						`         ${' '.repeat(17)}${chalk.bold(
 							chalk.cyan('Parent'),
 						)} Permanently stopping worker ${chalk.yellow(
 							payload.options.alias,
@@ -367,7 +367,7 @@ export function startNewProcess(
 			startNewProcess(payload, workers, client);
 		} else {
 			console.log(
-				`${' '.repeat(17)}${chalk.bold(
+				`         ${' '.repeat(17)}${chalk.bold(
 					chalk.cyan('Parent'),
 				)} Permanently stopping worker ${chalk.yellow(payload.options.alias)}`,
 			);

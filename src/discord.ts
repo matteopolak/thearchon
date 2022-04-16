@@ -31,7 +31,7 @@ export function create(
 
 	client.once('ready', () => {
 		console.log(
-			`${' '.repeat(17)}${chalk.bold(
+			`         ${' '.repeat(17)}${chalk.bold(
 				chalk.cyan('Parent'),
 			)} Discord bot logged in as ${chalk.green(client.user!.username)}`,
 		);
