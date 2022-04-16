@@ -1038,8 +1038,11 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 			return this.balance - (real ? 0 : SURPLUS_MONEY_THRESHOLD);
 
 		const balance: Promise<number> = new Promise(resolve => {
-			const listener = (m: string) => {
-				if (BALANCE_REGEX.test(m)) {
+			const listener = async (m: string) => {
+				if (m === 'Answer with /yes or /no') {
+					if (!this.flags.acceptedIP) await this.command(ctx, '/yes');
+					await this.command(ctx, '/balance');
+				} else if (BALANCE_REGEX.test(m)) {
 					this._bot.off('messagestr', listener);
 
 					const balanceString = m.match(BALANCE_REGEX)![1];
