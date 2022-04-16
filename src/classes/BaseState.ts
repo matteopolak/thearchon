@@ -22,7 +22,7 @@ import {
 	RecordingStep,
 	State,
 } from '../typings';
-import { cooldownSleep, sleep } from '../utils';
+import { cooldownSleep, runUntilSuccessful, sleep } from '../utils';
 import type BaseBot from './BaseBot';
 
 interface TransferOptions {
@@ -185,10 +185,12 @@ export default class BaseState {
 	) {
 		if (ctx.id !== this.client.contextId) return Promise.resolve();
 
-		await cooldownSleep(ctx.last_window_click, TIME_BETWEEN_WINDOW_CLICKS);
-		ctx.last_window_click = Date.now();
+		return runUntilSuccessful(async () => {
+			await cooldownSleep(ctx.last_window_click, TIME_BETWEEN_WINDOW_CLICKS);
+			ctx.last_window_click = Date.now();
 
-		return this.client._bot.clickWindow(slot, mouseButton, mode);
+			return this.client._bot.clickWindow(slot, mouseButton, mode);
+		}, 5);
 	}
 
 	closeWindow(ctx: Context, window: Window) {

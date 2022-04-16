@@ -390,3 +390,19 @@ export async function generateAlteningToken(): Promise<{
 
 	return { token: data.token, expires: new Date(data.expires).getTime() };
 }
+
+export async function runUntilSuccessful<T>(
+	fn: (...args: any[]) => PromiseLike<T>,
+	max: number = 5,
+): Promise<T | undefined> {
+	let result: T | undefined;
+
+	while (max--) {
+		try {
+			result = await fn();
+			break;
+		} catch {}
+	}
+
+	return result;
+}

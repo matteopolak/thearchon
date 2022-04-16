@@ -521,8 +521,10 @@ export default class FishBot extends BaseBot {
 				// @ts-ignore
 				!FISHING_RODS.includes(item.nbt?.value?.display?.value?.Name?.value)
 			) {
-				await this.client.toss(ctx, item.type, item.metadata, item.count);
-				await this.client.waitForTicks(ctx, 10);
+				for (;;) {
+					await this.client.waitForTicks(ctx, 10);
+					await this.client.toss(ctx, item.type, item.metadata, item.count);
+				}
 			}
 		}
 	}
