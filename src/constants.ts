@@ -364,6 +364,9 @@ export const PURCHASE_BAIT_REGEX =
 export const PURCHASE_ROD_REGEX =
 	/^You purchased the (\w+ Rod) from the Fishmonger!/;
 
+export const SELL_ALL_ITEM_REGEX =
+	/^TheArchon >> You sold all .+ for ([\d,\.]+)\$\.$/;
+
 export const PURCHASE_ITEM_REGEX =
 	/^TheArchon >> You bought \d+ x .+ for ([\d,\.]+)\$\.$/;
 

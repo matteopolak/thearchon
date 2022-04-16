@@ -29,6 +29,7 @@ import {
 	PURCHASE_ROD_REGEX,
 	RECEIVE_MONEY_REGEX,
 	RENEW_CAPTCHA_INTERVAL,
+	SELL_ALL_ITEM_REGEX,
 	SEND_MONEY_REGEX,
 	SURPLUS_MONEY_THRESHOLD,
 	TELEPORT_HERE_REGEX,
@@ -729,6 +730,16 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 
 				if (this.checkedBalance === false) await this.getCurrentBalance(ctx);
 				else this.setBalance(this.balance + value, name);
+
+				return;
+			}
+
+			if (SELL_ALL_ITEM_REGEX.test(m)) {
+				const [, _value] = m.match(SELL_ALL_ITEM_REGEX)!;
+				const value = parseFloat(_value.replaceAll(',', ''));
+
+				if (this.checkedBalance === false) await this.getCurrentBalance(ctx);
+				else this.setBalance(this.balance + value);
 
 				return;
 			}

@@ -540,8 +540,6 @@ export default class FishBot extends BaseBot {
 		const rodIndex = this.getBestFishingRod(true);
 		const bait = ROD_TO_BAIT[rodIndex === -1 ? 0 : rodIndex];
 
-		console.log(this.balance, bait.price);
-
 		if (inventory.count.bait <= BAIT_THRESHOLD && bait.price <= this.balance) {
 			await this.purchaseBait(ctx, homeContainsShop);
 		} else if (
@@ -569,7 +567,7 @@ export default class FishBot extends BaseBot {
 		if (this.state === State.FISHING) this.state = State.IDLE;
 	}
 
-	private async cast(ctx: Context) {
+	private async cast(ctx: Context, rod: Item) {
 		if (ctx.id !== this.contextId) return true;
 
 		let cast = true;
@@ -608,6 +606,14 @@ export default class FishBot extends BaseBot {
 		this.once('context_changed', contextListener);
 
 		do {
+			if (
+				// @ts-ignore
+				rod?.nbt?.value?.display?.value?.Name?.value !==
+				// @ts-ignore
+				this.client.heldItem?.nbt?.value?.display?.value?.Name?.value
+			)
+				process.exit(0);
+
 			this.client.activateItem(ctx);
 			await this.client.waitForTicks(ctx, 10);
 		} while (cast);
@@ -643,6 +649,7 @@ export default class FishBot extends BaseBot {
 		const ctx = this.context();
 
 		if (this.options.temporary && !this.flags.acceptedIP) {
+			this.flags.acceptedIP = true;
 			await this.command(ctx, '/yes');
 		}
 
@@ -729,7 +736,7 @@ export default class FishBot extends BaseBot {
 			ctx.allow_reaction = true;
 
 			this.logger.info('Casting...');
-			const error = await this.cast(ctx);
+			const error = await this.cast(ctx, rod);
 
 			if (!error) {
 				this.logger.info('Waiting for bite...');
