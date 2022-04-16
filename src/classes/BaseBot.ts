@@ -5,7 +5,7 @@ import type { MessagePort } from 'worker_threads';
 
 import chalk from 'chalk';
 import mineflayer from 'mineflayer';
-import type { Bot } from 'mineflayer';
+import type { Bot, Player } from 'mineflayer';
 import type { Window } from 'prismarine-windows';
 import type TypedEventEmitter from 'typed-emitter';
 
@@ -533,6 +533,47 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		this._bot.once('spawn', () => hook(this));
 	}
 
+	public handlePlayerJoin(player: Player) {
+		if (
+			!this.staff.members.has(player.username) ||
+			this.staff.online.has(player.username)
+		)
+			return;
+
+		const member = this.staff.members.get(player.username)!;
+
+		this.staff.hidden.delete(member.name);
+		this.staff.online.add(member.name);
+
+		return this.logger.joined(`[${member.title}] ${member.name}`);
+	}
+
+	public handlePlayerLeave(player: Player) {
+		if (!this.staff.members.has(player.username)) return;
+
+		const member = this.staff.members.get(player.username)!;
+
+		if (player.gamemode === 3) {
+			if (this.staff.hidden.has(player.username)) return;
+
+			this.staff.hidden.add(member.name);
+			this.staff.online.delete(member.name);
+
+			return this.logger.vanished(`[${member.title}] ${member.name}`);
+		}
+
+		if (
+			!this.staff.online.has(player.username) &&
+			!this.staff.hidden.has(player.username)
+		)
+			return;
+
+		this.staff.hidden.delete(member.name);
+		this.staff.online.delete(member.name);
+
+		return this.logger.left(`[${member.title}] ${member.name}`);
+	}
+
 	public async init() {
 		if (this.initialised) throw new Error('Already initialised');
 
@@ -566,32 +607,11 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		}
 
 		this._bot.on('playerJoined', player => {
-			if (!this.staff.members.has(player.username)) return;
-
-			const member = this.staff.members.get(player.username)!;
-
-			this.staff.hidden.delete(member.name);
-			this.staff.online.add(member.name);
-
-			return this.logger.joined(`[${member.title}] ${member.name}`);
+			this.handlePlayerJoin(player);
 		});
 
 		this._bot.on('playerLeft', player => {
-			if (!this.staff.members.has(player.username)) return;
-
-			const member = this.staff.members.get(player.username)!;
-
-			if (player.gamemode === 3) {
-				this.staff.hidden.add(member.name);
-				this.staff.online.delete(member.name);
-
-				return this.logger.vanished(`[${member.title}] ${member.name}`);
-			}
-
-			this.staff.hidden.delete(member.name);
-			this.staff.online.delete(member.name);
-
-			return this.logger.left(`[${member.title}] ${member.name}`);
+			this.handlePlayerLeave(player);
 		});
 
 		this._bot.on('messagestr', async m => {

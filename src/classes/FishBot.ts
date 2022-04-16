@@ -679,6 +679,10 @@ export default class FishBot extends BaseBot {
 	}
 
 	public async fish(_: Context) {
+		for (const username in this.client.players) {
+			this.handlePlayerJoin(this.client.players[username]);
+		}
+
 		this.state = State.FISHING;
 
 		const ctx = this.context();
@@ -694,8 +698,6 @@ export default class FishBot extends BaseBot {
 		ctx.location = _.location;
 
 		if (rod === null) return;
-
-		console.log(this.client.players);
 
 		if (!this.checkedBalance) await this.getCurrentBalance(ctx, true);
 		if (
