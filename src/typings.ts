@@ -142,6 +142,7 @@ export type Context = {
 		original_yaw: number;
 		original_position: Vec3;
 		fix_after_current: boolean;
+		paused: boolean;
 	};
 	location: Location | string;
 	last_window_click: number;

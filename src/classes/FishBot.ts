@@ -31,7 +31,13 @@ import {
 	State,
 } from '../typings';
 import type { Context, InventoryData, RawMapData } from '../typings';
-import { chance, currencyFormatter, sleep, unscramble } from '../utils';
+import {
+	chance,
+	currencyFormatter,
+	formatStaffList,
+	sleep,
+	unscramble,
+} from '../utils';
 import BaseBot from './BaseBot';
 
 const items = minecraftData(VERSION);
@@ -720,6 +726,7 @@ export default class FishBot extends BaseBot {
 			original_yaw: this.client.entity.yaw,
 			original_position: this.client.entity.position.clone(),
 			fix_after_current: false,
+			paused: false,
 		};
 
 		this.createMoveHandler(ctx);
@@ -733,7 +740,37 @@ export default class FishBot extends BaseBot {
 			) {
 				await this.client.waitForTicks(ctx, 20);
 
+				if (!ctx.fishing.paused) {
+					ctx.fishing.paused = true;
+
+					if (
+						config.fishing.pause_fishing_while_staff_hidden &&
+						this.staff.hidden.size > 0
+					) {
+						this.logger.info(
+							`Paused fishing as ${chalk.magenta(
+								`${this.staff.hidden.size} staff`,
+							)} ${
+								this.staff.hidden.size === 1 ? 'is' : 'are'
+							} vanished (${formatStaffList(this.staff.hidden)})`,
+						);
+					} else {
+						this.logger.info(
+							`Paused fishing as ${chalk.magenta(
+								`${this.staff.online.size} staff`,
+							)} ${
+								this.staff.online.size === 1 ? 'is' : 'are'
+							} online (${formatStaffList(this.staff.online)})`,
+						);
+					}
+				}
+
 				continue;
+			}
+
+			if (ctx.fishing.paused) {
+				ctx.fishing.paused = false;
+				this.logger.info('Fishing has been resumed');
 			}
 
 			ctx.allow_reaction = false;

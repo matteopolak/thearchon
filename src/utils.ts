@@ -431,3 +431,13 @@ export async function fetchStaffList(): Promise<Map<string, StaffMember>> {
 
 	return map;
 }
+
+export function formatStaffList(list: Set<string>) {
+	const mapped = [...list.keys()].map(u => chalk.magenta(u));
+
+	if (list.size === 1) return mapped[0];
+
+	const last = mapped.pop();
+
+	return `${mapped.join(chalk.gray(', '))} ${chalk.gray('and')} ${last}`;
+}
