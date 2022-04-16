@@ -47,6 +47,14 @@ export default class Logger {
 		console.log(`${this.leftPrefix} ${chalk.cyan(username)} has left`);
 	}
 
+	unvanished(username: string) {
+		if (!this.options.logger) return;
+
+		console.log(
+			`${this.vanishedPrefix} ${chalk.cyan(username)} has unvanished`,
+		);
+	}
+
 	vanished(username: string) {
 		if (!this.options.logger) return;
 

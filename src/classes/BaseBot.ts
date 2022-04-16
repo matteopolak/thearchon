@@ -541,11 +541,14 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 			return;
 
 		const member = this.staff.members.get(player.username)!;
+		const vanished = this.staff.hidden.has(player.username);
 
 		this.staff.hidden.delete(member.name);
 		this.staff.online.add(member.name);
 
-		return this.logger.joined(`[${member.title}] ${member.name}`);
+		return this.logger[vanished ? 'unvanished' : 'joined'](
+			`[${member.title}] ${member.name}`,
+		);
 	}
 
 	public handlePlayerLeave(player: Player) {
