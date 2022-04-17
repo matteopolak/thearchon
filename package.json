@@ -1,6 +1,6 @@
 {
 	"name": "@matteopolak/thearchon",
-	"version": "2.7.0",
+	"version": "2.7.1",
 	"description": "",
 	"main": "src/index.ts",
 	"scripts": {
@@ -23,7 +23,6 @@
 		"prismarine-viewer": "^1.22.0",
 		"socks": "^2.6.2",
 		"socks-proxy-agent": "^6.2.0-beta.0",
-		"thealtening-free": "^1.0.0",
 		"typed-emitter": "^2.1.0"
 	},
 	"devDependencies": {
