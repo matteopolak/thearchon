@@ -158,6 +158,9 @@ export default class FishBot extends BaseBot {
 	private waitForBite(ctx: Context) {
 		if (ctx.id !== this.contextId) return Promise.resolve();
 
+		const index = this.getBestFishingRod(true);
+		const data = FISHING_ROD_DATA[index];
+
 		return new Promise(resolve => {
 			const listener = (title: string) => {
 				if (
@@ -195,7 +198,7 @@ export default class FishBot extends BaseBot {
 				}
 
 				return resolve(true);
-			}, 60 * 1_000);
+			}, data.max_bite_time + 1_000);
 
 			if (ctx.id !== this.contextId) {
 				this._bot.off('title', listener);

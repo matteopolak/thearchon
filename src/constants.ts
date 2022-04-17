@@ -24,6 +24,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Old Rod',
 			name_raw: '§7§lOld Rod',
 			name_coloured_pretty: `an ${chalk.bold(chalk.grey('Old Rod'))}`,
+			max_bite_time: 25_000,
 		},
 		{
 			slot: 11,
@@ -31,6 +32,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Novice Rod',
 			name_raw: '§e§lNovice Rod',
 			name_coloured_pretty: `a ${chalk.bold(chalk.yellow('Novice Rod'))}`,
+			max_bite_time: 20_000,
 		},
 		{
 			slot: 13,
@@ -38,6 +40,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Apprentice Rod',
 			name_raw: '§a§lApprentice Rod',
 			name_coloured_pretty: `an ${chalk.bold(chalk.green('Apprentice Rod'))}`,
+			max_bite_time: 15_000,
 		},
 		{
 			slot: 15,
@@ -45,6 +48,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Sturdy Rod',
 			name_raw: '§b§lSturdy Rod',
 			name_coloured_pretty: `a ${chalk.bold(chalk.blue('Sturdy Rod'))}`,
+			max_bite_time: 10_000,
 		},
 		{
 			slot: 16,
@@ -52,6 +56,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Mega Rod',
 			name_raw: '§c§lMega Rod',
 			name_coloured_pretty: `a ${chalk.bold(chalk.red('Mega Rod'))}`,
+			max_bite_time: 8_000,
 		},
 	],
 	[ServerType.RUBY]: [
@@ -61,6 +66,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Old Rod',
 			name_raw: '§7§lOld Rod',
 			name_coloured_pretty: `an ${chalk.bold(chalk.grey('Old Rod'))}`,
+			max_bite_time: 25_000,
 		},
 		{
 			slot: 11,
@@ -68,6 +74,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Novice Rod',
 			name_raw: '§e§lNovice Rod',
 			name_coloured_pretty: `a ${chalk.bold(chalk.yellow('Novice Rod'))}`,
+			max_bite_time: 20_000,
 		},
 		{
 			slot: 13,
@@ -75,6 +82,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Apprentice Rod',
 			name_raw: '§a§lApprentice Rod',
 			name_coloured_pretty: `an ${chalk.bold(chalk.green('Apprentice Rod'))}`,
+			max_bite_time: 15_000,
 		},
 		{
 			slot: 15,
@@ -82,6 +90,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Sturdy Rod',
 			name_raw: '§b§lSturdy Rod',
 			name_coloured_pretty: `a ${chalk.bold(chalk.blue('Sturdy Rod'))}`,
+			max_bite_time: 10_000,
 		},
 		{
 			slot: 16,
@@ -89,6 +98,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Mega Rod',
 			name_raw: '§c§lMega Rod',
 			name_coloured_pretty: `a ${chalk.bold(chalk.red('Mega Rod'))}`,
+			max_bite_time: 8_000,
 		},
 	],
 	[ServerType.AMBER]: [
@@ -98,6 +108,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Old Rod',
 			name_raw: '§7§lOld Rod',
 			name_coloured_pretty: `an ${chalk.bold(chalk.grey('Old Rod'))}`,
+			max_bite_time: 25_000,
 		},
 		{
 			slot: 11,
@@ -105,6 +116,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Novice Rod',
 			name_raw: '§e§lNovice Rod',
 			name_coloured_pretty: `a ${chalk.bold(chalk.yellow('Novice Rod'))}`,
+			max_bite_time: 20_000,
 		},
 		{
 			slot: 13,
@@ -112,6 +124,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Apprentice Rod',
 			name_raw: '§a§lApprentice Rod',
 			name_coloured_pretty: `an ${chalk.bold(chalk.green('Apprentice Rod'))}`,
+			max_bite_time: 15_000,
 		},
 		{
 			slot: 15,
@@ -119,6 +132,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Sturdy Rod',
 			name_raw: '§b§lSturdy Rod',
 			name_coloured_pretty: `a ${chalk.bold(chalk.blue('Sturdy Rod'))}`,
+			max_bite_time: 10_000,
 		},
 		{
 			slot: 16,
@@ -126,6 +140,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Mega Rod',
 			name_raw: '§c§lMega Rod',
 			name_coloured_pretty: `a ${chalk.bold(chalk.red('Mega Rod'))}`,
+			max_bite_time: 8_000,
 		},
 	],
 	[ServerType.CHAOS]: [
@@ -135,6 +150,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Old Rod',
 			name_raw: '§7§lOld Rod',
 			name_coloured_pretty: `an ${chalk.bold(chalk.grey('Old Rod'))}`,
+			max_bite_time: 25_000,
 		},
 		{
 			slot: 11,
@@ -142,6 +158,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Novice Rod',
 			name_raw: '§e§lNovice Rod',
 			name_coloured_pretty: `a ${chalk.bold(chalk.yellow('Novice Rod'))}`,
+			max_bite_time: 20_000,
 		},
 		{
 			slot: 13,
@@ -149,6 +166,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Apprentice Rod',
 			name_raw: '§a§lApprentice Rod',
 			name_coloured_pretty: `an ${chalk.bold(chalk.green('Apprentice Rod'))}`,
+			max_bite_time: 15_000,
 		},
 		{
 			slot: 15,
@@ -156,6 +174,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Sturdy Rod',
 			name_raw: '§b§lSturdy Rod',
 			name_coloured_pretty: `a ${chalk.bold(chalk.blue('Sturdy Rod'))}`,
+			max_bite_time: 10_000,
 		},
 		{
 			slot: 16,
@@ -163,6 +182,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Mega Rod',
 			name_raw: '§c§lMega Rod',
 			name_coloured_pretty: `a ${chalk.bold(chalk.red('Mega Rod'))}`,
+			max_bite_time: 8_000,
 		},
 	],
 	[ServerType.GENESIS]: [
@@ -172,6 +192,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Old Rod',
 			name_raw: '§7§lOld Rod',
 			name_coloured_pretty: `an ${chalk.bold(chalk.grey('Old Rod'))}`,
+			max_bite_time: 25_000,
 		},
 		{
 			slot: 11,
@@ -179,6 +200,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Novice Rod',
 			name_raw: '§e§lNovice Rod',
 			name_coloured_pretty: `a ${chalk.bold(chalk.yellow('Novice Rod'))}`,
+			max_bite_time: 20_000,
 		},
 		{
 			slot: 13,
@@ -186,6 +208,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Apprentice Rod',
 			name_raw: '§a§lApprentice Rod',
 			name_coloured_pretty: `an ${chalk.bold(chalk.green('Apprentice Rod'))}`,
+			max_bite_time: 15_000,
 		},
 		{
 			slot: 15,
@@ -193,6 +216,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Sturdy Rod',
 			name_raw: '§b§lSturdy Rod',
 			name_coloured_pretty: `a ${chalk.bold(chalk.blue('Sturdy Rod'))}`,
+			max_bite_time: 10_000,
 		},
 		{
 			slot: 16,
@@ -200,6 +224,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Mega Rod',
 			name_raw: '§c§lMega Rod',
 			name_coloured_pretty: `a ${chalk.bold(chalk.red('Mega Rod'))}`,
+			max_bite_time: 8_000,
 		},
 	],
 	[ServerType.ORIGINS]: [
@@ -209,6 +234,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Old Rod',
 			name_raw: '§7§lOld Rod',
 			name_coloured_pretty: `an ${chalk.bold(chalk.grey('Old Rod'))}`,
+			max_bite_time: 25_000,
 		},
 		{
 			slot: 11,
@@ -216,6 +242,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Novice Rod',
 			name_raw: '§e§lNovice Rod',
 			name_coloured_pretty: `a ${chalk.bold(chalk.yellow('Novice Rod'))}`,
+			max_bite_time: 20_000,
 		},
 		{
 			slot: 13,
@@ -223,6 +250,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Apprentice Rod',
 			name_raw: '§a§lApprentice Rod',
 			name_coloured_pretty: `an ${chalk.bold(chalk.green('Apprentice Rod'))}`,
+			max_bite_time: 15_000,
 		},
 		{
 			slot: 15,
@@ -230,6 +258,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Sturdy Rod',
 			name_raw: '§b§lSturdy Rod',
 			name_coloured_pretty: `a ${chalk.bold(chalk.blue('Sturdy Rod'))}`,
+			max_bite_time: 10_000,
 		},
 		{
 			slot: 16,
@@ -237,6 +266,7 @@ export const ALL_FISHING_ROD_DATA: { [key in ServerType]: FishingRodData[] } = {
 			name: 'Mega Rod',
 			name_raw: '§c§lMega Rod',
 			name_coloured_pretty: `a ${chalk.bold(chalk.red('Mega Rod'))}`,
+			max_bite_time: 8_000,
 		},
 	],
 };

@@ -160,6 +160,7 @@ export interface FishingRodData {
 	name: string;
 	name_raw: string;
 	name_coloured_pretty: string;
+	max_bite_time: number;
 }
 
 export interface RawItem {
