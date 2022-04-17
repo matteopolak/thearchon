@@ -376,6 +376,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				if (
 					packet.item.blockId === 351 ||
 					packet.item.blockId === -1 ||
+					packet.item.blockId === 346 ||
 					(item !== undefined && packet.item.blockId !== item)
 				)
 					return;
