@@ -303,6 +303,9 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 							ctx.fishing!.original_position,
 						) > 0.5)
 				) {
+					this._bot.off('move', listener);
+					this.off('context_changed', contextListener);
+
 					const message = `Unusual movement. Detected yaw/pitch/movement change: ${
 						ctx.fishing!.pitch - this.client.entity.yaw
 					}/${
@@ -332,7 +335,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 						if (ctx.fishing) ctx.fishing.fix_after_current = true;
 					}
 
-					return;
+					return this.createMoveHandler(ctx);
 				}
 			}
 		};
