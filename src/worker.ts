@@ -76,13 +76,15 @@ console.log(
 bot._bot.on('kicked', async reason => {
 	bot.logger.error(`Kicked: ${chalk.redBright(reason)}`);
 
-	process.exit(reason.includes('BANNED') ? 1 : 0);
+	process.nextTick(() => process.exit(reason.includes('BANNED') ? 1 : 0));
 });
 
 bot._bot.on('end', async reason => {
-	bot.logger.error(`Ended: ${chalk.redBright(reason)}`);
+	setTimeout(() => {
+		bot.logger.error(`Ended: ${chalk.redBright(reason)}`);
 
-	process.exit(0);
+		process.exit(0);
+	}, 1000);
 });
 
 bot._bot.once('spawn', bot.join.bind(bot));

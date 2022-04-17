@@ -247,9 +247,26 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		this.logger.info(`Finished random movement ${chalk.red(movement.name)}`);
 
 		if (ctx.fishing) {
-			ctx.fishing.pitch = this.client.entity.pitch;
-			ctx.fishing.yaw = this.client.entity.yaw;
-			ctx.fishing.position = this.client.entity.position.clone();
+			if (
+				ctx.fishing.original_position.xzDistanceTo(
+					this.client.entity.position,
+				) > 1
+			) {
+				ctx.location = Location.UNKNOWN;
+				await this.teleport(ctx, this.homes.fishing);
+			} else if (
+				ctx.fishing.original_pitch !== this.client.entity.pitch ||
+				ctx.fishing.original_yaw !== this.client.entity.yaw
+			) {
+				await this.client.look(
+					ctx,
+					ctx.fishing!.original_yaw,
+					ctx.fishing!.original_pitch,
+				);
+
+				ctx.fishing.pitch = this.client.entity.pitch;
+				ctx.fishing.yaw = this.client.entity.yaw;
+			}
 		}
 	}
 

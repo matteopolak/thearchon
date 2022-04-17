@@ -1,5 +1,3 @@
-import fs from 'fs/promises';
-import path from 'path';
 import type { MessagePort } from 'worker_threads';
 
 import chalk from 'chalk';
@@ -184,9 +182,17 @@ export default class FishBot extends BaseBot {
 			this._bot.on('title', listener);
 			this.once('context_changed', contextListener);
 
-			const timeout = setTimeout(() => {
+			const timeout = setTimeout(async () => {
 				this._bot.off('title', listener);
 				this.off('context_changed', contextListener);
+
+				if (
+					ctx.fishing &&
+					!ctx.fishing.original_position.equals(this.client.entity.position)
+				) {
+					ctx.location = Location.UNKNOWN;
+					await this.teleportToHome(ctx, this.homes.fishing);
+				}
 
 				return resolve(true);
 			}, 60 * 1_000);
@@ -322,6 +328,14 @@ export default class FishBot extends BaseBot {
 				: 9;
 
 		await this.client.clickWindow(ctx, slotCount, 0, 0);
+
+		await this.completeActionAndWaitForWindow(ctx, () =>
+			this.client.closeWindow(ctx, this.client.currentWindow!),
+		);
+
+		await this.completeActionAndWaitForWindow(ctx, () =>
+			this.client.closeWindow(ctx, this.client.currentWindow!),
+		);
 
 		return true;
 	}
@@ -536,12 +550,6 @@ export default class FishBot extends BaseBot {
 	private async clearInventory(ctx: Context) {
 		await this.teleport(ctx, Location.SPAWN, LocationType.RAW);
 
-		const now = Date.now();
-		await fs.writeFile(
-			path.join(this.directory, `before-${now}.json`),
-			JSON.stringify(this._bot.inventory.slots, null, 2),
-		);
-
 		for (const item of this.client.inventory.slots) {
 			if (item === null || item.slot < 9 || item.slot > 44) continue;
 
@@ -556,11 +564,6 @@ export default class FishBot extends BaseBot {
 				await this.client.toss(ctx, item);
 			}
 		}
-
-		await fs.writeFile(
-			path.join(this.directory, `after-${now}.json`),
-			JSON.stringify(this._bot.inventory.slots, null, 2),
-		);
 	}
 
 	private async checkFishingThresholds(

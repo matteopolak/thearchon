@@ -17,7 +17,6 @@ import {
 import {
 	Context,
 	Direction,
-	Location,
 	MovementInstruction,
 	RecordingStep,
 	State,
@@ -538,25 +537,6 @@ export default class BaseState {
 		this.setControlState(ctx, 'right', false);
 		this.setControlState(ctx, 'sprint', false);
 		this.setControlState(ctx, 'jump', false);
-
-		if (ctx.fishing) {
-			if (ctx.fishing.position.xzDistanceTo(this.entity.position) > 1) {
-				ctx.location = Location.UNKNOWN;
-				await this.client.teleport(ctx, this.client.homes.fishing);
-			} else if (
-				ctx.fishing.original_pitch !== this.entity.pitch ||
-				ctx.fishing.original_yaw !== this.entity.yaw
-			) {
-				await this.look(
-					ctx,
-					ctx.fishing!.original_yaw,
-					ctx.fishing!.original_pitch,
-				);
-
-				ctx.fishing.pitch = this.entity.pitch;
-				ctx.fishing.yaw = this.entity.yaw;
-			}
-		}
 	}
 
 	async processMovementInstructions(
