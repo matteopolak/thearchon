@@ -271,7 +271,12 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				this.state === State.FISHING
 			) {
 				if (
-					(this.client.entity.pitch !== ctx.fishing!.pitch &&
+					(!(
+						this.client.entity.pitch === 0 &&
+						this.client.entity.yaw === Math.PI &&
+						this.client.entity.position.y === 100
+					) &&
+						this.client.entity.pitch !== ctx.fishing!.pitch &&
 						this.client.entity.pitch !== ctx.fishing!.original_pitch) ||
 					(this.client.entity.yaw !== ctx.fishing!.yaw &&
 						this.client.entity.yaw !== ctx.fishing!.original_yaw) ||
@@ -295,9 +300,6 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 							message,
 						},
 					});
-
-					this._bot.off('move', listener);
-					this.off('context_changed', contextListener);
 
 					if (config.react_to_external_move) {
 						if (
@@ -663,6 +665,12 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				);
 
 				this.logger.info('Captcha detected. Solving...');
+
+				console.log(
+					this.client.entity.position,
+					this.client.entity.pitch,
+					this.client.entity.yaw,
+				);
 
 				return;
 			}
