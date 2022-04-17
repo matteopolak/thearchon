@@ -1,6 +1,6 @@
 {
 	"name": "@matteopolak/thearchon",
-	"version": "2.6.0",
+	"version": "2.7.0",
 	"description": "",
 	"main": "src/index.ts",
 	"scripts": {
@@ -10,7 +10,8 @@
 		"check:tsc": "tsc --noEmit",
 		"test": "jest --verbose ./tests",
 		"benchmark": "ts-node benchmarks/benchmarks.ts --project tsconfig.benchmark.json",
-		"record": "ts-node src/record.ts"
+		"record": "ts-node src/record.ts",
+		"respond": "ts-node src/respond.ts"
 	},
 	"author": "Matteo Polak",
 	"license": "MIT",

@@ -72,12 +72,14 @@ export interface FishingAccount {
 
 export interface TheAlteningAccount {
 	username?: string;
+	password?: string;
 	expires?: number;
 	auth: 'thealtening';
 }
 
 export interface NormalAccount {
 	username: string;
+	password: string;
 	expires?: number;
 	auth?: AuthType;
 }
@@ -85,7 +87,6 @@ export interface NormalAccount {
 export type Account = (StorageAccount | FishingAccount) &
 	(NormalAccount | TheAlteningAccount) & {
 		alias: string;
-		password: string;
 		channels?: string[];
 		viewer_port?: number;
 		temporary?: boolean;

@@ -34,6 +34,7 @@ const config: Config = {
 	server: ServerType.ONYX,
 	// A list of Minecraft accounts to use
 	accounts: [
+		// Fisher account example
 		{
 			// The alias to use for the account
 			alias: 'username',
@@ -41,7 +42,7 @@ const config: Config = {
 			username: 'handle@gmail.com',
 			// The password for the account
 			password: 'password',
-			// The authentication service to use. Either `mojang` or `microsoft`
+			// The authentication service to use. Either `mojang`, `microsoft`, or `thealtening`
 			auth: 'mojang',
 			// The type of bot to use. Either `storage` or `fisher`
 			// `storage`: Automatically purchases items from the shop and stores them
@@ -64,6 +65,7 @@ const config: Config = {
 				forest: 'forest',
 			},
 		},
+		// Storage account example
 		{
 			alias: 'username',
 			username: 'handle@gmail.com',
@@ -88,6 +90,24 @@ const config: Config = {
 				// The home that is set at the drop location
 				drop: 'storage',
 			},
+		},
+		// TheAltening account example
+		{
+			alias: 'username',
+			// The email (TheAltening token) of the account
+			username: 'aaaa-aaaaa@alt.com',
+			// Must use `thealtening` as the auth service
+			auth: 'thealtening',
+			type: 'fisher',
+		},
+		// TheAltening automatic account example
+		{
+			alias: 'username',
+			// Using `undefined` will automatically create a token
+			username: undefined,
+			// Must use `thealtening` as the auth service
+			auth: 'thealtening',
+			type: 'fisher',
 		},
 	],
 	// Fishing-related settings

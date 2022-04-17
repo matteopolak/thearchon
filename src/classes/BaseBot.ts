@@ -683,12 +683,6 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 
 				this.logger.info('Captcha detected. Solving...');
 
-				console.log(
-					this.client.entity.position,
-					this.client.entity.pitch,
-					this.client.entity.yaw,
-				);
-
 				return;
 			}
 
