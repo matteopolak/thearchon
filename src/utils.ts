@@ -336,12 +336,12 @@ export function startNewProcess(
 	worker.once('error', async error => {
 		console.error(payload.options.alias, error);
 
-		worker.removeListener('message', messageHandler);
+		worker.off('message', messageHandler);
 		worker.terminate();
 	});
 
 	worker.once('exit', async code => {
-		worker.removeListener('message', messageHandler);
+		worker.off('message', messageHandler);
 
 		if (code === 0) {
 			await sleep(10_000);

@@ -1280,6 +1280,9 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		if (ctx.id !== this.contextId) return;
 
 		this.logger.error(`Exiting: ${reason}`);
-		process.exit(0);
+
+		process.nextTick(() => {
+			process.exit(0);
+		});
 	}
 }
