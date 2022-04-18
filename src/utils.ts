@@ -45,6 +45,10 @@ export function random(max: number, min: number = 0) {
 	return Math.floor(Math.random() * (max - min)) + min;
 }
 
+export function randomArray<T>(array: T[]): T {
+	return array[random(array.length)];
+}
+
 export function getItemDisplayName(item: Item, stripColour = true) {
 	// @ts-ignore
 	const name: string | undefined = item.nbt?.value?.display?.value?.Name?.value;

@@ -348,10 +348,17 @@ export default class FishBot extends BaseBot {
 		if (ctx.id !== this.contextId) return;
 
 		const window = await this.completeActionAndWaitForWindow(ctx, () =>
-			this.command(ctx, '/shop ores'),
+			this.command(ctx, '/shop'),
 		);
 
 		if (!window) return false;
+
+		await this.completeActionAndWaitForSlotItem(
+			ctx,
+			() => this.client.clickWindow(ctx, 14, 0, 0),
+			49,
+			166,
+		);
 
 		this._bot._client.write('window_click', {
 			windowId: window.id,

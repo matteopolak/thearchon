@@ -14,6 +14,7 @@ import {
 	BAIT_NAME_TO_PRICE,
 	BALANCE_REGEX,
 	CHAT_MESSAGE_REGEX,
+	COMMAND_ALIASES,
 	COMMAND_COOLDOWN,
 	COMMAND_REGEX,
 	DIRECT_MESSAGE_REGEX,
@@ -62,6 +63,7 @@ import {
 	generateActions,
 	generateResponse,
 	random,
+	randomArray,
 	sleep,
 } from '../utils';
 import BaseState from './BaseState';
@@ -1084,7 +1086,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 			}
 		});
 
-		await this.command(ctx, '/mobcoins balance');
+		await this.command(ctx, randomArray(COMMAND_ALIASES.MOBCOIN_BALANCE));
 
 		return balance;
 	}
@@ -1097,7 +1099,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 			const listener = async (m: string) => {
 				if (m === 'Answer with /yes or /no') {
 					if (!this.flags.acceptedIP) await this.command(ctx, '/yes');
-					await this.command(ctx, '/balance');
+					await this.command(ctx, randomArray(COMMAND_ALIASES.BALANCE));
 				} else if (BALANCE_REGEX.test(m)) {
 					this._bot.off('messagestr', listener);
 
@@ -1128,7 +1130,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 			}
 		});
 
-		await this.command(ctx, '/balance');
+		await this.command(ctx, randomArray(COMMAND_ALIASES.BALANCE));
 
 		return Math.max(await balance, 0);
 	}

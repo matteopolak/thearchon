@@ -445,3 +445,14 @@ export const THEALTENING_SESSIONSERVER_URL =
 
 export const STAFF_LIST_REGEX = /window\.NDZN_STAFF_GROUPS = (\[[\s\S]+?\]);/;
 export const FIX_OBJECT_REGEX = /(')|(\w+?): /g;
+
+export const COMMAND_ALIASES = {
+	BALANCE: ['/balance', '/bal'],
+	MOBCOIN_BALANCE: [
+		'/mobcoin bal',
+		'/mobcoins bal',
+		'/mobcoin balance',
+		'/mobcoins balance',
+	],
+	HOME: ['/home', '/homes'],
+};
