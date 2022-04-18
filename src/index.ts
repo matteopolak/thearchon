@@ -19,7 +19,7 @@ import {
 } from './utils';
 
 const workers = new Map<string, Worker>();
-const client = discordConfig.enabled ? create(discordConfig, workers) : null;
+const discord = discordConfig.enabled ? create(discordConfig, workers) : null;
 
 const defaults: Partial<BaseBotOptions> = {
 	whitelist: new Set(config.whitelist),
@@ -109,7 +109,7 @@ async function run() {
 				},
 			},
 			workers,
-			client,
+			discord,
 		);
 	}
 }

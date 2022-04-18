@@ -16,6 +16,7 @@ export const enum MessageType {
 	SELL_TYPE,
 	NOTIFICATION,
 	WARNING,
+	DISCORD_RESPONSE,
 }
 
 export type MessagePayload =
@@ -39,12 +40,28 @@ export type MessagePayload =
 			data: {
 				message: string;
 			};
+	  }
+	| {
+			type: MessageType.DISCORD_RESPONSE;
+			data: {
+				message: string;
+				id: number;
+			};
 	  };
 
 export interface ParentMessage {
 	command: string;
 	args: string[];
 	sender: string;
+	id: number;
+}
+
+export interface IdData {
+	count: number;
+	needed: number;
+	channel_id: string;
+	guild_id: string;
+	responses: [string, string][];
 }
 
 export interface DiscordConfig {
@@ -149,11 +166,26 @@ export type Context = {
 	last_window_click: number;
 };
 
+export const enum CommandType {
+	DISCORD,
+	PARTY_CHAT,
+}
+
+export type CommandOptions =
+	| {
+			username: string;
+			type: CommandType.PARTY_CHAT;
+	  }
+	| {
+			username?: string;
+			type: CommandType.DISCORD;
+	  };
+
 export type CommandFunction = (
 	ctx: Context,
-	username: string,
+	options: CommandOptions,
 	...args: string[]
-) => any;
+) => Promise<string> | string;
 
 export interface FishingRodData {
 	slot: number;

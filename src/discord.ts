@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import { Client, Intents } from 'discord.js';
 
 import config from './config';
-import type { DiscordConfig, ParentMessage } from './typings';
+import type { DiscordConfig, IdData, ParentMessage } from './typings';
 
 const NO_USERNAME_COMMANDS = new Set([
 	'exec',
@@ -21,6 +21,12 @@ const NO_USERNAME_COMMANDS = new Set([
 	'sell',
 ]);
 
+let id = 0;
+
+function createId() {
+	return ++id;
+}
+
 export function create(
 	discordConfig: DiscordConfig,
 	workers: Map<string, Worker>,
@@ -28,6 +34,8 @@ export function create(
 	const client = new Client({
 		intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
 	});
+
+	const idMap = new Map<number, IdData>();
 
 	client.once('ready', () => {
 		console.log(
@@ -38,7 +46,8 @@ export function create(
 	});
 
 	client.on('messageCreate', async message => {
-		if (!message.content.startsWith(discordConfig.prefix)) return;
+		if (!message.guild || !message.content.startsWith(discordConfig.prefix))
+			return;
 		if (!discordConfig.whitelist.includes(message.author.id)) return;
 
 		const [_command, ...args] = message.content
@@ -57,6 +66,7 @@ export function create(
 		}
 
 		const payload: ParentMessage = {
+			id: createId(),
 			command,
 			args,
 			sender: username,
@@ -67,6 +77,14 @@ export function create(
 		);
 
 		if (filtered.length > 0) {
+			idMap.set(payload.id, {
+				count: 0,
+				needed: filtered.length,
+				channel_id: message.channel.id,
+				guild_id: message.guild!.id,
+				responses: [],
+			});
+
 			for (const account of filtered.values()) {
 				const worker = workers.get(account.alias)!;
 
@@ -87,5 +105,5 @@ export function create(
 
 	client.login(discordConfig.token);
 
-	return client;
+	return { client, idMap };
 }

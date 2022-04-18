@@ -22,6 +22,7 @@ import {
 } from '../constants';
 import {
 	BaseBotOptions,
+	CommandOptions,
 	Location,
 	LocationType,
 	MessageType,
@@ -51,7 +52,7 @@ export default class FishBot extends BaseBot {
 	}
 
 	public async init() {
-		this.commands.set('fish', this.fish.bind(this));
+		this.commands.set('fish', this.fishCommand.bind(this));
 		this.commands.set('value', this.showFishValue.bind(this));
 		this.commands.set('clear', this.clearCommand.bind(this));
 		this.commands.set('stop', this.stopFishing.bind(this));
@@ -519,11 +520,13 @@ export default class FishBot extends BaseBot {
 	}
 
 	private clearCommand(ctx: Context) {
-		if (this.state === State.SOLVING_CAPTCHA) return;
+		if (this.state === State.SOLVING_CAPTCHA)
+			return 'Cannot clear inventory while solving a captcha.';
 
 		this.state = State.CLEARING_INVENTORY;
+		this.clearInventory(ctx);
 
-		return this.clearInventory(ctx);
+		return 'Clearing inventory...';
 	}
 
 	public isOwnedFish(item: Item) {
@@ -611,7 +614,13 @@ export default class FishBot extends BaseBot {
 	}
 
 	public async stopFishing() {
-		if (this.state === State.FISHING) this.state = State.IDLE;
+		if (this.state === State.FISHING) {
+			this.state = State.IDLE;
+
+			return 'Stopped fishing!';
+		}
+
+		return 'Not fishing. Aborting operation.';
 	}
 
 	private async cast(ctx: Context, rod: Item) {
@@ -688,6 +697,16 @@ export default class FishBot extends BaseBot {
 				e.username.includes('Fish') &&
 				e.position.distanceTo(this.client.entity.position) < 4,
 		);
+	}
+
+	public fishCommand(ctx: Context) {
+		if (this.state === State.FISHING) {
+			return 'Already fishing. Aborting operation.';
+		}
+
+		this.fish(ctx);
+
+		return 'Started fishing!';
 	}
 
 	public async fish(_: Context) {
@@ -881,8 +900,9 @@ export default class FishBot extends BaseBot {
 		return true;
 	}
 
-	public async showFishValue(ctx: Context) {
-		if (this.state === State.SOLVING_CAPTCHA) return;
+	public async showFishValue() {
+		if (this.state === State.SOLVING_CAPTCHA)
+			return 'Cannot show fish value while solving a captcha.';
 
 		const value = this.client.inventory.items().reduce(
 			// @ts-ignore
@@ -890,14 +910,22 @@ export default class FishBot extends BaseBot {
 			0,
 		);
 
-		return this.command(ctx, `/p ${currencyFormatter.format(value)}`);
+		return `Current fish value: ${currencyFormatter.format(value)}.`;
 	}
 
-	public async setSellTypeCommand(_: Context, __: string, type: string) {
+	public async setSellTypeCommand(
+		_: Context,
+		__: CommandOptions,
+		type: string,
+	) {
 		if (type === 'coins') type = SellType.COINS;
 		else if (type === 'mobcoins') type = SellType.MOB_COINS;
-		else return;
+		else return "Invalid sell type. Valid types are 'coins' and 'mobcoins'.";
 
 		this.setSellType(type as SellType);
+
+		return `Sell type set to ${
+			type === SellType.COINS ? 'money' : 'Mob Coins'
+		}.`;
 	}
 }

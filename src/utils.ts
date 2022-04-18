@@ -2,7 +2,7 @@ import { Worker } from 'worker_threads';
 
 import axios from 'axios';
 import chalk from 'chalk';
-import type { Client } from 'discord.js';
+import type { Client, TextChannel } from 'discord.js';
 import type { Item } from 'prismarine-item';
 
 import characters from './characters';
@@ -17,6 +17,7 @@ import {
 import type {
 	BaseBotOptions,
 	Direction,
+	IdData,
 	MessagePayload,
 	RawMapData,
 	StaffCategory,
@@ -264,7 +265,7 @@ export function createPromiseResolvePair(): {
 export function startNewProcess(
 	payload: { options: BaseBotOptions },
 	workers: Map<string, Worker>,
-	client: Client | null,
+	discord: { client: Client; idMap: Map<number, IdData> } | null,
 ) {
 	console.log(
 		`         ${' '.repeat(17)}${chalk.bold(
@@ -296,9 +297,34 @@ export function startNewProcess(
 			return;
 		}
 
-		const channel = discordConfig.channels.notifications
-			? client?.channels.cache.get(discordConfig.channels.notifications)
-			: undefined;
+		if (packet.type === MessageType.DISCORD_RESPONSE) {
+			const entry = discord!.idMap.get(packet.data.id);
+			if (!entry) return;
+
+			if (++entry.count >= entry.needed) {
+				discord!.idMap.delete(packet.data.id);
+			}
+
+			entry.responses.push([payload.options.alias, packet.data.message]);
+
+			const channel = discord!.client.channels.cache.get(
+				entry.channel_id,
+			) as TextChannel;
+			if (!channel) return;
+
+			channel.send(
+				entry.responses.map(r => `\`${escape(r[0])}\`: ${r[1]}`).join('\n'),
+			);
+
+			return;
+		}
+
+		const channel =
+			discordConfig.channels.notifications && discord
+				? discord.client.channels.cache.get(
+						discordConfig.channels.notifications,
+				  )
+				: undefined;
 
 		if (packet.type === MessageType.NOTIFICATION) {
 			if (channel?.type === 'GUILD_TEXT') {
@@ -364,7 +390,7 @@ export function startNewProcess(
 				payload.options.expires = data.expires;
 			}
 
-			startNewProcess(payload, workers, client);
+			startNewProcess(payload, workers, discord);
 		} else {
 			console.log(
 				`         ${' '.repeat(17)}${chalk.bold(
@@ -440,4 +466,8 @@ export function formatStaffList(list: Set<string>) {
 	const last = mapped.pop();
 
 	return `${mapped.join(chalk.gray(', '))} ${chalk.gray('and')} ${last}`;
+}
+
+export function escape(string: string) {
+	return string.replaceAll('_', '\\_');
 }

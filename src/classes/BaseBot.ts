@@ -9,7 +9,7 @@ import type { Bot, Player } from 'mineflayer';
 import type { Window } from 'prismarine-windows';
 import type TypedEventEmitter from 'typed-emitter';
 
-import config from '../config';
+import config, { discordConfig } from '../config';
 import {
 	BAIT_NAME_TO_PRICE,
 	BALANCE_REGEX,
@@ -36,7 +36,14 @@ import {
 	TELEPORT_REGEX,
 	TIME_BEFORE_FISH_AFTER_MOVEMENT_DETECT,
 } from '../constants';
-import { Location, LocationType, MessageType, State } from '../typings';
+import {
+	CommandOptions,
+	CommandType,
+	Location,
+	LocationType,
+	MessageType,
+	State,
+} from '../typings';
 import type {
 	BaseBotOptions,
 	CommandFunction,
@@ -51,6 +58,7 @@ import type {
 import {
 	createPromiseResolvePair,
 	currencyFormatter,
+	escape,
 	generateActions,
 	generateResponse,
 	random,
@@ -155,31 +163,40 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				this.homes.ender_chest = options.homes.ender_chest;
 		}
 
-		this.commands.set('tp', this.teleportTo.bind(this));
 		this.commands.set('look', this.lookAt.bind(this));
 		this.commands.set('inventory', this.saveInventory.bind(this));
 		this.commands.set('bal', this.showBalance.bind(this));
 		this.commands.set('mobcoins', this.showMobCoinsBalance.bind(this));
-		this.commands.set('accept', this.acceptTeleportRequest.bind(this));
 		this.commands.set('entity', this.saveEntityList.bind(this));
 		this.commands.set('pay', this.sendMoney.bind(this));
 		this.commands.set('exec', this.executeCommand.bind(this));
 		this.commands.set('chat', this.sendChatMessage.bind(this));
 		this.commands.set('move', this.executeMove.bind(this));
 
-		this.port.on('message', ({ command, args, sender }: ParentMessage) => {
-			const run = this.commands.get(command);
+		this.port.on(
+			'message',
+			async ({ command, args, sender, id }: ParentMessage) => {
+				const run = this.commands.get(command);
 
-			if (run !== undefined) {
-				this.logger.info(`${sender} ran command '${command}'`);
+				if (run !== undefined) {
+					this.logger.info(`${sender} ran command '${command}'`);
 
-				try {
-					return run(this.context(), sender, ...args);
-				} catch (e: any) {
-					this.logger.error(e);
+					try {
+						const message = await run(
+							this.context(),
+							{ username: sender, type: CommandType.DISCORD },
+							...args,
+						);
+
+						return this.port.postMessage({ id, message });
+					} catch (e: any) {
+						this.logger.error(e);
+
+						return this.port.postMessage({ id, message: 'An error occurred.' });
+					}
 				}
-			}
-		});
+			},
+		);
 	}
 
 	get balance() {
@@ -215,7 +232,11 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		};
 	}
 
-	async executeMove(ctx: Context, _?: string, ...instructions: string[]) {
+	async executeMove(
+		ctx: Context,
+		_: CommandOptions,
+		...instructions: string[]
+	) {
 		const parsed: MovementInstruction[] = [];
 
 		for (const instruction of instructions) {
@@ -232,8 +253,12 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		}
 
 		if (parsed.length > 0) {
-			return this.client.processMovementInstructions(ctx, parsed);
+			this.client.processMovementInstructions(ctx, parsed);
 		}
+
+		return `Executing ${parsed.length} movement instruction${
+			parsed.length === 1 ? '' : 's'
+		}.`;
 	}
 
 	async randomMovement(ctx: Context) {
@@ -697,7 +722,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				this.setState(ctx, State.IDLE);
 
 				if (this.previousState === State.FISHING && this.fisher) {
-					return this.fisher.fish(ctx);
+					return void this.fisher.fish(ctx);
 				}
 			}
 
@@ -937,7 +962,14 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				this.logger.info(`${sender} ran command '${command}'`);
 
 				try {
-					return run(ctx, sender, ...args);
+					return this.command(
+						ctx,
+						await run(
+							ctx,
+							{ username: sender, type: CommandType.PARTY_CHAT },
+							...args,
+						),
+					);
 				} catch (e: any) {
 					this.logger.error(e);
 				}
@@ -1100,37 +1132,62 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		return Math.max(await balance, 0);
 	}
 
-	private async sendChatMessage(ctx: Context, _?: string, ...args: string[]) {
-		if (args.length > 0) return this.chat(ctx, args.join(' '));
+	private async sendChatMessage(
+		ctx: Context,
+		_: CommandOptions,
+		...args: string[]
+	) {
+		if (args.length > 0) {
+			this.chat(ctx, args.join(' '));
+
+			return 'Sending message...';
+		}
+
+		return `Usage: ${discordConfig.prefix}chat <message>`;
 	}
 
-	private async sendMoney(ctx: Context, username?: string) {
+	private async sendMoney(ctx: Context, options: CommandOptions) {
+		if (!options.username)
+			return `Usage: ${discordConfig.prefix}pay <username>`;
+
 		await this.getCurrentBalance(ctx);
 
 		const balance = this.balance - SURPLUS_MONEY_THRESHOLD;
 
-		if (balance > 0 && username) {
+		if (balance > 0) {
 			const amount = Math.floor(balance);
 
-			await this.command(ctx, `/pay ${username} ${amount}`);
+			await this.command(ctx, `/pay ${options.username} ${amount}`);
+		}
+
+		return `Sent $${currencyFormatter.format(balance)} to **${escape(
+			options.username,
+		)}**.`;
+	}
+
+	private async lookAt(ctx: Context, options: CommandOptions) {
+		if (options.username) {
+			const player = this._bot.players[options.username];
+
+			if (player) {
+				this.client.lookAt(ctx, player.entity.position);
+
+				return `Looking at ${options.username}.`;
+			} else {
+				return `Could not find **${options.username}.`;
+			}
+		} else {
+			return `Usage: ${discordConfig.prefix}look <username>`;
 		}
 	}
 
-	private async teleportTo(ctx: Context, username?: string) {
-		if (username) return this.command(ctx, `/tpa ${username}`);
-	}
-
-	private async lookAt(ctx: Context, username: string) {
-		const player = this._bot.players[username];
-
-		if (player) return this.client.lookAt(ctx, player.entity.position);
-	}
-
 	private async saveInventory() {
-		return fs.writeFile(
+		await fs.writeFile(
 			path.join(this.directory, 'inventory.json'),
 			JSON.stringify(this._bot.inventory.slots, null, 2),
 		);
+
+		return 'Bot inventory has been saved.';
 	}
 
 	private async saveEntityList() {
@@ -1142,26 +1199,34 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 			path.join(this.directory, 'entities.json'),
 			JSON.stringify(this._bot.entities, null, 2),
 		);
+
+		return "Entity list has been saved to 'entities.json' and 'players.json'.";
 	}
 
-	private async acceptTeleportRequest(ctx: Context) {
-		return this.command(ctx, '/tpaccept');
-	}
+	private async executeCommand(
+		ctx: Context,
+		_: CommandOptions,
+		...args: string[]
+	) {
+		if (args.length > 0) {
+			this.command(ctx, `/${args.join(' ')}`);
 
-	private async executeCommand(ctx: Context, _: string, ...args: string[]) {
-		if (args.length > 0) return this.command(ctx, `/${args.join(' ')}`);
+			return 'Executing command...';
+		}
+
+		return `Usage: ${discordConfig.prefix}exec <command>`;
 	}
 
 	private async showMobCoinsBalance(ctx: Context) {
 		const balance = await this.getCurrentMobCoins(ctx);
 
-		return this.command(ctx, `/p ${currencyFormatter.format(balance)}`);
+		return `Current MobCoins balance: $${currencyFormatter.format(balance)}.`;
 	}
 
 	private async showBalance(ctx: Context) {
 		const balance = await this.getCurrentBalance(ctx, true);
 
-		return this.command(ctx, `/p ${currencyFormatter.format(balance)}`);
+		return `Current balance: $${currencyFormatter.format(balance)}`;
 	}
 
 	public async command(ctx: Context, message: string): Promise<void> {

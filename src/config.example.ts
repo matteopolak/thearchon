@@ -123,7 +123,7 @@ const config: Config = {
 		// Whether to stop fishing while staff are vanished
 		pause_fishing_while_staff_hidden: true,
 		// whether to stop fishing while staff are online
-		pause_fishing_while_staff_online: false,
+		pause_fishing_while_staff_online: true,
 		// Settings for random movement
 		random_movement: {
 			// Whether to enable random movement
