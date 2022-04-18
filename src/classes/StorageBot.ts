@@ -69,15 +69,18 @@ export default class FishBot extends BaseBot {
 			await this.completeActionAndWaitForSlotItem(
 				ctx,
 				() => this.client.clickWindow(ctx, slot - 1, 0, 0),
-				49,
-				[166, 95],
-				[undefined, 5],
+				[49, 49, 22, 22],
+				[166, 95, 166, 95],
+				[undefined, 5, undefined, 5],
 			);
 		}
 
-		if (this.client.currentWindow === null) return;
+		const window = this.client.currentWindow as Window | null;
+		if (window === null) return;
 
-		const item = (this.client.currentWindow as Window).slots[22];
+		const specialSpawnerShop = window.slots[13].type === 52;
+
+		const item = specialSpawnerShop ? window.slots[13] : window.slots[22];
 		const availableItems = this.client.inventory.slots.reduce((a, b) => {
 			if (b === null) return a + item.stackSize;
 			if (item.type === b.type && item.metadata === b.metadata)
@@ -96,7 +99,11 @@ export default class FishBot extends BaseBot {
 			)}`,
 		);
 
-		if (count >= 64) {
+		if (specialSpawnerShop) {
+			while (count--) {
+				await this.client.clickWindow(ctx, 13, 0, 0);
+			}
+		} else if (count >= 64) {
 			const slot = Math.min(8, Math.floor(count / 64) - 1);
 
 			await this.completeActionAndWaitForSlotItem(

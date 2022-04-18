@@ -490,7 +490,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 
 	public async waitForSlotItem(
 		ctx: Context,
-		slot: number,
+		slot: number | number[],
 		item: number | number[],
 		metadata?: number | (number | undefined)[],
 	) {
@@ -502,17 +502,18 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 			metadata === undefined || !Array.isArray(metadata)
 				? [metadata]
 				: metadata;
+		const slotArray = !Array.isArray(slot) ? [slot] : slot;
 
 		return new Promise<undefined>(resolve => {
 			const listener = (packet: RawItem) => {
 				if (
-					packet.slot !== slot ||
-					!itemArray.some(
+					!slotArray.some(
 						(x, i) =>
-							x === undefined ||
-							(x === packet.item.blockId &&
-								(metadataArray[i] === undefined ||
-									metadataArray[i] === packet.item.itemDamage)),
+							packet.slot === x &&
+							(itemArray[i] === undefined ||
+								(itemArray[i] === packet.item.blockId &&
+									(metadataArray[i] === undefined ||
+										metadataArray[i] === packet.item.itemDamage))),
 					)
 				)
 					return;
@@ -1266,7 +1267,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 	public async completeActionAndWaitForSlotItem(
 		ctx: Context,
 		action: () => any,
-		slot: number,
+		slot: number | number[],
 		item: number | number[],
 		metadata?: number | (number | undefined)[],
 	) {
