@@ -98,6 +98,7 @@ async function run() {
 
 			options.sessionServer = THEALTENING_SESSIONSERVER_URL;
 			options.authServer = THEALTENING_AUTHENTICATION_URL;
+			options.password = 'password';
 		}
 
 		startNewProcess(

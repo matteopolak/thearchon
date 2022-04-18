@@ -83,7 +83,7 @@ bot._bot.on('end', async reason => {
 	setTimeout(() => {
 		bot.logger.error(`Ended: ${chalk.redBright(reason)}`);
 
-		process.exit(0);
+		process.nextTick(() => process.exit(0));
 	}, 1000);
 });
 
