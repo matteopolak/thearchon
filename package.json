@@ -1,6 +1,6 @@
 {
 	"name": "@matteopolak/thearchon",
-	"version": "3.0.0",
+	"version": "3.0.1",
 	"description": "",
 	"main": "src/index.ts",
 	"scripts": {
@@ -11,7 +11,8 @@
 		"test": "jest --verbose ./tests",
 		"benchmark": "ts-node benchmarks/benchmarks.ts --project tsconfig.benchmark.json",
 		"record": "ts-node src/record.ts",
-		"respond": "ts-node src/respond.ts"
+		"respond": "ts-node src/respond.ts",
+		"update": "ts-node src/update.ts \"--update\""
 	},
 	"author": "Matteo Polak",
 	"license": "MIT",
@@ -23,12 +24,14 @@
 		"prismarine-viewer": "^1.22.0",
 		"socks": "^2.6.2",
 		"socks-proxy-agent": "^6.2.0-beta.0",
-		"typed-emitter": "^2.1.0"
+		"typed-emitter": "^2.1.0",
+		"unzipper": "^0.10.11"
 	},
 	"devDependencies": {
 		"@types/benchmark": "^2.1.1",
 		"@types/jest": "^27.4.1",
 		"@types/node": "^17.0.21",
+		"@types/unzipper": "^0.10.5",
 		"@typescript-eslint/eslint-plugin": "^5.15.0",
 		"@typescript-eslint/parser": "^5.15.0",
 		"benchmark": "^2.1.4",

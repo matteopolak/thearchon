@@ -12,26 +12,29 @@ import {
 } from './constants';
 import { create } from './discord';
 import { BaseBotOptions, SellType } from './typings';
+import { check } from './update';
 import {
 	fetchStaffList,
 	generateAlteningToken,
 	startNewProcess,
 } from './utils';
 
-const workers = new Map<string, Worker>();
-const discord = discordConfig.enabled ? create(discordConfig, workers) : null;
-
-const defaults: Partial<BaseBotOptions> = {
-	whitelist: new Set(config.whitelist),
-	logger: config.log,
-	host: 'archonhq.net',
-	port: 25565,
-	version: '1.12.2',
-	hideErrors: true,
-	viewDistance: config.minimize_memory_usage ? 'tiny' : 'far',
-};
-
 async function run() {
+	await check();
+
+	const workers = new Map<string, Worker>();
+	const discord = discordConfig.enabled ? create(discordConfig, workers) : null;
+
+	const defaults: Partial<BaseBotOptions> = {
+		whitelist: new Set(config.whitelist),
+		logger: config.log,
+		host: 'archonhq.net',
+		port: 25565,
+		version: '1.12.2',
+		hideErrors: true,
+		viewDistance: config.minimize_memory_usage ? 'tiny' : 'far',
+	};
+
 	const staff = await fetchStaffList();
 
 	console.log(
