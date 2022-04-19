@@ -54,24 +54,22 @@ All options are explained in the configuration file.
 ## Commands
 These commands must be run in an McMMO party chat or Discord channel to which the bot(s) have access.
 
-**WARNING: Commands that require a response from the bot will be sent to the party chat.**
-
 | Command | Description |
 | --- | --- |
-| `accept` | Accepts a pending teleportation request |
-| `bal` | Displays the bot's balance |
+| `bal` | Displays the bot's balance. |
+| `chat <message>` | Sends a chat message. |
 | `clear` | Goes to spawn and clears the bot's inventory of items that arent: <ul><li>Fish</li><li>Fishing Rods</li><li>Spawners</li><li>Bedrock</li></ul> |
-| `entity` | Saves entities to `data/{username}/[entities+players].json` |
-| `exec <command>` | Executes a command as the bot |
-| `fish` | Starts fishing |
-| `inventory` | Saves the contents of the bot's inventory to `data/{username}/inventory.json` |
-| `look` | Looks at the player if they're in range |
-| `mobcoins` | Displays the bot's MobCoin balance |
-| `pay` | Sends the entirety of the bot's balance to the player (minus $150,000) |
-| `stop` | Stops fishing |
-| `sell <coins/mobcoins>` | Changes the exchange type for selling fish |
-| `tp` | Sends a teleportation request to the player |
-| `value` | Displays the current value in fish in the bot's inventory |
+| `entity` | Saves entities to `data/{username}/[entities+players].json`. |
+| `exec <command>` | Executes a command as the bot. |
+| `fish` | Starts fishing. |
+| `inventory` | Saves the contents of the bot's inventory to `data/{username}/inventory.json`. |
+| `look` | Looks at the player if they're in range. |
+| `mobcoins` | Displays the bot's MobCoin balance. |
+| `move <instructions>` | Moves the bot. Instructions should be space-separated and must include the number of times to repeat. For example, `right(3) jump(2) back(1)` will move right 3 blocks, jump twice, and move back 1 block. |
+| `pay` | Sends the entirety of the bot's balance to the player (minus $150,000). |
+| `stop` | Stops fishing. |
+| `sell <coins/mobcoins>` | Changes the exchange type for selling fish. |
+| `value` | Displays the current value in fish in the bot's inventory. |
 
 ## Recordings
 
