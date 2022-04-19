@@ -28,6 +28,7 @@ import {
 	PURCHASE_BAIT_REGEX,
 	PURCHASE_ITEM_REGEX,
 	PURCHASE_ROD_REGEX,
+	PURCHASE_SPAWNER_REGEX,
 	RECEIVE_MONEY_REGEX,
 	RENEW_CAPTCHA_INTERVAL,
 	SELL_ALL_ITEM_REGEX,
@@ -871,6 +872,17 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				return;
 			}
 
+			if (PURCHASE_SPAWNER_REGEX.test(m)) {
+				const value = parseFloat(
+					m.match(PURCHASE_SPAWNER_REGEX)![1].replaceAll(',', ''),
+				);
+
+				if (this.checkedBalance === false) await this.getCurrentBalance(ctx);
+				else this.setBalance(this.balance - value);
+
+				return;
+			}
+
 			if (RECEIVE_MONEY_REGEX.test(m)) {
 				const [, _value, name] = m.match(RECEIVE_MONEY_REGEX)!;
 				const value = parseFloat(_value.replaceAll(',', ''));
@@ -1304,8 +1316,9 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 	public async completeActionAndWaitForMessage(
 		ctx: Context,
 		action: () => any,
-		message: string,
+		message: string | RegExp,
 	) {
+		// @ts-ignore
 		const promise = this.client.awaitMessage(ctx, message);
 
 		await action();

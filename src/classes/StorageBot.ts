@@ -100,9 +100,20 @@ export default class FishBot extends BaseBot {
 		);
 
 		if (specialSpawnerShop) {
-			while (count--) {
-				await this.client.clickWindow(ctx, 13, 0, 0);
-			}
+			await this.completeActionAndWaitForSlotItem(
+				ctx,
+				() => this.client.clickWindow(ctx, 13, 0, 0),
+				22,
+				386,
+			);
+
+			await this.completeActionAndWaitForMessage(
+				ctx,
+				() => this.client.clickWindow(ctx, 22, 0, 0),
+				/^Please enter the amount of .+ you want me to buy in chat\.{3}/,
+			);
+
+			await this.chat(ctx, count.toString());
 		} else if (count >= 64) {
 			const slot = Math.min(8, Math.floor(count / 64) - 1);
 
