@@ -1363,7 +1363,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 	private async showMobCoinsBalance(ctx: Context) {
 		const balance = await this.getCurrentMobCoins(ctx);
 
-		return `Current MobCoins balance: $${currencyFormatter.format(balance)}.`;
+		return `Current MobCoins balance: ${currencyFormatter.format(balance)}.`;
 	}
 
 	private async showBalance(ctx: Context) {
