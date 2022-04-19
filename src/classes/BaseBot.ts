@@ -100,6 +100,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 	public _state: State = State.IDLE;
 	public contextId: number = 0;
 	public joinedAt: number = 0;
+	public lastUnusualMovement: number = 0;
 	public logFileLocation: string;
 	public homes = {
 		fishing: Location.FISHING as string,
@@ -333,6 +334,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 					this._bot.off('move', listener);
 					this.off('context_changed', contextListener);
 
+					const now = Date.now();
 					const message = `Unusual movement. Detected yaw/pitch/movement change: ${
 						ctx.fishing!.pitch - this.client.entity.yaw
 					}/${
@@ -341,12 +343,16 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 
 					this.logger.warn(message);
 
-					this.port.postMessage({
-						type: MessageType.WARNING,
-						data: {
-							message,
-						},
-					});
+					if (now - 30_000 > this.lastUnusualMovement) {
+						this.lastUnusualMovement = now;
+
+						this.port.postMessage({
+							type: MessageType.WARNING,
+							data: {
+								message,
+							},
+						});
+					}
 
 					if (config.react_to_external_move) {
 						if (
