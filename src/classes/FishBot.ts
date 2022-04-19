@@ -79,7 +79,9 @@ export default class FishBot extends BaseBot {
 			const answer = unscramble(map);
 
 			if (answer.length === 5 && this.state === State.SOLVING_CAPTCHA) {
-				this.logger.info(`Possible answer found: ${answer.join('')}`);
+				this.logger.info(
+					`Possible answer found: ${chalk.green(chalk.bold(answer.join('')))}`,
+				);
 
 				this.state = State.IDLE;
 
@@ -243,10 +245,6 @@ export default class FishBot extends BaseBot {
 				inventory.slots.fish++;
 			} else inventory.slots.taken++;
 		}
-
-		this.logger.info(
-			`Fish: ${inventory.count.fish}/${inventory.slots.fish} Bait: ${inventory.count.bait}/${inventory.slots.bait}`,
-		);
 
 		return inventory;
 	}
@@ -883,7 +881,7 @@ export default class FishBot extends BaseBot {
 
 					if (coins && mobcoins && name) {
 						this.logger.info(
-							`Caught ${chalk.bold(chalk.magenta(name))} [${chalk.red(
+							`Caught ${chalk.magenta(name)} [${chalk.red(
 								reward.item.itemCount,
 							)}] worth ${chalk.green(
 								`$${currencyFormatter.format(coins)}${chalk.reset(
@@ -895,7 +893,7 @@ export default class FishBot extends BaseBot {
 						);
 					} else if (name) {
 						this.logger.info(
-							`Caught ${chalk.bold(chalk.magenta(name))} [${chalk.red(
+							`Caught ${chalk.magenta(name)} [${chalk.red(
 								reward.item.itemCount,
 							)}]`,
 						);

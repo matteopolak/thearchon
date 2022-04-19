@@ -73,7 +73,6 @@ export async function generateActions(prompt: string) {
 
 	if (status !== 200) return [];
 
-	// const numbers = data.entities['wit$number:number'] ?? [];
 	const movements =
 		data.entities['movement_with_repeat:movement_with_repeat'] ?? [];
 
