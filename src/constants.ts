@@ -401,7 +401,7 @@ export const PURCHASE_ITEM_REGEX =
 	/^TheArchon >> You bought \d+ x .+ for ([\d,\.]+)\$\.$/;
 
 export const PURCHASE_SPAWNER_REGEX =
-	/^You have purchased (\d+)x .+ for \$([\d,\.]+)!$/;
+	/^You have purchased \d+x .+ for \$([\d,\.]+)!$/;
 
 // Amount of money to obtain before automatically paying it to `config.autopay_to`
 export const MONEY_THRESHOLD = 5_000_000;
