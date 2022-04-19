@@ -136,8 +136,8 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		name: string;
 	}[] = [];
 	public staff: {
-		online: Set<string>;
-		hidden: Set<string>;
+		online: Map<string, StaffMember>;
+		hidden: Map<string, StaffMember>;
 		members: Map<string, StaffMember>;
 	};
 
@@ -155,8 +155,8 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		this.port = port;
 		this.logFileLocation = path.join(this.directory, 'latest.log');
 		this.staff = {
-			online: new Set(),
-			hidden: new Set(),
+			online: new Map(),
+			hidden: new Map(),
 			members: this.options.staff,
 		};
 
@@ -617,17 +617,16 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 	}
 
 	public handlePlayerJoin(player: Player) {
-		if (
-			!this.staff.members.has(player.username) ||
-			this.staff.online.has(player.username)
-		)
+		const username = player.username.toLowerCase();
+
+		if (!this.staff.members.has(username) || this.staff.online.has(username))
 			return;
 
-		const member = this.staff.members.get(player.username)!;
-		const vanished = this.staff.hidden.has(player.username);
+		const member = this.staff.members.get(username)!;
+		const vanished = this.staff.hidden.has(username);
 
-		this.staff.hidden.delete(member.name);
-		this.staff.online.add(member.name);
+		this.staff.hidden.delete(member.name_lower);
+		this.staff.online.set(member.name_lower, member);
 
 		return this.logger[vanished ? 'unvanished' : 'joined'](
 			`[${member.title}] ${member.name}`,
@@ -635,27 +634,26 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 	}
 
 	public handlePlayerLeave(player: Player) {
-		if (!this.staff.members.has(player.username)) return;
+		const username = player.username.toLowerCase();
 
-		const member = this.staff.members.get(player.username)!;
+		if (!this.staff.members.has(username)) return;
+
+		const member = this.staff.members.get(username)!;
 
 		if (player.gamemode === 3) {
-			if (this.staff.hidden.has(player.username)) return;
+			if (this.staff.hidden.has(username)) return;
 
-			this.staff.hidden.add(member.name);
-			this.staff.online.delete(member.name);
+			this.staff.hidden.set(member.name_lower, member);
+			this.staff.online.delete(member.name_lower);
 
 			return this.logger.vanished(`[${member.title}] ${member.name}`);
 		}
 
-		if (
-			!this.staff.online.has(player.username) &&
-			!this.staff.hidden.has(player.username)
-		)
+		if (!this.staff.online.has(username) && !this.staff.hidden.has(username))
 			return;
 
-		this.staff.hidden.delete(member.name);
-		this.staff.online.delete(member.name);
+		this.staff.hidden.delete(member.name_lower);
+		this.staff.online.delete(member.name_lower);
 
 		return this.logger.left(`[${member.title}] ${member.name}`);
 	}

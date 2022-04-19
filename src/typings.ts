@@ -357,6 +357,7 @@ export interface WitResponse {
 
 export interface StaffMember {
 	name: string;
+	name_lower: string;
 	title: string;
 	img: string;
 }

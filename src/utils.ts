@@ -457,6 +457,7 @@ export async function fetchStaffList(): Promise<Map<string, StaffMember>> {
 
 	for (const category of list) {
 		for (const member of category.members) {
+			member.name_lower = member.name.toLowerCase();
 			map.set(member.name, member);
 		}
 	}
@@ -464,8 +465,8 @@ export async function fetchStaffList(): Promise<Map<string, StaffMember>> {
 	return map;
 }
 
-export function formatStaffList(list: Set<string>) {
-	const mapped = [...list.keys()].map(u => chalk.magenta(u));
+export function formatStaffList(list: Map<string, StaffMember>) {
+	const mapped = [...list.values()].map(u => chalk.magenta(u.name));
 
 	if (list.size === 1) return mapped[0];
 
