@@ -774,21 +774,13 @@ export default class FishBot extends BaseBot {
 		this.createMoveHandler(ctx);
 
 		while (ctx.id === this.contextId) {
-			if (
-				(config.fishing.pause_fishing_while_staff_hidden &&
-					this.staff.hidden.size > 0) ||
-				(config.fishing.pause_fishing_while_staff_online &&
-					this.staff.online.size > 0)
-			) {
+			if (this.pause) {
 				await this.client.waitForTicks(ctx, 20);
 
 				if (!ctx.fishing.paused) {
 					ctx.fishing.paused = true;
 
-					if (
-						config.fishing.pause_fishing_while_staff_hidden &&
-						this.staff.hidden.size > 0
-					) {
+					if (config.pause_while_staff_hidden && this.staff.hidden.size > 0) {
 						this.logger.info(
 							`Paused fishing as ${chalk.magenta(
 								`${this.staff.hidden.size} staff`,

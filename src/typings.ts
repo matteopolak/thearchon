@@ -135,8 +135,6 @@ export interface Config {
 		sneak_while_fishing: boolean;
 		upgrade_fishing_rod_automatically: boolean;
 		stop_fishing_on_mention: boolean;
-		pause_fishing_while_staff_hidden: boolean;
-		pause_fishing_while_staff_online: boolean;
 		random_movement: {
 			enabled: boolean;
 			recordings: string[];
@@ -147,6 +145,8 @@ export interface Config {
 	notify_on_mention: boolean;
 	react_to_external_move: boolean;
 	minimize_memory_usage: boolean;
+	pause_while_staff_hidden: boolean;
+	pause_while_staff_online: boolean;
 }
 
 export type Context = {

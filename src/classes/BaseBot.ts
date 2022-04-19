@@ -210,6 +210,13 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		);
 	}
 
+	get pause() {
+		return (
+			(config.pause_while_staff_hidden && this.staff.hidden.size > 0) ||
+			(config.pause_while_staff_online && this.staff.online.size > 0)
+		);
+	}
+
 	get balance() {
 		return this._balance;
 	}
@@ -941,6 +948,8 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 
 					this.port.postMessage(payload);
 				}
+
+				if (this.pause) return;
 
 				if (this.responseMap.has(name)) {
 					const last = this.responseMap.get(name)!;
