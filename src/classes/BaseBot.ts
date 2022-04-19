@@ -233,13 +233,13 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		this._state = value;
 	}
 
-	context(): Context {
+	context(oldCtx?: Context): Context {
 		return {
 			id: this.contextId,
 			allow_reaction: false,
 			reacting_to_movement: false,
 			location: Location.UNKNOWN,
-			last_window_click: 0,
+			last_window_click: oldCtx?.last_window_click ?? 0,
 		};
 	}
 
@@ -723,7 +723,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				this.captcha.startedAt = Date.now();
 				this.setState(ctx, State.SOLVING_CAPTCHA);
 
-				const newCtx = this.context();
+				const newCtx = this.context(ctx);
 
 				if (Date.now() - this.joinedAt < 5_000)
 					this.client.activateItem(newCtx);
@@ -763,7 +763,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				this.logger.info('Server rebooting... Waiting to reconnect...');
 				this.setState(ctx, State.IDLE);
 
-				const newCtx = this.context();
+				const newCtx = this.context(ctx);
 
 				await this.client.waitForTicks(newCtx, 100);
 				await this.client.waitForChunksToLoad(newCtx);

@@ -733,7 +733,7 @@ export default class FishBot extends BaseBot {
 
 		this.state = State.FISHING;
 
-		const ctx = this.context();
+		const ctx = this.context(_);
 
 		if (this.options.temporary && !this.flags.acceptedIP) {
 			this.flags.acceptedIP = true;

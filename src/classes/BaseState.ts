@@ -546,10 +546,13 @@ export default class BaseState {
 		if (ctx.id !== this.client.contextId) return;
 
 		this.client.setState(ctx, State.PROCESSING_MOVEMENT);
+		this.client.logger.info(
+			`Processing movements: ${instructions
+				.map(i => `${i.direction}(${i.distance})`)
+				.join(', ')}`,
+		);
 
-		console.log(instructions);
-
-		ctx = this.client.context();
+		ctx = this.client.context(ctx);
 		const backwards: (MovementInstruction & { direction: Direction })[] = [];
 
 		for (const { direction, distance } of instructions) {
