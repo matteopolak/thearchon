@@ -881,7 +881,7 @@ export default class FishBot extends BaseBot {
 
 					if (coins && mobcoins && name) {
 						this.logger.info(
-							`Caught ${chalk.magenta(name)} [${chalk.red(
+							`Caught ${chalk.italic(name)} [${chalk.red(
 								reward.item.itemCount,
 							)}] worth ${chalk.green(
 								`$${currencyFormatter.format(coins)}${chalk.reset(
@@ -893,7 +893,7 @@ export default class FishBot extends BaseBot {
 						);
 					} else if (name) {
 						this.logger.info(
-							`Caught ${chalk.magenta(name)} [${chalk.red(
+							`Caught ${chalk.italic(name)} [${chalk.red(
 								reward.item.itemCount,
 							)}]`,
 						);

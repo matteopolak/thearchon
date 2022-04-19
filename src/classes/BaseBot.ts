@@ -870,7 +870,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				);
 
 				this.logger.info(
-					`Sold fish for ${chalk.magenta(
+					`Sold fish for ${chalk.yellow(
 						`${currencyFormatter.format(value)} MobCoins`,
 					)}`,
 				);

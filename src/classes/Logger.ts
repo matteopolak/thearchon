@@ -50,7 +50,7 @@ export default class Logger {
 		if (!this.options.logger) return;
 
 		console.log(
-			`${this.timestamp} ${this.joinedPrefix} ${chalk.cyan(
+			`${this.timestamp} ${this.joinedPrefix} ${chalk.magenta(
 				username,
 			)} has joined`,
 		);
@@ -60,7 +60,9 @@ export default class Logger {
 		if (!this.options.logger) return;
 
 		console.log(
-			`${this.timestamp} ${this.leftPrefix} ${chalk.cyan(username)} has left`,
+			`${this.timestamp} ${this.leftPrefix} ${chalk.magenta(
+				username,
+			)} has left`,
 		);
 	}
 
@@ -68,7 +70,7 @@ export default class Logger {
 		if (!this.options.logger) return;
 
 		console.log(
-			`${this.timestamp} ${this.vanishedPrefix} ${chalk.cyan(
+			`${this.timestamp} ${this.vanishedPrefix} ${chalk.magenta(
 				username,
 			)} has unvanished`,
 		);
@@ -78,7 +80,7 @@ export default class Logger {
 		if (!this.options.logger) return;
 
 		console.log(
-			`${this.timestamp} ${this.vanishedPrefix} ${chalk.cyan(
+			`${this.timestamp} ${this.vanishedPrefix} ${chalk.magenta(
 				username,
 			)} has vanished`,
 		);
