@@ -55,6 +55,7 @@ import type {
 	MovementInstruction,
 	ParentMessage,
 	RawItem,
+	RawWindowItems,
 	RecordingStep,
 	StaffMember,
 } from '../typings';
@@ -491,22 +492,49 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 					return;
 
 				this._bot._client.off('set_slot', listener);
+				this._bot._client.off('window_items', windowItemsListener);
 				this.off('context_changed', contextListener);
 
 				resolve(packet);
 			};
 
+			const windowItemsListener = (packet: RawWindowItems) => {
+				for (let i = 0; i < packet.items.length; ++i) {
+					const currentItem = packet.items[i];
+
+					if (
+						currentItem.blockId === 351 ||
+						currentItem.blockId === -1 ||
+						(item !== undefined && currentItem.blockId !== item)
+					)
+						continue;
+
+					this._bot._client.off('set_slot', listener);
+					this._bot._client.off('window_items', windowItemsListener);
+					this.off('context_changed', contextListener);
+
+					resolve({
+						slot: i,
+						windowId: packet.windowId,
+						item: currentItem,
+					});
+				}
+			};
+
 			const contextListener = () => {
 				this._bot._client.off('set_slot', listener);
+				this._bot._client.off('window_items', windowItemsListener);
 
 				resolve(undefined);
 			};
 
 			this._bot._client.on('set_slot', listener);
+			this._bot._client.on('window_items', windowItemsListener);
 			this.once('context_changed', contextListener);
 
 			if (ctx.id !== this.contextId) {
 				this._bot._client.off('set_slot', listener);
+				this._bot._client.off('window_items', windowItemsListener);
 				this.off('context_changed', contextListener);
 
 				resolve(undefined);
@@ -529,7 +557,6 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				? [metadata]
 				: metadata;
 		const slotArray = !Array.isArray(slot) ? [slot] : slot;
-
 		return new Promise<undefined>(resolve => {
 			const listener = (packet: RawItem) => {
 				if (
@@ -545,22 +572,48 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 					return;
 
 				this._bot._client.off('set_slot', listener);
+				this._bot._client.off('window_items', windowItemsListener);
 				this.off('context_changed', contextListener);
 
 				resolve(undefined);
 			};
 
+			const windowItemsListener = (packet: RawWindowItems) => {
+				for (let i = 0; i < slotArray.length; ++i) {
+					const currentItem = packet.items[i];
+
+					if (
+						!(
+							itemArray[i] === undefined ||
+							(itemArray[i] === currentItem.blockId &&
+								(metadataArray[i] === undefined ||
+									metadataArray[i] === currentItem.itemDamage))
+						)
+					)
+						continue;
+
+					this._bot._client.off('set_slot', listener);
+					this._bot._client.off('window_items', windowItemsListener);
+					this.off('context_changed', contextListener);
+
+					resolve(undefined);
+				}
+			};
+
 			const contextListener = () => {
 				this._bot._client.off('set_slot', listener);
+				this._bot._client.off('window_items', windowItemsListener);
 
 				resolve(undefined);
 			};
 
 			this._bot._client.on('set_slot', listener);
+			this._bot._client.on('window_items', windowItemsListener);
 			this.once('context_changed', contextListener);
 
 			if (ctx.id !== this.contextId) {
 				this._bot._client.off('set_slot', listener);
+				this._bot._client.off('window_items', windowItemsListener);
 				this.off('context_changed', contextListener);
 
 				resolve(undefined);

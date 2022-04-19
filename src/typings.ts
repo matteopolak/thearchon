@@ -229,6 +229,11 @@ export interface FishingRodData {
 	max_bite_time: number;
 }
 
+export interface RawWindowItems {
+	windowId: number;
+	items: RawItem['item'][];
+}
+
 export interface RawItem {
 	windowId: number;
 	slot: number;
