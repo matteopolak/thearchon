@@ -628,6 +628,16 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		this.staff.hidden.delete(member.name_lower);
 		this.staff.online.set(member.name_lower, member);
 
+		const payload: MessagePayload = {
+			type: vanished ? MessageType.STAFF_UNVANISH : MessageType.STAFF_JOIN,
+			data: {
+				name: member.name,
+				title: member.title,
+			},
+		};
+
+		this.port.postMessage(payload);
+
 		return this.logger[vanished ? 'unvanished' : 'joined'](
 			`[${member.title}] ${member.name}`,
 		);
@@ -646,6 +656,16 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 			this.staff.hidden.set(member.name_lower, member);
 			this.staff.online.delete(member.name_lower);
 
+			const payload: MessagePayload = {
+				type: MessageType.STAFF_VANISH,
+				data: {
+					name: member.name,
+					title: member.title,
+				},
+			};
+
+			this.port.postMessage(payload);
+
 			return this.logger.vanished(`[${member.title}] ${member.name}`);
 		}
 
@@ -654,6 +674,16 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 
 		this.staff.hidden.delete(member.name_lower);
 		this.staff.online.delete(member.name_lower);
+
+		const payload: MessagePayload = {
+			type: MessageType.STAFF_LEAVE,
+			data: {
+				name: member.name,
+				title: member.title,
+			},
+		};
+
+		this.port.postMessage(payload);
 
 		return this.logger.left(`[${member.title}] ${member.name}`);
 	}

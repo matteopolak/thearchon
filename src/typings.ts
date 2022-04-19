@@ -17,6 +17,10 @@ export const enum MessageType {
 	NOTIFICATION,
 	WARNING,
 	DISCORD_RESPONSE,
+	STAFF_JOIN,
+	STAFF_LEAVE,
+	STAFF_VANISH,
+	STAFF_UNVANISH,
 }
 
 export type MessagePayload =
@@ -47,6 +51,34 @@ export type MessagePayload =
 			data: {
 				message: string;
 				id: number;
+			};
+	  }
+	| {
+			type: MessageType.STAFF_JOIN;
+			data: {
+				name: string;
+				title: string;
+			};
+	  }
+	| {
+			type: MessageType.STAFF_LEAVE;
+			data: {
+				name: string;
+				title: string;
+			};
+	  }
+	| {
+			type: MessageType.STAFF_VANISH;
+			data: {
+				name: string;
+				title: string;
+			};
+	  }
+	| {
+			type: MessageType.STAFF_UNVANISH;
+			data: {
+				name: string;
+				title: string;
 			};
 	  };
 
