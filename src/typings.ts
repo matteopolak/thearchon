@@ -32,6 +32,7 @@ export type MessagePayload =
 			data: {
 				message: string;
 				sender: string;
+				tag: boolean;
 				type: 'direct message' | 'message';
 			};
 	  }

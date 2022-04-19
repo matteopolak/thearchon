@@ -25,6 +25,7 @@ import {
 	CommandOptions,
 	Location,
 	LocationType,
+	MessagePayload,
 	MessageType,
 	SellType,
 	State,
@@ -130,13 +131,16 @@ export default class FishBot extends BaseBot {
 
 	private async setSellType(type: SellType) {
 		this.sellType = type;
-		this.port.postMessage({
+
+		const payload: MessagePayload = {
 			type: MessageType.SELL_TYPE,
 			data: {
 				sell_type: this.sellType,
 				is_fishing: this.state === State.FISHING,
 			},
-		});
+		};
+
+		this.port.postMessage(payload);
 	}
 
 	public getBestFishingRod(index: true): number;

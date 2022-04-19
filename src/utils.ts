@@ -331,8 +331,10 @@ export function startNewProcess(
 				: undefined;
 
 		if (packet.type === MessageType.NOTIFICATION) {
-			if (channel?.type === 'GUILD_TEXT') {
-				channel.send(
+			if (channel?.type !== 'GUILD_TEXT') return;
+
+			if (packet.data.tag) {
+				return channel.send(
 					`${discordConfig.whitelist
 						.map(u => `<@${u}>`)
 						.join(' ')}\n**NOTIFICATION**: \`${

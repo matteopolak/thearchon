@@ -50,6 +50,7 @@ import type {
 	CommandFunction,
 	Context,
 	Direction,
+	MessagePayload,
 	MovementInstruction,
 	ParentMessage,
 	RawItem,
@@ -180,6 +181,13 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 			'message',
 			async ({ command, args, sender, id }: ParentMessage) => {
 				const run = this.commands.get(command);
+				const payload: MessagePayload = {
+					type: MessageType.DISCORD_RESPONSE,
+					data: {
+						id,
+						message: 'An error occurred.',
+					},
+				};
 
 				if (run !== undefined) {
 					this.logger.info(`${sender} ran command '${command}'`);
@@ -191,13 +199,13 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 							...args,
 						);
 
-						return this.port.postMessage({ id, message });
+						payload.data.message = message;
 					} catch (e: any) {
 						this.logger.error(e);
-
-						return this.port.postMessage({ id, message: 'An error occurred.' });
 					}
 				}
+
+				return this.port.postMessage(payload);
 			},
 		);
 	}
@@ -346,12 +354,14 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 					if (now - 30_000 > this.lastUnusualMovement) {
 						this.lastUnusualMovement = now;
 
-						this.port.postMessage({
+						const payload: MessagePayload = {
 							type: MessageType.WARNING,
 							data: {
 								message,
 							},
-						});
+						};
+
+						this.port.postMessage(payload);
 					}
 
 					if (config.react_to_external_move) {
@@ -772,14 +782,17 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				}
 
 				if (config.notify_on_mention) {
-					this.port.postMessage({
+					const payload: MessagePayload = {
 						type: MessageType.NOTIFICATION,
 						data: {
 							message,
+							tag: true,
 							sender: name,
 							type: 'message',
 						},
-					});
+					};
+
+					this.port.postMessage(payload);
 				}
 
 				return;
@@ -916,14 +929,17 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				}
 
 				if (config.notify_on_mention) {
-					this.port.postMessage({
+					const payload: MessagePayload = {
 						type: MessageType.NOTIFICATION,
 						data: {
 							message,
+							tag: true,
 							sender: name,
 							type: 'direct message',
 						},
-					});
+					};
+
+					this.port.postMessage(payload);
 				}
 
 				if (this.responseMap.has(name)) {
