@@ -69,9 +69,9 @@ export default class FishBot extends BaseBot {
 			await this.completeActionAndWaitForSlotItem(
 				ctx,
 				() => this.client.clickWindow(ctx, slot - 1, 0, 0),
-				[49, 49, 22, 22],
-				[166, 95, 166, 95],
-				[undefined, 5, undefined, 5],
+				[49, 49, 22, 22, 22],
+				[166, 95, 166, 95, 160],
+				[undefined, 5, undefined, 5, 7],
 			);
 		}
 
@@ -79,7 +79,6 @@ export default class FishBot extends BaseBot {
 		if (window === null) return;
 
 		const specialSpawnerShop = window.slots[13].type === 52;
-
 		const item = specialSpawnerShop ? window.slots[13] : window.slots[22];
 		const availableItems = this.client.inventory.slots.reduce((a, b) => {
 			if (b === null) return a + item.stackSize;
@@ -110,7 +109,7 @@ export default class FishBot extends BaseBot {
 			await this.completeActionAndWaitForMessage(
 				ctx,
 				() => this.client.clickWindow(ctx, 22, 0, 0),
-				/^Please enter the amount of .+ you want me to buy in chat\.{3}/,
+				/^Please enter the amount of .+ you want to buy in chat\.{3}/,
 			);
 
 			await this.chat(ctx, count.toString());
