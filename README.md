@@ -19,8 +19,10 @@ Auto-fishing is against the rules, so using this tool will put you at risk of ge
 ## Features
 * Sells fish, replenishes bait, and upgrades fishing rods
 * Solves anti-macro CAPTCHAs
+* Keeps track of online (and vanished) staff members
 * Support for SOCKS4/5 proxies
 * Responds to direct messages with OpenAI (requires API key)
+* Performs actions as response to direct messages with Wit.ai (requires API key)
 * Reacts to external movement and rotation
 * Discord integration
 	* Receive notifications for direct messages and movement
