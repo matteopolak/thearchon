@@ -547,7 +547,12 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 	public async join(ctx: Context = this.context()): Promise<void> {
 		if (ctx.id !== this.contextId) return;
 
-		if (this.fisher && config.fishing.fish_on_join) {
+		const previous = this.previousState;
+
+		if (
+			this.fisher &&
+			(config.fishing.fish_on_join || previous === State.FISHING)
+		) {
 			this.setState(ctx, State.FISHING);
 			ctx.id = this.contextId;
 		}
@@ -575,7 +580,10 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 			return this.join(ctx);
 		}
 
-		if (this.fisher && config.fishing.fish_on_join) {
+		if (
+			this.fisher &&
+			(config.fishing.fish_on_join || previous === State.FISHING)
+		) {
 			this.fisher.fish(ctx);
 		}
 	}
@@ -736,7 +744,15 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 			}
 
 			if (m.startsWith('TheArchon » This server is rebooting')) {
-				return this.exit(ctx, 'Server rebooting');
+				this.logger.info('Server rebooting... Waiting to reconnect...');
+				this.setState(ctx, State.IDLE);
+
+				const newCtx = this.context();
+
+				await this.client.waitForTicks(newCtx, 100);
+				await this.client.waitForChunksToLoad(newCtx);
+
+				return this.join(newCtx);
 			}
 
 			if (CHAT_MESSAGE_REGEX.test(m)) {

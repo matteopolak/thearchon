@@ -122,6 +122,10 @@ export default class FishBot extends BaseBot {
 		if (name === this.homes.fishing && config.fishing.sneak_while_fishing) {
 			this.client.setControlState(ctx, 'sneak', true);
 		}
+
+		if (ctx.fishing) {
+			ctx.fishing.position = this.client.entity.position.clone();
+		}
 	}
 
 	private async setSellType(type: SellType) {
