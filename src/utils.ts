@@ -470,7 +470,7 @@ export async function fetchStaffList(): Promise<Map<string, StaffMember>> {
 	for (const category of list) {
 		for (const member of category.members) {
 			member.name_lower = member.name.toLowerCase();
-			map.set(member.name, member);
+			map.set(member.name_lower, member);
 		}
 	}
 
