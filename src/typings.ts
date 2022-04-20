@@ -396,7 +396,6 @@ export interface StaffMember {
 	name: string;
 	name_lower: string;
 	title: string;
-	img: string;
 }
 
 export interface StaffCategory {

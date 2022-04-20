@@ -1,3 +1,5 @@
+import fs from 'fs/promises';
+import path from 'path';
 import { Worker } from 'worker_threads';
 
 import axios from 'axios';
@@ -453,11 +455,17 @@ export async function fetchStaffList(): Promise<Map<string, StaffMember>> {
 
 	if (match === null) return new Map();
 
+	const defaultList: [string, StaffMember][] = JSON.parse(
+		await fs.readFile(
+			path.join(__dirname, '..', 'resources', 'staff.json'),
+			'utf8',
+		),
+	);
 	const list: StaffCategory[] = JSON.parse(
 		match[1].replace(FIX_OBJECT_REGEX, (_, a, b) => (a ? '"' : `"${b}":`)),
 	);
 
-	const map = new Map<string, StaffMember>();
+	const map = new Map<string, StaffMember>(defaultList);
 
 	for (const category of list) {
 		for (const member of category.members) {
