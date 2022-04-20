@@ -359,33 +359,33 @@ export default class FishBot extends BaseBot {
 
 		if (this.client.currentWindow === null) return false;
 
-		await this.completeActionAndWaitForSlotItem(
+		const item = await this.completeActionAndWaitForSlotItem(
 			ctx,
 			() => this.client.clickWindow(ctx, 14, 0, 0),
 			49,
 			166,
 		);
 
-		const window = this.client.currentWindow!;
+		if (item === undefined) return false;
 
 		this._bot._client.write('window_click', {
-			windowId: window.id,
+			windowId: item.windowId,
 			slot: 16,
 			mouseButton: 2,
 			action: 32600,
 			mode: 3,
-			item: window.slots[16],
+			item,
 		});
 
 		await this.client.waitForTicks(ctx, 10);
 
 		this._bot._client.write('window_click', {
-			windowId: window.id,
+			windowId: item.windowId,
 			slot: 12,
 			mouseButton: 2,
 			action: 32650,
 			mode: 3,
-			item: window.slots[12],
+			item,
 		});
 
 		return true;

@@ -557,7 +557,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				? [metadata]
 				: metadata;
 		const slotArray = !Array.isArray(slot) ? [slot] : slot;
-		return new Promise<undefined>(resolve => {
+		return new Promise<undefined | RawItem>(resolve => {
 			const listener = (packet: RawItem) => {
 				if (
 					!slotArray.some(
@@ -575,7 +575,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				this._bot._client.off('window_items', windowItemsListener);
 				this.off('context_changed', contextListener);
 
-				resolve(undefined);
+				resolve(packet);
 			};
 
 			const windowItemsListener = (packet: RawWindowItems) => {
@@ -596,7 +596,11 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 					this._bot._client.off('window_items', windowItemsListener);
 					this.off('context_changed', contextListener);
 
-					resolve(undefined);
+					resolve({
+						item: currentItem,
+						windowId: packet.windowId,
+						slot: i,
+					});
 				}
 			};
 
