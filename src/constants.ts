@@ -404,7 +404,7 @@ export const PURCHASE_SPAWNER_REGEX =
 	/^You have purchased \d+x .+ for \$([\d,\.]+)!$/;
 
 // Amount of money to obtain before automatically paying it to `config.autopay_to`
-export const MONEY_THRESHOLD = 5_000_000;
+export const MONEY_THRESHOLD = config.fishing.money_threshold ?? 5_000_000;
 
 // Amount of money to keep in reserve
 export const SURPLUS_MONEY_THRESHOLD = 150_000;

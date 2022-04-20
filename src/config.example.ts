@@ -113,6 +113,8 @@ const config: Config = {
 	],
 	// Fishing-related settings
 	fishing: {
+		// Amount of money to obtain before automatically paying it to `config.autopay_to`
+		money_threshold: 5_000_000,
 		// Whether to start fishing immediately
 		fish_on_join: false,
 		// Whether to sneak while fishing
