@@ -609,18 +609,26 @@ export default class BaseState {
 		this.setControlState(ctx, direction, true);
 
 		const last = this.entity.position.clone();
+		let stop = false;
+		let times = 0;
 
-		while (
-			original.distanceTo(this.entity.position) < distance &&
-			last.distanceTo(this.entity.position) > 0.1
-		) {
-			await this.waitForTicks(ctx, 1);
+		const listener = () => {
+			if (this.entity.position.distanceTo(last) < 0.1 && times++ > 5) {
+				stop = true;
+				this.client._bot.off('move', listener);
+			}
 
 			last.set(
 				this.entity.position.x,
 				this.entity.position.y,
 				this.entity.position.z,
 			);
+		};
+
+		this.client._bot.on('move', listener);
+
+		while (original.distanceTo(this.entity.position) < distance && !stop) {
+			await this.waitForTicks(ctx, 1);
 		}
 
 		this.setControlState(ctx, direction, false);
