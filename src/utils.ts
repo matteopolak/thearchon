@@ -5,11 +5,17 @@ import { Worker } from 'worker_threads';
 import axios from 'axios';
 import chalk from 'chalk';
 import type { Client, TextChannel } from 'discord.js';
-import { Item } from 'prismarine-item';
+import type { Item } from 'prismarine-item';
+import prismarineItem from 'prismarine-item';
 
 import characters from './characters';
 import config, { discordConfig } from './config';
-import { FIX_OBJECT_REGEX, STAFF_LIST_REGEX, WORKER_PATH } from './constants';
+import {
+	FIX_OBJECT_REGEX,
+	STAFF_LIST_REGEX,
+	VERSION,
+	WORKER_PATH,
+} from './constants';
 import {
 	MessageType,
 	MovementInstruction,
@@ -27,6 +33,8 @@ import type {
 	StaffMember,
 	WitResponse,
 } from './typings';
+
+const ItemUtil = prismarineItem(VERSION);
 
 const CHARACTER_WIDTH = 12;
 const CHARACTER_HEIGHT = 14;
@@ -493,5 +501,5 @@ export function escape(string: string) {
 }
 
 export function convertRawItem(item: RawItem): Item {
-	return Item.fromNotch(item.item)!;
+	return ItemUtil.fromNotch(item.item)!;
 }
