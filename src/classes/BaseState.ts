@@ -663,16 +663,20 @@ export default class BaseState {
 			};
 		}
 
-		const [level, maxLevel] = value.split('/');
+		const [_level, _maxLevel] = value.split('/');
+		const level = parseInt(_level);
+		const maxLevel = parseInt(_maxLevel);
+
 		// @ts-ignore
-		const cost = description.find(d =>
-			d.startsWith('§3 - §bCost to upgrade: §f'),
-		)!;
+		const cost =
+			level >= maxLevel
+				? '-1'
+				: description.find(d => d.startsWith('§3 - §bCost to upgrade: §f'))!;
 
 		return {
 			required_level: requiredLevel,
-			max_level: parseInt(maxLevel),
-			level: parseInt(level),
+			max_level: maxLevel,
+			level,
 			price: parseInt(cost.slice(26)),
 			slot: item.slot,
 			name,

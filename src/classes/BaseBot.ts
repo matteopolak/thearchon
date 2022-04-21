@@ -117,6 +117,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 	};
 	public class = {
 		tokens: 0,
+		tokens_required: 0,
 		level: 0,
 		maxed: false,
 		checked: false,

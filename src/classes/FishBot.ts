@@ -35,6 +35,7 @@ import {
 import type { Context, InventoryData, RawMapData } from '../typings';
 import {
 	chance,
+	convertRawItem,
 	currencyFormatter,
 	formatStaffList,
 	randomArray,
@@ -442,13 +443,18 @@ export default class FishBot extends BaseBot {
 		this.class.tokens = tokens;
 		this.class.level = level;
 
-		if (this.class.tokens === 0) return;
-
 		const perks = [
 			this.client.parseClassPerk(window.slots[11]),
 			this.client.parseClassPerk(window.slots[12]),
 			this.client.parseClassPerk(window.slots[13]),
 		];
+
+		this.class.tokens_required = perks.reduce(
+			(a, b) => (a < b.price ? a : b.price),
+			Infinity,
+		);
+
+		if (this.class.tokens === 0) return;
 
 		// Only upgrade Merchant to level 1 at the most
 		perks[0].max_level = 1;
@@ -460,18 +466,35 @@ export default class FishBot extends BaseBot {
 
 			if (perk === undefined) break;
 
-			this.class.tokens -= perk.price;
-			++perk.level;
-			perk.upgraded = true;
-
 			this.logger.info(
 				`Upgrading perk ${chalk.bold(perk.name)} to ${chalk.yellow(
 					`level ${perk.level}`,
 				)}`,
 			);
 
-			await this.client.clickWindow(ctx, perk.slot, 1, 0);
+			const item = await this.completeActionAndWaitForSlotItem(
+				ctx,
+				() => this.client.clickWindow(ctx, perk.slot, 1, 0),
+				perk.slot,
+				288,
+			);
+
+			if (item) {
+				const updated = this.client.parseClassPerk(convertRawItem(item));
+
+				this.class.tokens -= perk.price;
+
+				perk.upgraded = true;
+				perk.required_level = updated.required_level;
+				perk.level = updated.level;
+				perk.price = updated.price;
+			}
 		}
+
+		this.class.tokens_required = perks.reduce(
+			(a, b) => (a < b.price ? a : b.price),
+			Infinity,
+		);
 
 		if (perks.every(p => p.level >= p.max_level)) {
 			this.class.maxed = true;

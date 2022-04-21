@@ -5,7 +5,7 @@ import { Worker } from 'worker_threads';
 import axios from 'axios';
 import chalk from 'chalk';
 import type { Client, TextChannel } from 'discord.js';
-import type { Item } from 'prismarine-item';
+import { Item } from 'prismarine-item';
 
 import characters from './characters';
 import config, { discordConfig } from './config';
@@ -21,6 +21,7 @@ import type {
 	Direction,
 	IdData,
 	MessagePayload,
+	RawItem,
 	RawMapData,
 	StaffCategory,
 	StaffMember,
@@ -489,4 +490,8 @@ export function formatStaffList(list: Map<string, StaffMember>) {
 
 export function escape(string: string) {
 	return string.replaceAll('_', '\\_');
+}
+
+export function convertRawItem(item: RawItem): Item {
+	return Item.fromNotch(item.item)!;
 }

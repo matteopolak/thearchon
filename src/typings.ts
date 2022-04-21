@@ -1,5 +1,4 @@
 import type { BotOptions } from 'mineflayer';
-import type { Item } from 'prismarine-item';
 import type { Vec3 } from 'vec3';
 
 export type AuthType = 'mojang' | 'microsoft' | 'thealtening';
@@ -242,7 +241,7 @@ export interface RawItem {
 		blockId: number;
 		itemCount: number;
 		itemDamage: number;
-		nbtData: Item['nbt'];
+		nbtData: Buffer | undefined;
 	};
 }
 
