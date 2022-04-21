@@ -403,3 +403,13 @@ export interface StaffCategory {
 	name: string;
 	members: StaffMember[];
 }
+
+export interface ClassPerk {
+	required_level: number;
+	max_level: number;
+	level: number;
+	price: number;
+	slot: number;
+	upgraded: boolean;
+	name: string;
+}

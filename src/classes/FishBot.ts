@@ -10,6 +10,7 @@ import config from '../config';
 import {
 	BAIT_THRESHOLD,
 	CAPTCHA_TIME_THRESHOLD,
+	CLASS_ACCEPT_SLOTS,
 	FISHING_RODS,
 	FISHING_ROD_DATA,
 	FISH_COUNT_THRESHOLD,
@@ -28,6 +29,7 @@ import {
 	MessagePayload,
 	MessageType,
 	SellType,
+	ServerType,
 	State,
 } from '../typings';
 import type { Context, InventoryData, RawMapData } from '../typings';
@@ -35,6 +37,7 @@ import {
 	chance,
 	currencyFormatter,
 	formatStaffList,
+	randomArray,
 	sleep,
 	unscramble,
 } from '../utils';
@@ -391,6 +394,105 @@ export default class FishBot extends BaseBot {
 		return true;
 	}
 
+	private async upgradeClassAction(ctx: Context) {
+		{
+			const window = await this.completeActionAndWaitForWindow(ctx, () =>
+				this.command(ctx, '/class'),
+			);
+
+			if (!window) return;
+			if (window.slots[15].type !== 166) {
+				await this.completeActionAndWaitForSlotItem(
+					ctx,
+					() => this.client.clickWindow(ctx, 15, 0, 0),
+					0,
+					160,
+					5,
+				);
+
+				await this.completeActionAndWaitForEvent(
+					ctx,
+					() =>
+						this.client.clickWindow(ctx, randomArray(CLASS_ACCEPT_SLOTS), 0, 0),
+					'windowClose',
+				);
+
+				await this.completeActionAndWaitForWindow(ctx, () =>
+					this.command(ctx, '/class'),
+				);
+			}
+		}
+
+		this.class.checked = true;
+
+		await this.completeActionAndWaitForSlotItem(
+			ctx,
+			() => this.client.clickWindow(ctx, 13, 0, 0),
+			31,
+			280,
+		);
+
+		const window = this.client.currentWindow!;
+		const data: string[] =
+			// @ts-ignore
+			window.slots[4].nbt!.value.display.value.Lore.value.value;
+		const tokens = parseInt(data[3].slice(19));
+		const level = parseInt(data[0].slice(17));
+
+		this.class.tokens = tokens;
+		this.class.level = level;
+
+		const perks = [
+			this.client.parseClassPerk(window.slots[11]),
+			this.client.parseClassPerk(window.slots[12]),
+			this.client.parseClassPerk(window.slots[13]),
+		];
+
+		// Only upgrade Merchant to level 1 at the most
+		perks[0].max_level = 1;
+
+		while (this.class.tokens > 0) {
+			const perk = perks.find(
+				p => p.price <= this.class.tokens && p.level < p.max_level,
+			);
+
+			if (perk === undefined) break;
+
+			this.class.tokens -= perk.price;
+			++perk.level;
+			perk.upgraded = true;
+
+			this.logger.info(
+				`Upgrading perk ${chalk.bold(perk.name)} to ${chalk.yellow(
+					`level ${perk.level}`,
+				)}`,
+			);
+
+			await this.client.clickWindow(ctx, perk.slot, 1, 0);
+		}
+
+		if (perks[0].upgraded) {
+			await this.completeActionAndWaitForSlotItem(
+				ctx,
+				() => this.client.clickWindow(ctx, 11, 0, 0),
+				11,
+				160,
+				0,
+			);
+
+			await this.completeActionAndWaitForSlotItem(
+				ctx,
+				() => this.client.clickWindow(ctx, 11, 0, 0),
+				31,
+				166,
+			);
+
+			await this.client.clickWindow(ctx, 11, 0, 0);
+		}
+
+		this.client.closeWindow(ctx, this.client.currentWindow!);
+	}
+
 	private async prepareFromNothing(ctx: Context) {
 		if (ctx.id !== this.contextId) return null;
 
@@ -745,6 +847,8 @@ export default class FishBot extends BaseBot {
 
 		if (rod === null) return;
 
+		if (config.server === ServerType.AMBER && !this.class.checked)
+			await this.upgradeClassAction(ctx);
 		if (!this.checkedBalance) await this.getCurrentBalance(ctx, true);
 		if (
 			// @ts-ignore
@@ -832,6 +936,14 @@ export default class FishBot extends BaseBot {
 
 				ctx.fishing.pitch = this.client.entity.pitch;
 				ctx.fishing.yaw = this.client.entity.yaw;
+			}
+
+			if (
+				config.server === ServerType.AMBER &&
+				this.class.tokens > 0 &&
+				!this.class.maxed
+			) {
+				await this.upgradeClassAction(ctx);
 			}
 
 			if (

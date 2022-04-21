@@ -1,8 +1,8 @@
 node_modules
 dist
 data
+test
 .env
 src/config.ts
-**/*.js
 recordings
 src/wit_token

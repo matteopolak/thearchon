@@ -5,7 +5,7 @@ import type { MessagePort } from 'worker_threads';
 
 import chalk from 'chalk';
 import mineflayer from 'mineflayer';
-import type { Bot, Player } from 'mineflayer';
+import type { Bot, BotEvents, Player } from 'mineflayer';
 import type { Window } from 'prismarine-windows';
 import type TypedEventEmitter from 'typed-emitter';
 
@@ -14,6 +14,7 @@ import {
 	BAIT_NAME_TO_PRICE,
 	BALANCE_REGEX,
 	CHAT_MESSAGE_REGEX,
+	CLASS_LEVELUP_REGEX,
 	COMMAND_ALIASES,
 	COMMAND_COOLDOWN,
 	COMMAND_REGEX,
@@ -114,7 +115,12 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 	public flags = {
 		acceptedIP: false,
 	};
-
+	public class = {
+		tokens: 0,
+		level: 0,
+		maxed: false,
+		checked: false,
+	};
 	private commandQueue: {
 		message: string;
 		resolve: () => void;
@@ -538,6 +544,34 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				this.off('context_changed', contextListener);
 
 				resolve(undefined);
+			}
+		});
+	}
+
+	public async waitForEvent<T extends keyof BotEvents>(ctx: Context, event: T) {
+		if (ctx.id !== this.contextId) return;
+
+		return new Promise<Parameters<BotEvents[T]> | null>(resolve => {
+			const listener = (...data: any[]) => {
+				this._bot.off(event, listener);
+				this.off('context_changed', contextListener);
+
+				resolve(data as Parameters<BotEvents[T]>);
+			};
+
+			const contextListener = () => {
+				this._bot.off(event, listener);
+				resolve(null);
+			};
+
+			this._bot.on(event, listener);
+			this.once('context_changed', contextListener);
+
+			if (ctx.id !== this.contextId) {
+				this._bot.off(event, listener);
+				this.off('context_changed', contextListener);
+
+				resolve(null);
 			}
 		});
 	}
@@ -1095,6 +1129,12 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				return;
 			}
 
+			if (CLASS_LEVELUP_REGEX.test(m)) {
+				++this.class.tokens;
+
+				return;
+			}
+
 			if (COMMAND_REGEX.test(m) === false) return;
 
 			const [, sender, raw] = m.match(COMMAND_REGEX)!;
@@ -1405,6 +1445,18 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 	) {
 		// @ts-ignore
 		const promise = this.client.awaitMessage(ctx, message);
+
+		await action();
+
+		return promise;
+	}
+
+	public async completeActionAndWaitForEvent<T extends keyof BotEvents>(
+		ctx: Context,
+		action: () => any,
+		event: T,
+	) {
+		const promise = this.waitForEvent<T>(ctx, event);
 
 		await action();
 

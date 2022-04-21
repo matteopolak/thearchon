@@ -12,9 +12,11 @@ import type { Vec3 } from 'vec3';
 import {
 	NORMAL_DIRECTION,
 	OPPOSITE_DIRECTION,
+	SKILL_NAME_REGEX,
 	TIME_BETWEEN_WINDOW_CLICKS,
 } from '../constants';
 import {
+	ClassPerk,
 	Context,
 	Direction,
 	MovementInstruction,
@@ -632,5 +634,49 @@ export default class BaseState {
 		}
 
 		this.setControlState(ctx, direction, false);
+	}
+
+	parseClassPerk(item: Item): ClassPerk {
+		// @ts-ignore
+		const description: string[] = item.nbt.value.display.value.Lore.value.value;
+		// @ts-ignore
+		const _name: string = item.nbt?.value.display.value.Name.value;
+		const name = _name.match(SKILL_NAME_REGEX)![1];
+		const requiredLevel = parseInt(description[0].slice(26));
+
+		const [key, value] = description[1].split(': §f');
+
+		if (key === '§bMax Level') {
+			// @ts-ignore
+			const cost = description.find(d =>
+				d.startsWith('§3 - §bCost to purchase: §f'),
+			)!;
+
+			return {
+				required_level: requiredLevel,
+				max_level: parseInt(value),
+				level: 0,
+				price: parseInt(cost.slice(27)),
+				slot: item.slot,
+				name,
+				upgraded: false,
+			};
+		}
+
+		const [level, maxLevel] = value.split('/');
+		// @ts-ignore
+		const cost = description.find(d =>
+			d.startsWith('§3 - §bCost to upgrade: §f'),
+		)!;
+
+		return {
+			required_level: requiredLevel,
+			max_level: parseInt(maxLevel),
+			level: parseInt(level),
+			price: parseInt(cost.slice(26)),
+			slot: item.slot,
+			name,
+			upgraded: false,
+		};
 	}
 }

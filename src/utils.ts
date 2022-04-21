@@ -484,7 +484,7 @@ export function formatStaffList(list: Map<string, StaffMember>) {
 
 	const last = mapped.pop();
 
-	return `${mapped.join(chalk.gray(', '))} ${chalk.gray('and')} ${last}`;
+	return `${mapped.join(chalk.white(', '))} ${chalk.white('and')} ${last}`;
 }
 
 export function escape(string: string) {

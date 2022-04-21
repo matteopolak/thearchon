@@ -403,6 +403,9 @@ export const PURCHASE_ITEM_REGEX =
 export const PURCHASE_SPAWNER_REGEX =
 	/^You have purchased \d+x .+ for \$([\d,\.]+)!$/;
 
+export const CLASS_LEVELUP_REGEX =
+	/^Level up! You have just increased your class level to \d+!/;
+
 // Amount of money to obtain before automatically paying it to `config.autopay_to`
 export const MONEY_THRESHOLD = config.fishing.money_threshold ?? 5_000_000;
 
@@ -459,3 +462,7 @@ export const COMMAND_ALIASES = {
 	],
 	HOME: ['/home', '/homes'],
 };
+
+export const CLASS_ACCEPT_SLOTS = [0, 1, 2, 3, 9, 10, 11, 12, 18, 19, 20, 21];
+
+export const SKILL_NAME_REGEX = /^§3§lSkill: §f§l(.+?)(?: §| \[| \(|$])/;
