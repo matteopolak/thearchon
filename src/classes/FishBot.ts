@@ -471,6 +471,10 @@ export default class FishBot extends BaseBot {
 			await this.client.clickWindow(ctx, perk.slot, 1, 0);
 		}
 
+		if (perks.every(p => p.level >= p.max_level)) {
+			this.class.maxed = true;
+		}
+
 		if (perks[0].upgraded) {
 			await this.completeActionAndWaitForSlotItem(
 				ctx,
