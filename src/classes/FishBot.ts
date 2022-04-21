@@ -969,7 +969,7 @@ export default class FishBot extends BaseBot {
 
 			if (
 				config.server === ServerType.AMBER &&
-				this.class.tokens > 0 &&
+				this.class.tokens >= this.class.tokens_required &&
 				!this.class.maxed
 			) {
 				await this.upgradeClassAction(ctx);
