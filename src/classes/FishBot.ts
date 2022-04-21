@@ -442,6 +442,8 @@ export default class FishBot extends BaseBot {
 		this.class.tokens = tokens;
 		this.class.level = level;
 
+		if (this.class.tokens === 0) return;
+
 		const perks = [
 			this.client.parseClassPerk(window.slots[11]),
 			this.client.parseClassPerk(window.slots[12]),
