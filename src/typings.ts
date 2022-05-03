@@ -20,6 +20,9 @@ export const enum MessageType {
 	STAFF_LEAVE,
 	STAFF_VANISH,
 	STAFF_UNVANISH,
+	STAFF_STATE_CHANGE,
+	DISCORD_COMMAND,
+	REQUEST_STAFF_STATE,
 }
 
 export type MessagePayload =
@@ -56,6 +59,7 @@ export type MessagePayload =
 			type: MessageType.STAFF_JOIN;
 			data: {
 				name: string;
+				name_lower: string;
 				title: string;
 			};
 	  }
@@ -63,6 +67,7 @@ export type MessagePayload =
 			type: MessageType.STAFF_LEAVE;
 			data: {
 				name: string;
+				name_lower: string;
 				title: string;
 			};
 	  }
@@ -70,6 +75,7 @@ export type MessagePayload =
 			type: MessageType.STAFF_VANISH;
 			data: {
 				name: string;
+				name_lower: string;
 				title: string;
 			};
 	  }
@@ -77,16 +83,32 @@ export type MessagePayload =
 			type: MessageType.STAFF_UNVANISH;
 			data: {
 				name: string;
+				name_lower: string;
 				title: string;
 			};
+	  }
+	| {
+			type: MessageType.REQUEST_STAFF_STATE;
 	  };
 
-export interface ParentMessage {
-	command: string;
-	args: string[];
-	sender: string;
-	id: number;
+export enum StaffState {
+	ONLINE,
+	VANISHED,
+	OFFLINE,
 }
+
+export type ParentMessage =
+	| {
+			type: MessageType.DISCORD_COMMAND;
+			command: string;
+			args: string[];
+			sender: string;
+			id: number;
+	  }
+	| {
+			type: MessageType.STAFF_STATE_CHANGE;
+			states: StaffState[];
+	  };
 
 export interface IdData {
 	count: number;
@@ -138,6 +160,7 @@ export type Account = (StorageAccount | FishingAccount) &
 		alias: string;
 		channels?: string[];
 		viewer_port?: number;
+		disconnect_while_staff_present?: boolean;
 		temporary?: boolean;
 		type: BotType;
 		proxy?: `${

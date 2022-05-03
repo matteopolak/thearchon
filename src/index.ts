@@ -11,7 +11,7 @@ import {
 	THEALTENING_SESSIONSERVER_URL,
 } from './constants';
 import { create } from './discord';
-import { BaseBotOptions, SellType } from './typings';
+import { BaseBotOptions, SellType, StaffMember } from './typings';
 import { check } from './update';
 import {
 	fetchStaffList,
@@ -35,12 +35,16 @@ async function run() {
 		viewDistance: config.minimize_memory_usage ? 'tiny' : 'far',
 	};
 
-	const staff = await fetchStaffList();
+	const staff = {
+		all: await fetchStaffList(),
+		online: new Map<string, StaffMember>(),
+		vanished: new Map<string, StaffMember>(),
+	};
 
 	console.log(
 		`         ${' '.repeat(17)}${chalk.bold(
 			chalk.cyan('Parent'),
-		)} Fetched staff list of ${chalk.magenta(staff.size)} members`,
+		)} Fetched staff list of ${chalk.magenta(staff.all.size)} members`,
 	);
 
 	if (config.witai_key !== undefined) {
@@ -109,11 +113,12 @@ async function run() {
 					...options,
 					sell_type: SellType.COINS,
 					fish: config.fishing.fish_on_join,
-					staff,
+					staff: staff.all,
 				},
 			},
 			workers,
 			discord,
+			staff,
 		);
 	}
 }

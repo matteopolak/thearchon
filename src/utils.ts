@@ -20,7 +20,9 @@ import {
 	MessageType,
 	MovementInstruction,
 	OpenAIResponse,
+	ParentMessage,
 	SellType,
+	StaffState,
 } from './typings';
 import type {
 	BaseBotOptions,
@@ -280,6 +282,11 @@ export function startNewProcess(
 	payload: { options: BaseBotOptions },
 	workers: Map<string, Worker>,
 	discord: { client: Client; idMap: Map<number, IdData> } | null,
+	staff: {
+		all: Map<string, StaffMember>;
+		online: Map<string, StaffMember>;
+		vanished: Map<string, StaffMember>;
+	},
 ) {
 	console.log(
 		`         ${' '.repeat(17)}${chalk.bold(
@@ -365,16 +372,47 @@ export function startNewProcess(
 			return;
 		} else if (packet.type === MessageType.STAFF_JOIN) {
 			channel.send(`\`[${packet.data.title}] ${packet.data.name}\` has joined`);
+
+			if (staff.online.size === 0) {
+				for (const worker of workers.values()) {
+					worker.postMessage({});
+				}
+			}
+
+			staff.online.set(packet.data.name_lower, packet.data);
+			staff.vanished.delete(packet.data.name_lower);
 		} else if (packet.type === MessageType.STAFF_LEAVE) {
 			channel.send(`\`[${packet.data.title}] ${packet.data.name}\` has left`);
+
+			staff.online.delete(packet.data.name_lower);
+			staff.vanished.delete(packet.data.name_lower);
 		} else if (packet.type === MessageType.STAFF_VANISH) {
 			channel.send(
 				`\`[${packet.data.title}] ${packet.data.name}\` has vanished`,
 			);
+
+			staff.online.delete(packet.data.name_lower);
+			staff.vanished.set(packet.data.name_lower, packet.data);
 		} else if (packet.type === MessageType.STAFF_UNVANISH) {
 			channel.send(
 				`\`[${packet.data.title}] ${packet.data.name}\` has unvanished`,
 			);
+
+			staff.vanished.delete(packet.data.name_lower);
+			staff.online.set(packet.data.name_lower, packet.data);
+		} else if (packet.type === MessageType.REQUEST_STAFF_STATE) {
+			const states: StaffState[] = [];
+
+			if (staff.online.size > 0) states.push(StaffState.ONLINE);
+			if (staff.vanished.size > 0) states.push(StaffState.VANISHED);
+			if (states.length === 0) states.push(StaffState.OFFLINE);
+
+			const payload: ParentMessage = {
+				type: MessageType.STAFF_STATE_CHANGE,
+				states,
+			};
+
+			worker.postMessage(payload);
 		}
 	};
 
@@ -411,7 +449,7 @@ export function startNewProcess(
 				payload.options.expires = data.expires;
 			}
 
-			startNewProcess(payload, workers, discord);
+			startNewProcess(payload, workers, discord, staff);
 		} else {
 			console.log(
 				`         ${' '.repeat(17)}${chalk.bold(

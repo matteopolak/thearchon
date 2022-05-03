@@ -186,9 +186,9 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 		this.commands.set('chat', this.sendChatMessage.bind(this));
 		this.commands.set('move', this.executeMove.bind(this));
 
-		this.port.on(
-			'message',
-			async ({ command, args, sender, id }: ParentMessage) => {
+		this.port.on('message', async (message: ParentMessage) => {
+			if (message.type === MessageType.DISCORD_COMMAND) {
+				const { command, args, sender, id } = message;
 				const run = this.commands.get(command);
 				const payload: MessagePayload = {
 					type: MessageType.DISCORD_RESPONSE,
@@ -215,8 +215,8 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				}
 
 				return this.port.postMessage(payload);
-			},
-		);
+			}
+		});
 	}
 
 	get pause() {
@@ -724,11 +724,16 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 			type: vanished ? MessageType.STAFF_UNVANISH : MessageType.STAFF_JOIN,
 			data: {
 				name: member.name,
+				name_lower: member.name_lower,
 				title: member.title,
 			},
 		};
 
 		this.port.postMessage(payload);
+
+		if (this.options.disconnect_while_staff_present) {
+			return process.exit(0);
+		}
 
 		return this.logger[vanished ? 'unvanished' : 'joined'](
 			`[${member.title}] ${member.name}`,
@@ -752,11 +757,16 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 				type: MessageType.STAFF_VANISH,
 				data: {
 					name: member.name,
+					name_lower: member.name_lower,
 					title: member.title,
 				},
 			};
 
 			this.port.postMessage(payload);
+
+			if (this.options.disconnect_while_staff_present) {
+				return process.exit(0);
+			}
 
 			return this.logger.vanished(`[${member.title}] ${member.name}`);
 		}
@@ -771,6 +781,7 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 			type: MessageType.STAFF_LEAVE,
 			data: {
 				name: member.name,
+				name_lower: member.name_lower,
 				title: member.title,
 			},
 		};
