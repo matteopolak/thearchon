@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import { Client, Intents } from 'discord.js';
 
 import config from './config';
-import type { DiscordConfig, IdData, ParentMessage } from './typings';
+import { DiscordConfig, IdData, MessageType, ParentMessage } from './typings';
 
 const NO_USERNAME_COMMANDS = new Set([
 	'exec',
@@ -67,6 +67,7 @@ export function create(
 
 		const payload: ParentMessage = {
 			id: createId(),
+			type: MessageType.DISCORD_COMMAND,
 			command,
 			args,
 			sender: username,
