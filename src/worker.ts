@@ -17,7 +17,7 @@ import {
 	ParentMessage,
 	StaffState,
 } from './typings';
-import { createPromiseResolvePair } from './utils';
+import { createPromiseResolvePair, sleep } from './utils';
 
 if (config.witai_key) {
 	config.witai_key = fs.readFileSync(
@@ -27,13 +27,18 @@ if (config.witai_key) {
 }
 
 async function waitForStaffDisconnect() {
+	let startWait = 0;
+
 	const { promise, resolve } = createPromiseResolvePair();
 	const messageListener = (message: ParentMessage) => {
 		if (message.type !== MessageType.STAFF_STATE_CHANGE) return;
-		if (!message.states.includes(StaffState.OFFLINE)) return;
+		if (!message.states.includes(StaffState.OFFLINE)) {
+			startWait = Date.now();
+			return;
+		}
 
 		parentPort!.off('message', messageListener);
-		resolve();
+		sleep(startWait - Date.now() + 60_000 * 5).then(resolve);
 	};
 
 	parentPort!.on('message', messageListener);
