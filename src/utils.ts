@@ -92,6 +92,8 @@ export async function generateActions(prompt: string) {
 	const instructions: MovementInstruction[] = [];
 
 	for (const movement of movements) {
+		if (!movement.entities?.length) continue;
+
 		const [action, count] = movement.entities.reduce(
 			(a, b) => {
 				if (b.confidence < 0.9 || b.value === 'spin') return a;
