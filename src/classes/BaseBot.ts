@@ -827,7 +827,12 @@ export default class BaseBot extends (EventEmitter as new () => TypedEventEmitte
 			this.handlePlayerJoin(player);
 		});
 
-		this._bot.on('playerLeft', player => {
+		this._bot.on('playerLeft', async player => {
+			// The gamemode packet may be sent after the player leave packet
+			// In that case, the staff member would be incorrectly flagged as having left
+			// instead of having gone into vanish mode
+			await sleep(1_000);
+
 			this.handlePlayerLeave(player);
 		});
 
