@@ -302,6 +302,21 @@ export function startNewProcess(
 
 	workers.set(payload.options.alias, worker);
 
+	const sendStateChange = () => {
+		const states: StaffState[] = [];
+
+		if (staff.online.size > 0) states.push(StaffState.ONLINE);
+		if (staff.vanished.size > 0) states.push(StaffState.VANISHED);
+		if (states.length === 0) states.push(StaffState.OFFLINE);
+
+		const payload: ParentMessage = {
+			type: MessageType.STAFF_STATE_CHANGE,
+			states,
+		};
+
+		worker.postMessage(payload);
+	};
+
 	const messageHandler = async (packet: MessagePayload) => {
 		if (packet.type === MessageType.SELL_TYPE) {
 			console.log(
@@ -383,11 +398,19 @@ export function startNewProcess(
 
 			staff.online.set(packet.data.name_lower, packet.data);
 			staff.vanished.delete(packet.data.name_lower);
+
+			if (staff.vanished.size === 0 || staff.online.size === 1) {
+				sendStateChange();
+			}
 		} else if (packet.type === MessageType.STAFF_LEAVE) {
 			channel.send(`\`[${packet.data.title}] ${packet.data.name}\` has left`);
 
 			staff.online.delete(packet.data.name_lower);
 			staff.vanished.delete(packet.data.name_lower);
+
+			if (staff.vanished.size === 0 || staff.online.size === 0) {
+				sendStateChange();
+			}
 		} else if (packet.type === MessageType.STAFF_VANISH) {
 			channel.send(
 				`\`[${packet.data.title}] ${packet.data.name}\` has vanished`,
@@ -395,6 +418,10 @@ export function startNewProcess(
 
 			staff.online.delete(packet.data.name_lower);
 			staff.vanished.set(packet.data.name_lower, packet.data);
+
+			if (staff.vanished.size === 1 || staff.online.size === 0) {
+				sendStateChange();
+			}
 		} else if (packet.type === MessageType.STAFF_UNVANISH) {
 			channel.send(
 				`\`[${packet.data.title}] ${packet.data.name}\` has unvanished`,
@@ -402,19 +429,12 @@ export function startNewProcess(
 
 			staff.vanished.delete(packet.data.name_lower);
 			staff.online.set(packet.data.name_lower, packet.data);
+
+			if (staff.vanished.size === 0 || staff.online.size === 1) {
+				sendStateChange();
+			}
 		} else if (packet.type === MessageType.REQUEST_STAFF_STATE) {
-			const states: StaffState[] = [];
-
-			if (staff.online.size > 0) states.push(StaffState.ONLINE);
-			if (staff.vanished.size > 0) states.push(StaffState.VANISHED);
-			if (states.length === 0) states.push(StaffState.OFFLINE);
-
-			const payload: ParentMessage = {
-				type: MessageType.STAFF_STATE_CHANGE,
-				states,
-			};
-
-			worker.postMessage(payload);
+			sendStateChange();
 		}
 	};
 
