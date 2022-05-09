@@ -314,7 +314,9 @@ export function startNewProcess(
 			states,
 		};
 
-		worker.postMessage(payload);
+		for (const worker of workers.values()) {
+			worker.postMessage(payload);
+		}
 	};
 
 	const messageHandler = async (packet: MessagePayload) => {
